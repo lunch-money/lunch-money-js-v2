@@ -4,6 +4,10 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var createClient = require('openapi-fetch');
 
+function _interopDefault (e) { return e && e.__esModule ? e : { default: e }; }
+
+var createClient__default = /*#__PURE__*/_interopDefault(createClient);
+
 class LunchMoneyError extends Error {
     constructor(message, status, 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -22,7 +26,7 @@ class LunchMoneyError extends Error {
 class LunchMoneyClient {
     constructor(options) {
         const { apiKey, baseUrl = "https://dev.lunchmoney.app/v2" } = options;
-        this.client = createClient({
+        this.client = createClient__default.default({
             baseUrl,
             headers: {
                 Authorization: `Bearer ${apiKey}`,
