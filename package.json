@@ -1,0 +1,59 @@
+{
+	"name": "lunch-money-js-v2",
+	"version": "0.0.1",
+	"type": "module",
+	"description": "TypeScript client library for Lunch Money API v2",
+	"main": "dist/index.js",
+	"module": "dist/index.esm.js",
+	"types": "dist/index.d.ts",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "rollup -c",
+		"dev": "rollup -c -w",
+		"typecheck": "tsc --noEmit",
+		"lint": "eslint src --ext .ts",
+		"lint:fix": "eslint src --ext .ts --fix",
+		"format": "prettier --write src/**/*.ts",
+		"format:check": "prettier --check src/**/*.ts",
+		"generate-types": "openapi-typescript https://lm-v2-api-mock-data-f24357049a1b.herokuapp.com/v2/openapi/ -o src/types.generated.ts",
+		"prepare": "npm run generate-types && npm run build"
+	},
+	"keywords": [
+		"lunch-money",
+		"api",
+		"typescript",
+		"openapi",
+		"finance"
+	],
+	"author": "Lunch Money",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/lunch-money/lunch-money-js-v2.git"
+	},
+	"bugs": {
+		"url": "https://github.com/lunch-money/lunch-money-js-v2/issues"
+	},
+	"homepage": "https://github.com/lunch-money/lunch-money-js-v2#readme",
+	"dependencies": {
+		"openapi-fetch": "^0.14.0"
+	},
+	"devDependencies": {
+		"@rollup/plugin-commonjs": "^28.0.6",
+		"@rollup/plugin-node-resolve": "^16.0.1",
+		"@rollup/plugin-typescript": "^12.1.4",
+		"@typescript-eslint/eslint-plugin": "^8.0.0",
+		"@typescript-eslint/parser": "^8.0.0",
+		"eslint": "^9.0.0",
+		"eslint-config-prettier": "^9.0.0",
+		"eslint-plugin-prettier": "^5.0.0",
+		"openapi-typescript": "^7.9.1",
+		"prettier": "^3.0.0",
+		"rollup": "^4.52.2",
+		"rollup-plugin-dts": "^6.2.3",
+		"tslib": "^2.8.1",
+		"typescript": "^5.9.2"
+	}
+}

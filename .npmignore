@@ -1,0 +1,44 @@
+# Source files
+src/
+
+# Development files
+tsconfig.json
+rollup.config.js
+example.ts
+
+# Development dependencies
+node_modules/
+
+# Build scripts and config
+.github/
+.vscode/
+.idea/
+
+# Documentation (keep README.md)
+docs/
+
+# Git files
+.gitignore
+.git/
+
+# Environment and local files
+.env*
+*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Test files
+test/
+tests/
+__tests__/
+*.test.*
+*.spec.*
+
+# Coverage
+coverage/
+.nyc_output/
