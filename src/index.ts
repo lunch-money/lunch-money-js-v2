@@ -20,6 +20,7 @@ import type {
 	CreateTagBody,
 	UpdateTagBody,
 	GetBudgetSummaryParams,
+	GetAllRecurringItemsParams,
 	AlignedSummaryResponse,
 	NonAlignedSummaryResponse,
 } from "./types";
@@ -273,8 +274,12 @@ export class LunchMoneyClient {
 
 	get recurringItems() {
 		return {
-			getAll: async (): Promise<RecurringItem[]> => {
-				const response = await this.client.GET("/recurring_items");
+			getAll: async (
+				params?: GetAllRecurringItemsParams,
+			): Promise<RecurringItem[]> => {
+				const response = await this.client.GET("/recurring_items", {
+					params: { query: params },
+				});
 				const data = this.handleResponse(response);
 				return data.recurring_items || [];
 			},

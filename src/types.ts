@@ -60,6 +60,8 @@ export type UpdateTagBody =
 	operations["updateTag"]["requestBody"]["content"]["application/json"];
 export type GetBudgetSummaryParams =
 	operations["getBudgetSummary"]["parameters"]["query"];
+export type GetAllRecurringItemsParams =
+	operations["getAllRecurring"]["parameters"]["query"];
 
 // Re-export the raw OpenAPI types for advanced usage
 export type { paths, operations, components } from "./types.generated";

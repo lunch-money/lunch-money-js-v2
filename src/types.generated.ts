@@ -115,7 +115,7 @@ export interface paths {
         put?: never;
         /**
          * Create a manual account
-         * @description Create a new manually-managed account.
+         * @description Create a new manually-managed account.<br><br>
          */
         post: operations["createManualAccount"];
         delete?: never;
@@ -526,7 +526,7 @@ export interface components {
             /** @description User's email */
             email: string;
             /**
-             * Format: int64
+             * Format: int32
              * @description Unique identifier for user
              */
             id: number;
@@ -547,7 +547,7 @@ export interface components {
         /** category object */
         categoryObject: {
             /**
-             * Format: int64
+             * Format: int32
              * @description A system defined unique identifier for the category.
              */
             id: number;
@@ -592,7 +592,7 @@ export interface components {
         };
         childCategoryObject: {
             /**
-             * Format: int64
+             * Format: int32
              * @description A system defined unique identifier for the category.
              */
             id: number;
@@ -763,7 +763,7 @@ export interface components {
              */
             to_base: number;
             /**
-             * Format: int64
+             * Format: int32
              * @description The unique identifier of the associated recurring item that this transaction matched.
              */
             recurring_id: number | null;
@@ -773,17 +773,17 @@ export interface components {
              *      */
             payee: string;
             /**
-             * Format: int64
+             * Format: int32
              * @description Unique identifier of associated category set by the user or by a matched recurring_item.<br> Category details can be obtained by passing the value of this property to the [Get A Single Category](../operations/getCategoryById) API
              */
             category_id: number | null;
             /**
-             * Format: int64
+             * Format: int32
              * @description The unique identifier of the plaid account associated with this transaction. This will always be null if this transaction is associated with a manual account or if this transaction has no associated account and appears as a "Cash Transaction" in the Lunch Money GUI.
              */
             plaid_account_id: number | null;
             /**
-             * Format: int64
+             * Format: int32
              * @description The unique identifier of the manual account associated with this transaction. This will always be null if this transaction is associated with a synced account or if this transaction has no associated account and appears as a "Cash Transaction" in the Lunch Money GUI.
              */
             manual_account_id: number | null;
@@ -799,13 +799,12 @@ export interface components {
             /**
              * @description Status of the transaction:
              *     - `reviewed`: User has reviewed the transaction, or it was automatically marked as reviewed due to reviewed recurring_item logic
-             *     - `unreviewed`: User has not reviewed the transaction and it does not match any reviewed recurring_items.
+             *     - `unreviewed`: User has not reviewed the transaction and it does not match any reviewed recurring_items. Note that any transactions  where `is_pending` is true will be returned with a status of unreviewed.
              *     - `delete_pending`: The synced account deleted this transaction after it was updated by the user. Requires manual intervention.
-             *     - `pending`: Transaction is still pending with the synced institution (not posted).
              *
              * @enum {string}
              */
-            status: "reviewed" | "unreviewed" | "delete_pending" | "pending";
+            status: "reviewed" | "unreviewed" | "delete_pending";
             /** @description Denotes if the transaction is pending (not posted). Applies only to transactions in synced accounts and will always be false for transactions associated with manual accounts. */
             is_pending: boolean;
             /**
@@ -849,7 +848,7 @@ export interface components {
              *     - `plaid`: Transaction came from a Financial Institution synced via Plaid
              *     - `recurring`: Transaction was created from the Recurring page
              *     - `rule`: Transaction was created by a rule to split a transaction
-             *     - `split`: This is a transaction created by splitting another transaction
+             *     - `split`: Transaction was created by splitting another transaction
              *     - `user`: This is a legacy value and is replaced by either csv or manual
              *
              * @enum {string|null}
@@ -877,7 +876,7 @@ export interface components {
              */
             to_base: number;
             /**
-             * Format: int64
+             * Format: int32
              * @description The unique identifier of the associated recurring item that this transaction matched.
              */
             recurring_id: number | null;
@@ -887,7 +886,7 @@ export interface components {
              *      */
             payee: string;
             /**
-             * Format: int64
+             * Format: int32
              * @description Unique identifier of associated category set by the user or by a matched recurring item.<br> Category details can be obtained by passing the value of this property to the [Get A Single Category](../operations/getCategoryById) API
              */
             category_id: number | null;
@@ -901,7 +900,7 @@ export interface components {
              *
              * @enum {string}
              */
-            status: "reviewed" | "unreviewed" | "delete_pending" | "pending";
+            status: "reviewed" | "unreviewed" | "delete_pending";
             /** @description Denotes if the transaction is pending (not posted). Applies only to transactions in synced accounts and will always be false for transactions associated with manual accounts. */
             is_pending: boolean;
             /**
@@ -929,12 +928,12 @@ export interface components {
              */
             group_id: number | null;
             /**
-             * Format: int64
+             * Format: int32
              * @description The unique identifier of the manual account associated with this transaction. This will always be null if this transaction is associated with a synced account or if this transaction has no associated account and appears as a "Cash Transaction" in the Lunch Money GUI.
              */
             manual_account_id: number | null;
             /**
-             * Format: int64
+             * Format: int32
              * @description The unique identifier of the plaid account associated with this transaction. This will always be null if this transaction is associated with a manual account or if this transaction has no associated account and appears as a "Cash Transaction" in the Lunch Money GUI.
              */
             plaid_account_id: number | null;
@@ -977,7 +976,7 @@ export interface components {
             /** @description Name of payee for the transaction. */
             payee?: string;
             /**
-             * Format: int64
+             * Format: int32
              * @description The ID of the category associated with the transactions. If set, the category ID must exist for the user's account and it cannot be a category group.
              */
             category_id?: number | null;
@@ -987,17 +986,17 @@ export interface components {
              *      */
             notes?: string | null;
             /**
-             * Format: int64
+             * Format: int32
              * @description The Unique identifier for the associated manually managed account. If set, this must match an existing manual account id associated with the user's account. If not set, and `plaid_account_id` is also not set, no account is associated with the transaction and it will appear as a "Cash Transaction" in the Lunch Money GUI. It is an error if this, and `plaid_account_id` is also set on the same transaction.
              */
             manual_account_id?: number | null;
             /**
-             * Format: int64
+             * Format: int32
              * @description The Unique identifier for the associated plaid synced account. If set, this must match an existing plaid account id associated with the user's account. If not set, and `manual_account_id` is also not set, no account is associated with the transaction and it will appear as a "Cash Transaction" in the Lunch Money GUI. It is an error if this, and `manual_account_id` is also set on the same transaction. In addition the specified plaid account must have the "Allow Modifications To Transactions" property set (which is enabled by default), or the insert will fail.
              */
             plaid_account_id?: number | null;
             /**
-             * Format: int64
+             * Format: int32
              * @description Unique identifier for associated recurring item. Recurring item must be associated with the same account.
              */
             recurring_id?: number | null;
@@ -1032,7 +1031,7 @@ export interface components {
             /** @description Three-letter lowercase currency code of the transaction in ISO 4217 format.<br> May not be updated on transactions that belong to a synced account with the "Allow Modifications to Transactions" property disabled. */
             currency?: components["schemas"]["currencyEnum"];
             /**
-             * Format: int64
+             * Format: int32
              * @description The unique identifier of the associated recurring item that this transaction matches.
              */
             recurring_id?: number | null;
@@ -1040,7 +1039,7 @@ export interface components {
              *      */
             payee?: string;
             /**
-             * Format: int64
+             * Format: int32
              * @description Unique identifier of the category for this transaction. Set this to 0 to clear the transaction's category.
              */
             category_id?: number | null;
@@ -1048,12 +1047,12 @@ export interface components {
              *      */
             notes?: string | null;
             /**
-             * Format: int64
+             * Format: int32
              * @description The unique identifier of the manual account associated with this transaction. Set this to zero to disassociate the transaction with an account. If set `plaid_account_id` may not also be set to a non zero value. Moving an existing transaction to to another account will not work if the transaction belongs to a synced account who's "Allow Modifications to Transactions" property is not set.
              */
             manual_account_id?: number | null;
             /**
-             * Format: int64
+             * Format: int32
              * @description The unique identifier of the plaid account associated with this transaction. If set `manual_account_id` may not also be set to a non zero value. Moving an existing transaction to to an existing Plaid account will not work if the account's "Allow Modifications to Transactions" property is not set.
              */
             plaid_account_id?: number | null;
@@ -1127,7 +1126,7 @@ export interface components {
              */
             date?: string;
             /**
-             * Format: int64
+             * Format: int32
              * @description Unique identifier for associated category_id. Category must already exist for the account. Will inherit category from the parent if not defined.
              */
             category_id?: number;
@@ -1166,7 +1165,7 @@ export interface components {
         };
         transactionAttachmentObject: {
             /**
-             * Format: int64
+             * Format: int32
              * @description The unique identifier of the attachment
              */
             id?: number;
@@ -1192,7 +1191,7 @@ export interface components {
         /** @description An object containing information about a manual account */
         manualAccountObject: {
             /**
-             * Format: int64
+             * Format: int32
              * @description The unique identifier of this account
              */
             id: number;
@@ -1224,6 +1223,10 @@ export interface components {
             institution_name: string | null;
             /** @description An optional external_id that may be set or updated via the API */
             external_id: string | null;
+            /** @description User defined JSON data that can be set or cleared via the API. */
+            custom_metadata?: {
+                [key: string]: unknown;
+            } | null;
             /**
              * @description If true, this account will not show up as an option for assignment when creating transactions manually
              * @default false
@@ -1254,7 +1257,7 @@ export interface components {
              */
             subtype?: string;
             /**
-             * @description Display name of the account as set by user.
+             * @description Display name of the account as set by user.<br> This must be unique for the user.  If not set, it will be derived from the `institution_name` (if any) concatenated with the `name`.
              * @example Savings
              */
             display_name?: string;
@@ -1283,6 +1286,10 @@ export interface components {
             institution_name?: string;
             /** @description An optional external_id that may be set or updated via the API */
             external_id?: string | null;
+            /** @description An optional JSON object that includes additional data related to this account. This must be a valid JSON object and, when stringified, must not exceed 4096 characters. */
+            custom_metadata?: {
+                [key: string]: unknown;
+            } | null;
             /**
              * @description If true, this asset will not show up as an option for assignment when creating transactions manually.
              * @default false
@@ -1291,7 +1298,7 @@ export interface components {
         };
         updateManualAccountRequestObject: {
             /**
-             * Format: int64
+             * Format: int32
              * @description System defined unique identifier of this account. Ignored if set.
              */
             id?: number;
@@ -1301,7 +1308,7 @@ export interface components {
             type?: components["schemas"]["accountTypeEnum"];
             /** @description If set an optional account subtype. Examples include<br> - retirement - checking - savings - prepaid credit card */
             subtype?: string;
-            /** @description If set, an optional display name for the account. */
+            /** @description If set, an optional display name for the account.<br> This must be unique for the user.  If not set, it will be derived from the `institution_name` (if any) concatenated with the `name`. */
             display_name?: string | null;
             /**
              * @description Numeric value of the current balance, up to four decimal places, of the account as a number or string. Do not include any special characters aside from a decimal point.
@@ -1321,6 +1328,10 @@ export interface components {
             institution_name?: string | null;
             /** @description An optional external_id that may be set or updated via the API */
             external_id?: string | null;
+            /** @description An optional JSON object that includes additional data related to this account. This must be a valid JSON object and, when stringified, must not exceed 4096 characters. */
+            custom_metadata?: {
+                [key: string]: unknown;
+            } | null;
             /** @description If set, this will indicate if this account will not show up as an option for assignment when creating transactions manually. */
             exclude_from_transactions?: boolean;
             /**
@@ -1337,7 +1348,7 @@ export interface components {
         /** @description An object containing information about an account synced via Plaid */
         plaidAccountObject: {
             /**
-             * Format: int64
+             * Format: int32
              * @description The unique identifier of this account
              */
             id: number;
@@ -1401,7 +1412,7 @@ export interface components {
         };
         tagObject: {
             /**
-             * Format: int64
+             * Format: int32
              * @description Unique identifier for the tag.
              */
             id: number;
@@ -1450,7 +1461,7 @@ export interface components {
             /** @description If set will indicate if this category is archived. */
             archived?: boolean;
             /**
-             * Format: int64
+             * Format: int32
              * @description System defined unique identifier for the category. Ignored if set.
              */
             id?: number;
@@ -1481,7 +1492,10 @@ export interface components {
             };
         };
         recurringObject: {
-            /** @description The unique identifier of this recurring item */
+            /**
+             * Format: int32
+             * @description The unique identifier of this recurring item
+             */
             id: number;
             /** @description An optional description of this recurring item. This is not written into the transactions. */
             description: string | null;
@@ -1612,7 +1626,6 @@ export interface components {
              * @enum {boolean}
              */
             aligned: true;
-            rollover_pool?: components["schemas"]["summaryRolloverPoolObject"];
             categories: components["schemas"]["alignedSummaryCategoryObject"][];
         };
         /** non-aligned summary response object */
@@ -1623,7 +1636,6 @@ export interface components {
              * @enum {boolean}
              */
             aligned: false;
-            rollover_pool?: components["schemas"]["summaryRolloverPoolObject"];
             categories: components["schemas"]["nonAlignedSummaryCategoryObject"][];
         };
         /** @description Total inflow and outflow for the given date range.  This object is returned when the query parameter `include_totals` is set to `true`. */
@@ -1637,7 +1649,7 @@ export interface components {
             /** @description Total amount, in the user's default currency, of recurring activity that has occurred for the given date range. */
             recurring_activity?: number;
             /** @description Total amount, in the user's default currency, of expected recurring activity that has not yet occurred. */
-            recurring_remaining?: number | null;
+            recurring_remaining?: number;
             /** @description Total amount, in the user's default currency, of non recurring activity coming from un-categorized transactions. */
             uncategorized?: number;
             /** @description Number of un-categorized transactions for the given date range. */
@@ -1650,7 +1662,7 @@ export interface components {
             /** @description ID of the category associated with the totals. */
             category_id: number;
             totals: components["schemas"]["alignedCategoryTotalsObject"];
-            occurrences: components["schemas"]["summaryCategoryOccurrenceObject"][];
+            occurrences?: components["schemas"]["summaryCategoryOccurrenceObject"][];
         };
         /** @description List of each category's budget configuration and activity for the given date range.<br> Does not include occurrences since the start_date and end_date are not aligned with budget period setting. */
         nonAlignedSummaryCategoryObject: {
@@ -1682,9 +1694,9 @@ export interface components {
             /** @description Total amount of funds available, in the user's default currency, for the category within the given date range. */
             available: number | null;
             /** @description Total expected recurring activity, in the user's default currency, that has not yet occurred for the category within the given date range. */
-            recurring_remaining: number | null;
+            recurring_remaining: number;
             /** @description Total expected recurring activity for the category within the given date range. */
-            recurring_expected: number | null;
+            recurring_expected: number;
         };
         /** @description Total activity for the given category within the given date range which is not aligned with budget period setting. */
         nonAlignedCategoryTotalsObject: {
@@ -1693,9 +1705,9 @@ export interface components {
             /** @description Total recurring activity, in the user's default currency, for the category within the given date range.<br> The total activity for the category is the sum of this and the other_activity. */
             recurring_activity: number;
             /** @description Total expected recurring activity, in the user's default currency, that has not yet occurred for the category within the given date range. */
-            recurring_remaining: number | null;
+            recurring_remaining: number;
             /** @description Total expected recurring activity for the category within the given date range. */
-            recurring_expected: number | null;
+            recurring_expected: number;
         };
         /** @description Per period budget activity for the each budget period within the given date range.<br> This is only returned if the query parameter `include_occurrences` is set to `true`. */
         summaryCategoryOccurrenceObject: {
@@ -1844,12 +1856,10 @@ export interface operations {
                 end_date: string;
                 /** @description Enable to include categories that have the 'Exclude from Budgets' flag set in the returned `categories` array. */
                 include_exclude_from_budgets?: boolean;
-                /** @description Enable to include details for individual budget periods for each category. */
+                /** @description Enable to include an `occurrences` array for each category in an aligned response. Each array will include an object for each budget period that falls within the specified date range which includes details on the activity for the budget period. */
                 include_occurrences?: boolean;
                 /** @description Enable to include a top-level `totals` section that summarizes the inflow and outflow across all transactions for the specified date range. */
                 include_totals?: boolean;
-                /** @description Enable to include a top-level `rollover_pool` section that summarizes the current rollover pool balance and all previous adjustments.<br> This works only if the `start_date` and `end_date` are aligned with one or more budget periods. */
-                include_rollover_pool?: boolean;
             };
             header?: never;
             path?: never;
@@ -2268,20 +2278,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
-                     *       "message": "Request Validation Failure",
-                     *       "errors": [
-                     *         {
-                     *           "errMsg": "must have required property 'name'",
-                     *           "instancePath": "/requestBody",
-                     *           "schemaPath": "#/properties/requestBody/required",
-                     *           "keyword": "required",
-                     *           "params": {
-                     *             "missingProperty": "name"
-                     *           }
-                     *         }
-                     *       ]
-                     *     } */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -2334,20 +2330,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
-                     *       "message": "Request Validation Failure",
-                     *       "errors": [
-                     *         {
-                     *           "errMsg": "must be integer",
-                     *           "instancePath": "/path/id",
-                     *           "schemaPath": "#/properties/path/properties/ids/items/type",
-                     *           "keyword": "type",
-                     *           "params": {
-                     *             "type": "integer"
-                     *           }
-                     *         }
-                     *       ]
-                     *     } */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -2404,14 +2386,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
-                     *       "message": "Invalid Request Body",
-                     *       "errors": [
-                     *         {
-                     *           "errMsg": "A request to update a manual account must include at least one of the following properties: name, type, subtype, display_name, balance, balance_as_of, closed_on, currency, institution_name, exclude_from_transactions"
-                     *         }
-                     *       ]
-                     *     } */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -2781,13 +2755,17 @@ export interface operations {
                 recurring_id?: number;
                 /** @description Filter transactions to those associated with the specified category ID. Will also match category groups.  Set this to 0 to return only un-categorized transactions */
                 category_id?: number;
-                /** @description Filter by group (returns only transaction groups if set to true) */
-                is_group?: boolean;
-                /** @description Filter transactions to those with the specified status:<br> - `reviewed`: Only user reviewed transactions or those that were automatically marked as reviewed due to reviewed recurring_item logic<br> - `unreviewed`: Only transactions that need to be reviewed<br> - `delete_pending`: Only transactions that require manual intervention because the plaid account deleted this transaction after it was updated by the user. <br> - `pending`: Only pending transactions from synced accounts.  */
-                status?: "reviewed" | "unreviewed" | "delete_pending" | "pending";
                 /** @description Filter transactions to those that have a tag with the specified Tag ID */
                 tag_id?: number;
-                /** @description Set to true if you'd like to include imported transactions with a pending status. This query param is ignored if the `status` query param is also set. */
+                /** @description Filter by group (returns only transaction groups if set to true) */
+                is_group?: boolean;
+                /** @description Filter transactions to those with the specified status:<br> - `reviewed`: Only user reviewed transactions or those that were automatically marked as reviewed due to reviewed recurring_item logic<br> - `unreviewed`: Only transactions that need to be reviewed<br> - `delete_pending`: Only transactions that require manual intervention because the plaid account deleted this transaction after it was updated by the user. */
+                status?: "reviewed" | "unreviewed" | "delete_pending";
+                /** @description Filter transactions by pending status. Set to `true` to return only pending transactions, or `false` to return only non-pending transactions. When this parameter is set, it takes precedence over `include_pending`. Note: Pending transactions always have a status of `unreviewed`, so when setting this parameter to `true`, either omit the `status` parameter or set it to `unreviewed`.
+                 *      */
+                is_pending?: boolean;
+                /** @description By default, pending transactions are excluded from results. Set to `true` to include imported transactions with a pending status in the results. This query param is ignored if the `is_pending` query param is also set.
+                 *      */
                 include_pending?: boolean;
                 /** @description By default, custom and plaid metadata are not included in the response.  Set to true if you'd like the returned transactions objects to include any  metadata associated with the transactions. */
                 include_metadata?: boolean;
@@ -3258,9 +3236,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        transactions?: components["schemas"]["transactionObject"][];
-                    };
+                    "application/json": components["schemas"]["transactionObject"];
                 };
             };
             /** @description Bad Request */
@@ -3423,16 +3399,7 @@ export interface operations {
                 "multipart/form-data": {
                     /**
                      * Format: binary
-                     * @description The file to attach.
-                     *
-                     *     Supported file types:
-                     *     - image/jpeg
-                     *     - image/png
-                     *     - application/pdf
-                     *     - image/heic
-                     *     - image/heif
-                     *
-                     *     Maximum file size: 10MB
+                     * @description The file to attach via multipart form encoding.  File size may not exceed 10MB.
                      *
                      */
                     file: string;
