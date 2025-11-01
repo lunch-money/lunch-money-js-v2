@@ -206,7 +206,7 @@ export class LunchMoneyClient {
 		};
 	}
 
-	get accounts() {
+	get manualAccounts() {
 		return {
 			getAll: async (): Promise<ManualAccount[]> => {
 				const response = await this.client.GET("/manual_accounts");
