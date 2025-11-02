@@ -275,7 +275,6 @@ export interface paths {
          *
          *     If `is_group` is true in the returned transaction, the object will also include the `children` property which will contain a list of the  original transactions that make up the transaction group.<br>
          *     If `is_parent` is true in the returned transaction, the object will also include the `children` property which will contain a list of the split transactions.
-         *
          */
         get: operations["getTransactionById"];
         /**
@@ -321,7 +320,6 @@ export interface paths {
          *     To see the details of the original transactions that were used to create a transaction group, use the
          *     `GET /transactions/{id}` endpoint, passing the ID of the grouped transaction. The grouped transactions will
          *     be included in the `children` property of the transaction returned in the response
-         *
          */
         post: operations["groupTransactions"];
         delete?: never;
@@ -637,8 +635,10 @@ export interface components {
             order: number | null;
         };
         createCategoryRequestObject: {
-            /** @description The name of the new category. Must be between 1 and 100 characters.
-             *     Must not match the name of any existing categories or category groups. */
+            /**
+             * @description The name of the new category. Must be between 1 and 100 characters.
+             *     Must not match the name of any existing categories or category groups.
+             */
             name: string;
             /**
              * @description The description of the category. Must not exceed 200 characters.
@@ -767,10 +767,11 @@ export interface components {
              * @description The unique identifier of the associated recurring item that this transaction matched.
              */
             recurring_id: number | null;
-            /** @description Name of payee set by the user, the financial institution, or by
+            /**
+             * @description Name of payee set by the user, the financial institution, or by
              *     a matched recurring item. This will match the value
              *     displayed in payee field on the transactions page in the GUI.
-             *      */
+             */
             payee: string;
             /**
              * Format: int32
@@ -791,17 +792,17 @@ export interface components {
             external_id: string | null;
             /** @description A list of tag_ids for the tags associated with this transaction. If the transaction has no tags this will be an empty list.<br> Tag details can be obtained by passing the value of this attribute as the `ids` query parameter to the [List Tags](../operations/getTags) API */
             tag_ids: number[];
-            /** @description Any transaction notes set by the user or by
+            /**
+             * @description Any transaction notes set by the user or by
              *     a matched recurring item. This will match the value
              *     displayed in notes field on the transactions page in the GUI.
-             *      */
+             */
             notes: string | null;
             /**
              * @description Status of the transaction:
              *     - `reviewed`: User has reviewed the transaction, or it was automatically marked as reviewed due to reviewed recurring_item logic
              *     - `unreviewed`: User has not reviewed the transaction and it does not match any reviewed recurring_items. Note that any transactions  where `is_pending` is true will be returned with a status of unreviewed.
              *     - `delete_pending`: The synced account deleted this transaction after it was updated by the user. Requires manual intervention.
-             *
              * @enum {string}
              */
             status: "reviewed" | "unreviewed" | "delete_pending";
@@ -850,7 +851,6 @@ export interface components {
              *     - `rule`: Transaction was created by a rule to split a transaction
              *     - `split`: Transaction was created by splitting another transaction
              *     - `user`: This is a legacy value and is replaced by either csv or manual
-             *
              * @enum {string|null}
              */
             source: "api" | "csv" | "manual" | "merge" | "plaid" | "recurring" | "rule" | "split" | "user" | null;
@@ -880,24 +880,25 @@ export interface components {
              * @description The unique identifier of the associated recurring item that this transaction matched.
              */
             recurring_id: number | null;
-            /** @description Name of payee set by the user, the financial institution, or by
+            /**
+             * @description Name of payee set by the user, the financial institution, or by
              *     a matched recurring item. This will match the value
              *     displayed in payee field on the transactions page in the GUI.
-             *      */
+             */
             payee: string;
             /**
              * Format: int32
              * @description Unique identifier of associated category set by the user or by a matched recurring item.<br> Category details can be obtained by passing the value of this property to the [Get A Single Category](../operations/getCategoryById) API
              */
             category_id: number | null;
-            /** @description Any transaction notes set by the user or by
+            /**
+             * @description Any transaction notes set by the user or by
              *     a matched recurring item. This will match the value
              *     displayed in notes field on the transactions page in the GUI.
-             *      */
+             */
             notes: string | null;
             /**
              * @description Status of the transaction.  Will be one of the following values:
-             *
              * @enum {string}
              */
             status: "reviewed" | "unreviewed" | "delete_pending";
@@ -950,7 +951,6 @@ export interface components {
              *     - `rule`: Transaction was created by a rule to split a transaction
              *     - `split`: This is a transaction created by splitting another transaction
              *     - `user`: This is a legacy value and is replaced by either csv or manual
-             *
              * @enum {string|null}
              */
             source: "api" | "csv" | "manual" | "merge" | "plaid" | "recurring" | "rule" | "split" | "user" | null;
@@ -980,10 +980,11 @@ export interface components {
              * @description The ID of the category associated with the transactions. If set, the category ID must exist for the user's account and it cannot be a category group.
              */
             category_id?: number | null;
-            /** @description Any transaction notes set by the user or by
+            /**
+             * @description Any transaction notes set by the user or by
              *     a matched recurring item. This will match the value
              *     displayed in notes field on the transactions page in the GUI.
-             *      */
+             */
             notes?: string | null;
             /**
              * Format: int32
@@ -1025,8 +1026,10 @@ export interface components {
              * @description Date of transaction in ISO 8601 format
              */
             date?: string;
-            /** @description Numeric value of amount without currency symbol. i.e. $4.25 should be denoted as 4.25. May be a string or a number in double format. Regardless of the value of the user's `debits_as_negative` property, transactions with positive amounts are treated as debits. Set the amount to a negative value to insert a credit transaction.<br><br>
-             *     May not be updated on transactions that belong to a synced account with the "Allow Modifications to Transactions" property disabled. */
+            /**
+             * @description Numeric value of amount without currency symbol. i.e. $4.25 should be denoted as 4.25. May be a string or a number in double format. Regardless of the value of the user's `debits_as_negative` property, transactions with positive amounts are treated as debits. Set the amount to a negative value to insert a credit transaction.<br><br>
+             *     May not be updated on transactions that belong to a synced account with the "Allow Modifications to Transactions" property disabled.
+             */
             amount?: number | string;
             /** @description Three-letter lowercase currency code of the transaction in ISO 4217 format.<br> May not be updated on transactions that belong to a synced account with the "Allow Modifications to Transactions" property disabled. */
             currency?: components["schemas"]["currencyEnum"];
@@ -1035,16 +1038,14 @@ export interface components {
              * @description The unique identifier of the associated recurring item that this transaction matches.
              */
             recurring_id?: number | null;
-            /** @description The new payee for the transaction.
-             *      */
+            /** @description The new payee for the transaction. */
             payee?: string;
             /**
              * Format: int32
              * @description Unique identifier of the category for this transaction. Set this to 0 to clear the transaction's category.
              */
             category_id?: number | null;
-            /** @description New notes for the transaction. Set this to an empty string to clear the existing notes.
-             *      */
+            /** @description New notes for the transaction. Set this to an empty string to clear the existing notes. */
             notes?: string | null;
             /**
              * Format: int32
@@ -1068,7 +1069,6 @@ export interface components {
              * @description Status of the transaction, may be one of:
              *     - `reviewed`: User has reviewed the transaction, or it was automatically marked as reviewed due to reviewed recurring_item logic
              *     - `unreviewed`: User has not reviewed the transaction and it does not match any reviewed recurring_items.
-             *
              * @enum {string}
              */
             status?: "reviewed" | "unreviewed";
@@ -1109,7 +1109,6 @@ export interface components {
             group_id?: number | null;
             /**
              * @description System defined original source of the transaction. Ignored if set.
-             *
              * @enum {string|null}
              */
             source?: "api" | "csv" | "manual" | "merge" | "plaid" | "recurring" | "rule" | "split" | "user" | null;
@@ -1139,7 +1138,6 @@ export interface components {
              * @description The reason the transaction was skipped, may be one of:
              *     - `duplicate_external_id`: The transaction has the same `manual_account_id` and `external_id` as an existing transaction
              *     - `duplicate_payee_amount_date`: The `skip_duplicates` request body property was set to `true` and the transaction has the same `amount`, `payee`, and `date` as an existing transaction associated with the same account.
-             *
              * @enum {string}
              */
             reason?: "duplicate_external_id" | "duplicate_payee_amount_date";
@@ -1439,8 +1437,10 @@ export interface components {
             archived_at: string | null;
         };
         createTagRequestObject: {
-            /** @description The name of the new tag. Must be between 1 and 100 characters.
-             *     Must not match the name of any existing tags. */
+            /**
+             * @description The name of the new tag. Must be between 1 and 100 characters.
+             *     Must not match the name of any existing tags.
+             */
             name: string;
             /**
              * @description The description of the tag. Must not exceed 200 characters.
@@ -1599,7 +1599,6 @@ export interface components {
              *     - `transaction`: User created this by converting a transaction from the Transactions page
              *     - `system`: Recurring item was created by the system on transaction import
              *     - `null`: Some older recurring items may not have a source.
-             *
              * @enum {string}
              */
             source: "manual" | "transaction" | "system";
@@ -1761,14 +1760,16 @@ export interface components {
                 [name: string]: unknown;
             };
             content: {
-                /** @example {
+                /**
+                 * @example {
                  *       "message": "Unauthorized",
                  *       "errors": [
                  *         {
                  *           "errMsg": "Access token does not exist."
                  *         }
                  *       ]
-                 *     } */
+                 *     }
+                 */
                 "application/json": components["schemas"]["errorResponseObject"];
             };
         };
@@ -1778,14 +1779,16 @@ export interface components {
                 [name: string]: unknown;
             };
             content: {
-                /** @example {
+                /**
+                 * @example {
                  *       "message": "Too Many Requests",
                  *       "errors": [
                  *         {
                  *           "errMsg": "Too many requests, please try again later."
                  *         }
                  *       ]
-                 *     } */
+                 *     }
+                 */
                 "application/json": components["schemas"]["errorResponseObject"];
             };
         };
@@ -1795,14 +1798,16 @@ export interface components {
                 [name: string]: unknown;
             };
             content: {
-                /** @example {
+                /**
+                 * @example {
                  *       "message": "Internal Server Error",
                  *       "errors": [
                  *         {
                  *           "errMsg": "Currently in maintenance mode. Please try again in a few minutes."
                  *         }
                  *       ]
-                 *     } */
+                 *     }
+                 */
                 "application/json": components["schemas"]["errorResponseObject"];
             };
         };
@@ -1829,7 +1834,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "name": "User 1",
                      *       "email": "user-1@lunchmoney.dev",
                      *       "id": 18328,
@@ -1838,7 +1844,8 @@ export interface operations {
                      *       "primary_currency": "usd",
                      *       "api_key_label": "Side project dev key",
                      *       "debits_as_negative": false
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["userObject"];
                 };
             };
@@ -1912,7 +1919,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Request Validation Failure",
                      *       "errors": [
                      *         {
@@ -1928,7 +1936,8 @@ export interface operations {
                      *           }
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -1965,14 +1974,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Invalid Request Body",
                      *       "errors": [
                      *         {
                      *           "errMsg": "Cannot specify a 'group_id' in request body if 'is_group' is also true"
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -2008,7 +2019,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Request Validation Failure",
                      *       "errors": [
                      *         {
@@ -2021,7 +2033,8 @@ export interface operations {
                      *           }
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -2032,14 +2045,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
                      *           "errMsg": "There is no category with the id:'543210'`"
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -2078,14 +2093,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Invalid Request Body",
                      *       "errors": [
                      *         {
                      *           "errMsg": "Cannot modify the 'group_id' property of an existing category or category group"
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -2096,14 +2113,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
                      *           "errMsg": "There is no category with the id:'543210'`"
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -2140,14 +2159,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
                      *           "errMsg": "There is no category with the id:'543210'`"
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -2179,7 +2200,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "manual_accounts": [
                      *         {
                      *           "id": 119807,
@@ -2216,7 +2238,8 @@ export interface operations {
                      *           "updated_at": "2025-06-26T19:03:38.312Z"
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": {
                         manual_accounts?: components["schemas"]["manualAccountObject"][];
                     };
@@ -2228,7 +2251,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Request Validation Failure",
                      *       "errors": [
                      *         {
@@ -2241,7 +2265,8 @@ export interface operations {
                      *           }
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -2304,7 +2329,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "id": 119807,
                      *       "name": "Individual Brokerage",
                      *       "type": "investment",
@@ -2320,7 +2346,8 @@ export interface operations {
                      *       "exclude_from_transactions": false,
                      *       "created_at": "2025-06-25T17:00:04.414Z",
                      *       "updated_at": "2025-06-26T19:03:38.312Z"
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["manualAccountObject"];
                 };
             };
@@ -2340,14 +2367,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
                      *           "errMsg": "There is no manual account with the id:'9999999999999'`"
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -2396,14 +2425,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
                      *           "errMsg": "There is no manual account with the id:'543210'`"
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -2437,14 +2468,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
                      *           "errMsg": "There is no manual account with the id:'543210'`"
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -2467,7 +2500,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "plaid_accounts": [
                      *         {
                      *           "id": 119804,
@@ -2533,7 +2567,8 @@ export interface operations {
                      *           "plaid_last_successful_update": "2023-01-27T01:38:11.862Z"
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": {
                         plaid_accounts?: components["schemas"]["plaidAccountObject"][];
                     };
@@ -2545,7 +2580,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Request Validation Failure",
                      *       "errors": [
                      *         {
@@ -2558,7 +2594,8 @@ export interface operations {
                      *           }
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -2585,7 +2622,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "id": 119805,
                      *       "date_linked": "2020-01-28",
                      *       "name": "Freedom",
@@ -2605,7 +2643,8 @@ export interface operations {
                      *       "last_import": "2023-01-24T12:57:03.250Z",
                      *       "last_fetch": "2023-01-28T01:38:11.862Z",
                      *       "plaid_last_successful_update": "2023-01-27T01:38:11.862Z"
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["plaidAccountObject"];
                 };
             };
@@ -2615,7 +2654,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Request Validation Failure",
                      *       "errors": [
                      *         {
@@ -2628,7 +2668,8 @@ export interface operations {
                      *           }
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -2639,14 +2680,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
                      *           "errMsg": "There is no manual account with the id:'9999999999999'`"
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -2659,7 +2702,7 @@ export interface operations {
             query?: {
                 /** @description Denotes the beginning of the time period to fetch transactions for. If omitted, the most recent transactions will be returned. <br> Required if end_date exists. <br> */
                 start_date?: string;
-                /** @description Denotes the end of the time period you'd like to get transactions for. Required if start_date exists.  */
+                /** @description Denotes the end of the time period you'd like to get transactions for. Required if start_date exists. */
                 end_date?: string;
                 /** @description Specific ID of a plaid account to fetch. If not set the endpoint will trigger a fetch for all eligible accounts. */
                 id?: number;
@@ -2683,7 +2726,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Request Validation Failure",
                      *       "errors": [
                      *         {
@@ -2696,7 +2740,8 @@ export interface operations {
                      *           }
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -2707,14 +2752,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
                      *           "errMsg": "There is no manual account with the id:'9999999999999'`"
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -2724,14 +2771,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Too Early",
                      *       "errors": [
                      *         {
                      *           "errMsg": "Please wait at least 60 seconds between fetch requests."
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -2744,14 +2793,13 @@ export interface operations {
             query?: {
                 /** @description Denotes the beginning of the time period to fetch transactions for. If omitted, the most recent transactions will be returned. See `limit`. Required if end_date exists. <br> */
                 start_date?: string;
-                /** @description Denotes the end of the time period you'd like to get transactions for. Required if start_date exists.  */
+                /** @description Denotes the end of the time period you'd like to get transactions for. Required if start_date exists. */
                 end_date?: string;
                 /** @description Filter transactions to those associated with specified manual account ID or set this to 0 to omit any transactions from manual accounts. Setting both this and `synched_account_id` to 0 will return transactions with no account. These are listed as "Cash Transactions" in the Lunch Money GUI. */
                 manual_account_id?: number;
                 /** @description Filter transactions to those associated with specified plaid account ID or set this to 0 to omit any transactions from plaid accounts. Setting both this and `manual_account_id` to 0 will return transactions with no account. These are listed as "Cash Transactions" in the Lunch Money GUI. */
                 plaid_account_id?: number;
-                /** @description Filter transactions to those associated with specified Recurring  Item ID
-                 *      */
+                /** @description Filter transactions to those associated with specified Recurring  Item ID */
                 recurring_id?: number;
                 /** @description Filter transactions to those associated with the specified category ID. Will also match category groups.  Set this to 0 to return only un-categorized transactions */
                 category_id?: number;
@@ -2761,11 +2809,9 @@ export interface operations {
                 is_group?: boolean;
                 /** @description Filter transactions to those with the specified status:<br> - `reviewed`: Only user reviewed transactions or those that were automatically marked as reviewed due to reviewed recurring_item logic<br> - `unreviewed`: Only transactions that need to be reviewed<br> - `delete_pending`: Only transactions that require manual intervention because the plaid account deleted this transaction after it was updated by the user. */
                 status?: "reviewed" | "unreviewed" | "delete_pending";
-                /** @description Filter transactions by pending status. Set to `true` to return only pending transactions, or `false` to return only non-pending transactions. When this parameter is set, it takes precedence over `include_pending`. Note: Pending transactions always have a status of `unreviewed`, so when setting this parameter to `true`, either omit the `status` parameter or set it to `unreviewed`.
-                 *      */
+                /** @description Filter transactions by pending status. Set to `true` to return only pending transactions, or `false` to return only non-pending transactions. When this parameter is set, it takes precedence over `include_pending`. Note: Pending transactions always have a status of `unreviewed`, so when setting this parameter to `true`, either omit the `status` parameter or set it to `unreviewed`. */
                 is_pending?: boolean;
-                /** @description By default, pending transactions are excluded from results. Set to `true` to include imported transactions with a pending status in the results. This query param is ignored if the `is_pending` query param is also set.
-                 *      */
+                /** @description By default, pending transactions are excluded from results. Set to `true` to include imported transactions with a pending status in the results. This query param is ignored if the `is_pending` query param is also set. */
                 include_pending?: boolean;
                 /** @description By default, custom and plaid metadata are not included in the response.  Set to true if you'd like the returned transactions objects to include any  metadata associated with the transactions. */
                 include_metadata?: boolean;
@@ -2806,7 +2852,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Request Validation Failure",
                      *       "errors": [
                      *         {
@@ -2819,7 +2866,8 @@ export interface operations {
                      *           }
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -2958,7 +3006,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Invalid Request Body",
                      *       "errors": [
                      *         {
@@ -2978,7 +3027,8 @@ export interface operations {
                      *           ]
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -2989,7 +3039,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Invalid Request Body",
                      *       "errors": [
                      *         {
@@ -3003,7 +3054,8 @@ export interface operations {
                      *           "transaction_id": 9999999999
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -3038,7 +3090,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Request Validation Failure",
                      *       "errors": [
                      *         {
@@ -3051,7 +3104,8 @@ export interface operations {
                      *           }
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -3062,14 +3116,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
                      *           "errMsg": "There is no transaction with the id:'543210'`"
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -3111,7 +3167,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Request Validation Failure",
                      *       "errors": [
                      *         {
@@ -3124,7 +3181,8 @@ export interface operations {
                      *           }
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -3135,14 +3193,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
                      *           "errMsg": "There is no transaction with the id:'543210'`"
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -3176,14 +3236,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
                      *           "errMsg": "There is no transaction with the id:'543210'`"
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -3208,16 +3270,14 @@ export interface operations {
                      * @description Date for the new grouped transaction in ISO 8601 format.
                      */
                     date: string;
-                    /** @description The payee for the new grouped transaction.
-                     *      */
+                    /** @description The payee for the new grouped transaction. */
                     payee: string;
                     /**
                      * Format: int64
                      * @description The ID of an existing category to assign to the grouped transaction. If not set and all the grouped transactions have the same category, the grouped transaction will inherit the category, otherwise the new transaction will have no category.
                      */
                     category_id?: number | null;
-                    /** @description Notes for the grouped transaction.
-                     *      */
+                    /** @description Notes for the grouped transaction. */
                     notes?: string | null;
                     /**
                      * @description If set must be either `reviewed` or `unreviewed`. If not set, defaults to `reviewed`.
@@ -3279,14 +3339,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
                      *           "errMsg": "There is no transaction with the id: 543210"
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -3361,7 +3423,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Invalid Request Body",
                      *       "errors": [
                      *         {
@@ -3372,7 +3435,8 @@ export interface operations {
                      *           "id": 2112140458
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -3392,15 +3456,16 @@ export interface operations {
         };
         requestBody: {
             content: {
-                /** @example {
+                /**
+                 * @example {
                  *       "file": "./test-attachment.png",
                  *       "notes": "Test file attachment"
-                 *     } */
+                 *     }
+                 */
                 "multipart/form-data": {
                     /**
                      * Format: binary
                      * @description The file to attach via multipart form encoding.  File size may not exceed 10MB.
-                     *
                      */
                     file: string;
                     /** @description Optional notes about the file */
@@ -3415,7 +3480,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "id": 1234567890,
                      *       "uploaded_by": 1,
                      *       "name": "receipt.png",
@@ -3424,7 +3490,8 @@ export interface operations {
                      *       "notes": null,
                      *       "source": "api",
                      *       "created_at": "2025-06-11T22:33:20.294Z"
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["transactionAttachmentObject"];
                 };
             };
@@ -3464,10 +3531,12 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "url": "https://files.lunchmoney.app/66938-41ebb56a066bf09898de.png?X-Header1=X-Value1&X-Header2=Test-Do-Not-Use",
                      *       "expires_at": "2025-07-14T12:00:00Z"
-                     *     } */
+                     *     }
+                     */
                     "application/json": {
                         /** @description The signed url to download the file attachment */
                         url: string;
@@ -3486,14 +3555,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
                      *           "errMsg": "File attachment 1234567890 not found"
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -3524,14 +3595,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
                      *           "errMsg": "File attachment 1234567890 not found"
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -3552,7 +3625,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "tags": [
                      *         {
                      *           "id": 94317,
@@ -3582,7 +3656,8 @@ export interface operations {
                      *           "archived_at": null
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": {
                         tags?: components["schemas"]["tagObject"][];
                     };
@@ -3594,7 +3669,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Request Validation Failure",
                      *       "errors": [
                      *         {
@@ -3610,7 +3686,8 @@ export interface operations {
                      *           }
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -3647,14 +3724,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Invalid Request Body",
                      *       "errors": [
                      *         {
                      *           "errMsg": "Tag with name 'New Tag' already exists"
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -3681,7 +3760,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "id": 94319,
                      *       "name": "Date Night",
                      *       "description": "",
@@ -3689,7 +3769,8 @@ export interface operations {
                      *       "created_at": "2025-01-28T10:02:03.238Z",
                      *       "archived": false,
                      *       "archived_at": null
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["tagObject"];
                 };
             };
@@ -3699,7 +3780,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Request Validation Failure",
                      *       "errors": [
                      *         {
@@ -3712,7 +3794,8 @@ export interface operations {
                      *           }
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -3723,14 +3806,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
                      *           "errMsg": "There is no tag with the id:'543210'"
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -3769,14 +3854,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Invalid Request Body",
                      *       "errors": [
                      *         {
                      *           "errMsg": "A request to update a tag must include at least one of the following properties: name, description, archived"
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -3787,14 +3874,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
                      *           "errMsg": "There is no tag with the id:'543210'`"
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -3831,14 +3920,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
                      *           "errMsg": "There is no tag with the id:'543210'`"
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -3848,13 +3939,15 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "tag_name": "Tag to be Deleted",
                      *       "dependents": {
                      *         "rules": 1,
                      *         "transactions": 10
                      *       }
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["deleteTagResponseWithDependencies"];
                 };
             };
@@ -3867,7 +3960,7 @@ export interface operations {
             query?: {
                 /** @description Denotes the beginning of the range used to populate the `matching` object in the recurring items. If omitted, the current month will be used as the range.<br> Required if end_date exists. */
                 start_date?: string;
-                /** @description Denotes the end of the the range used to populate the `matching` object in the recurring items. Required if start_date exists.  */
+                /** @description Denotes the end of the the range used to populate the `matching` object in the recurring items. Required if start_date exists. */
                 end_date?: string;
                 include_suggested?: boolean;
             };
@@ -3883,7 +3976,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "recurring_items": {
                      *         "recurring_items": [
                      *           {
@@ -3970,7 +4064,8 @@ export interface operations {
                      *           }
                      *         ]
                      *       }
-                     *     } */
+                     *     }
+                     */
                     "application/json": {
                         recurring_items?: components["schemas"]["recurringObject"][];
                     };
@@ -3982,7 +4077,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Request Validation Failure",
                      *       "errors": [
                      *         {
@@ -3995,7 +4091,8 @@ export interface operations {
                      *           }
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -4006,14 +4103,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
                      *           "errMsg": "There is no tag with the id:'543210'"
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -4026,7 +4125,7 @@ export interface operations {
             query?: {
                 /** @description Denotes the beginning of the range used to populate the `matching` object in the recurring items. If omitted, the current month will be used as the range.<br> Required if end_date exists. */
                 start_date?: string;
-                /** @description Denotes the end of the the range used to populate the `matching` object in the recurring items. Required if start_date exists.  */
+                /** @description Denotes the end of the the range used to populate the `matching` object in the recurring items. Required if start_date exists. */
                 end_date?: string;
             };
             header?: never;
@@ -4044,7 +4143,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "id": 994069,
                      *       "description": "Income",
                      *       "status": "reviewed",
@@ -4086,7 +4186,8 @@ export interface operations {
                      *       "created_at": "2024-07-28T01:01:38.716Z",
                      *       "updated_at": "2024-07-28T01:01:38.716Z",
                      *       "source": "manual"
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["recurringObject"];
                 };
             };
@@ -4096,7 +4197,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Request Validation Failure",
                      *       "errors": [
                      *         {
@@ -4109,7 +4211,8 @@ export interface operations {
                      *           }
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
@@ -4120,14 +4223,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
                      *           "errMsg": "There is no tag with the id:'543210'"
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };

@@ -84,9 +84,9 @@ class LunchMoneyClient {
                 });
                 return this.handleResponse(response);
             },
-            delete: async (id) => {
+            delete: async (id, params) => {
                 const response = await this.client.DELETE("/categories/{id}", {
-                    params: { path: { id } },
+                    params: { path: { id }, query: params },
                 });
                 return this.handleResponse(response);
             },
@@ -157,7 +157,7 @@ class LunchMoneyClient {
             },
         };
     }
-    get accounts() {
+    get manualAccounts() {
         return {
             getAll: async () => {
                 const response = await this.client.GET("/manual_accounts");
@@ -211,9 +211,9 @@ class LunchMoneyClient {
                 });
                 return this.handleResponse(response);
             },
-            delete: async (id) => {
+            delete: async (id, params) => {
                 const response = await this.client.DELETE("/tags/{id}", {
-                    params: { path: { id } },
+                    params: { path: { id }, query: params },
                 });
                 return this.handleResponse(response);
             },
@@ -221,8 +221,10 @@ class LunchMoneyClient {
     }
     get recurringItems() {
         return {
-            getAll: async () => {
-                const response = await this.client.GET("/recurring_items");
+            getAll: async (params) => {
+                const response = await this.client.GET("/recurring_items", {
+                    params: { query: params },
+                });
                 const data = this.handleResponse(response);
                 return data.recurring_items || [];
             },

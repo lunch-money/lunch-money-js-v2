@@ -21,6 +21,8 @@ import type {
 	UpdateTagBody,
 	GetBudgetSummaryParams,
 	GetAllRecurringItemsParams,
+	DeleteCategoryParams,
+	DeleteTagParams,
 	AlignedSummaryResponse,
 	NonAlignedSummaryResponse,
 } from "./types";
@@ -127,9 +129,12 @@ export class LunchMoneyClient {
 				});
 				return this.handleResponse(response);
 			},
-			delete: async (id: number): Promise<void> => {
+			delete: async (
+				id: number,
+				params?: DeleteCategoryParams,
+			): Promise<void> => {
 				const response = await this.client.DELETE("/categories/{id}", {
-					params: { path: { id } },
+					params: { path: { id }, query: params },
 				});
 				return this.handleResponse(response);
 			},
@@ -263,9 +268,9 @@ export class LunchMoneyClient {
 				});
 				return this.handleResponse(response);
 			},
-			delete: async (id: number): Promise<void> => {
+			delete: async (id: number, params?: DeleteTagParams): Promise<void> => {
 				const response = await this.client.DELETE("/tags/{id}", {
-					params: { path: { id } },
+					params: { path: { id }, query: params },
 				});
 				return this.handleResponse(response);
 			},

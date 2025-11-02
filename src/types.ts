@@ -62,6 +62,9 @@ export type GetBudgetSummaryParams =
 	operations["getBudgetSummary"]["parameters"]["query"];
 export type GetAllRecurringItemsParams =
 	operations["getAllRecurring"]["parameters"]["query"];
+export type DeleteCategoryParams =
+	operations["deleteCategory"]["parameters"]["query"];
+export type DeleteTagParams = operations["deleteTag"]["parameters"]["query"];
 
 // Re-export the raw OpenAPI types for advanced usage
 export type { paths, operations, components } from "./types.generated";
