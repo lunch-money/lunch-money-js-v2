@@ -26,17 +26,26 @@ class LunchMoneyClient {
             },
         });
     }
-    handleResponse(response) {
+    handleError(response) {
+        const errorData = response.error;
+        const message = errorData.message || "API request failed";
+        const errors = errorData.errors || [];
+        throw new LunchMoneyError(message, response.response.status, response.error, errors);
+    }
+    handleDataResponse(response) {
         if (response.error) {
-            const errorData = response.error;
-            const message = errorData.message || "API request failed";
-            const errors = errorData.errors || [];
-            throw new LunchMoneyError(message, response.response.status, response.error, errors);
+            this.handleError(response);
         }
-        if (!response.data) {
-            throw new LunchMoneyError("No data returned from API", response.response.status);
+        if (response.data === undefined) {
+            throw new LunchMoneyError("Expected data in response but received undefined", response.response.status);
         }
         return response.data;
+    }
+    handleVoidResponse(response) {
+        if (response.error) {
+            this.handleError(response);
+        }
+        // No data expected, just return void
     }
     get user() {
         return {
@@ -45,7 +54,7 @@ class LunchMoneyClient {
              */
             getMe: async () => {
                 const response = await this.client.GET("/me");
-                return this.handleResponse(response);
+                return this.handleDataResponse(response);
             },
         };
     }
@@ -58,7 +67,7 @@ class LunchMoneyClient {
                 const response = await this.client.GET("/categories", {
                     params: { query: params },
                 });
-                const data = this.handleResponse(response);
+                const data = this.handleDataResponse(response);
                 return data.categories || [];
             },
             /**
@@ -68,27 +77,27 @@ class LunchMoneyClient {
                 const response = await this.client.GET("/categories/{id}", {
                     params: { path: { id } },
                 });
-                return this.handleResponse(response);
+                return this.handleDataResponse(response);
             },
             /**
              * Create a new category
              */
             create: async (data) => {
                 const response = await this.client.POST("/categories", { body: data });
-                return this.handleResponse(response);
+                return this.handleDataResponse(response);
             },
             update: async (id, data) => {
                 const response = await this.client.PUT("/categories/{id}", {
                     params: { path: { id } },
                     body: data,
                 });
-                return this.handleResponse(response);
+                return this.handleDataResponse(response);
             },
             delete: async (id, params) => {
                 const response = await this.client.DELETE("/categories/{id}", {
                     params: { path: { id }, query: params },
                 });
-                return this.handleResponse(response);
+                return this.handleVoidResponse(response);
             },
         };
     }
@@ -98,62 +107,65 @@ class LunchMoneyClient {
                 const response = await this.client.GET("/transactions", {
                     params: { query: params },
                 });
-                const data = this.handleResponse(response);
-                return data.transactions || [];
+                const data = this.handleDataResponse(response);
+                return {
+                    transactions: data.transactions || [],
+                    hasMore: data.has_more || false,
+                };
             },
             get: async (id) => {
                 const response = await this.client.GET("/transactions/{id}", {
                     params: { path: { id } },
                 });
-                return this.handleResponse(response);
+                return this.handleDataResponse(response);
             },
             create: async (data) => {
                 const response = await this.client.POST("/transactions", {
                     body: data,
                 });
-                return this.handleResponse(response);
+                return this.handleDataResponse(response);
             },
             update: async (id, data) => {
                 const response = await this.client.PUT("/transactions/{id}", {
                     params: { path: { id } },
                     body: data,
                 });
-                return this.handleResponse(response);
+                return this.handleDataResponse(response);
             },
             delete: async (id) => {
                 const response = await this.client.DELETE("/transactions/{id}", {
                     params: { path: { id } },
                 });
-                return this.handleResponse(response);
+                return this.handleVoidResponse(response);
             },
             updateMany: async (data) => {
                 const response = await this.client.PUT("/transactions", { body: data });
-                return this.handleResponse(response);
+                return this.handleDataResponse(response);
             },
             split: async (id, data) => {
                 const response = await this.client.POST("/transactions/split/{id}", {
                     params: { path: { id } },
                     body: data,
                 });
-                return this.handleResponse(response);
+                return this.handleDataResponse(response);
             },
             unsplit: async (id) => {
                 const response = await this.client.DELETE("/transactions/split/{id}", {
                     params: { path: { id } },
                 });
-                return this.handleResponse(response);
+                return this.handleVoidResponse(response);
             },
             group: async (data) => {
                 const response = await this.client.POST("/transactions/group", {
                     body: data,
                 });
-                return this.handleResponse(response);
+                return this.handleDataResponse(response);
             },
             ungroup: async (id) => {
                 const response = await this.client.DELETE("/transactions/group/{id}", {
                     params: { path: { id } },
                 });
-                return this.handleResponse(response);
+                return this.handleVoidResponse(response);
             },
         };
     }
@@ -161,14 +173,14 @@ class LunchMoneyClient {
         return {
             getAll: async () => {
                 const response = await this.client.GET("/manual_accounts");
-                const data = this.handleResponse(response);
+                const data = this.handleDataResponse(response);
                 return data.manual_accounts || [];
             },
             get: async (id) => {
                 const response = await this.client.GET("/manual_accounts/{id}", {
                     params: { path: { id } },
                 });
-                return this.handleResponse(response);
+                return this.handleDataResponse(response);
             },
         };
     }
@@ -176,14 +188,14 @@ class LunchMoneyClient {
         return {
             getAll: async () => {
                 const response = await this.client.GET("/plaid_accounts");
-                const data = this.handleResponse(response);
+                const data = this.handleDataResponse(response);
                 return data.plaid_accounts || [];
             },
             get: async (id) => {
                 const response = await this.client.GET("/plaid_accounts/{id}", {
                     params: { path: { id } },
                 });
-                return this.handleResponse(response);
+                return this.handleDataResponse(response);
             },
         };
     }
@@ -191,31 +203,31 @@ class LunchMoneyClient {
         return {
             getAll: async () => {
                 const response = await this.client.GET("/tags");
-                const data = this.handleResponse(response);
+                const data = this.handleDataResponse(response);
                 return data.tags || [];
             },
             get: async (id) => {
                 const response = await this.client.GET("/tags/{id}", {
                     params: { path: { id } },
                 });
-                return this.handleResponse(response);
+                return this.handleDataResponse(response);
             },
             create: async (data) => {
                 const response = await this.client.POST("/tags", { body: data });
-                return this.handleResponse(response);
+                return this.handleDataResponse(response);
             },
             update: async (id, data) => {
                 const response = await this.client.PUT("/tags/{id}", {
                     params: { path: { id } },
                     body: data,
                 });
-                return this.handleResponse(response);
+                return this.handleDataResponse(response);
             },
             delete: async (id, params) => {
                 const response = await this.client.DELETE("/tags/{id}", {
                     params: { path: { id }, query: params },
                 });
-                return this.handleResponse(response);
+                return this.handleVoidResponse(response);
             },
         };
     }
@@ -225,14 +237,14 @@ class LunchMoneyClient {
                 const response = await this.client.GET("/recurring_items", {
                     params: { query: params },
                 });
-                const data = this.handleResponse(response);
+                const data = this.handleDataResponse(response);
                 return data.recurring_items || [];
             },
             get: async (id) => {
                 const response = await this.client.GET("/recurring_items/{id}", {
                     params: { path: { id } },
                 });
-                return this.handleResponse(response);
+                return this.handleDataResponse(response);
             },
         };
     }
@@ -242,7 +254,7 @@ class LunchMoneyClient {
                 const response = await this.client.GET("/summary", {
                     params: { query: params },
                 });
-                return this.handleResponse(response);
+                return this.handleDataResponse(response);
             },
         };
     }

@@ -22,6 +22,10 @@ export type TransactionAttachment =
 // Response types
 export type InsertTransactionsResponse =
 	components["schemas"]["insertTransactionsResponseObject"];
+export type GetAllTransactionsResponse = {
+	transactions: Transaction[];
+	hasMore: boolean;
+};
 export type ErrorResponse = components["schemas"]["errorResponseObject"];
 export type AlignedSummaryResponse =
 	components["schemas"]["alignedSummaryResponseObject"];

@@ -12,6 +12,7 @@ import type {
 	CreateCategoryBody,
 	UpdateCategoryBody,
 	GetAllTransactionsParams,
+	GetAllTransactionsResponse,
 	CreateTransactionBody,
 	UpdateTransactionBody,
 	UpdateTransactionsBody,
@@ -51,32 +52,49 @@ export class LunchMoneyClient {
 		});
 	}
 
-	private handleResponse<T>(response: {
+	private handleError(response: {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		error?: any;
+		response: { status: number };
+	}): never {
+		const errorData = response.error as ErrorResponse;
+		const message = errorData.message || "API request failed";
+		const errors = errorData.errors || [];
+		throw new LunchMoneyError(
+			message,
+			response.response.status,
+			response.error,
+			errors,
+		);
+	}
+
+	private handleDataResponse<T>(response: {
 		data?: T;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		error?: any;
 		response: { status: number };
 	}): T {
 		if (response.error) {
-			const errorData = response.error as ErrorResponse;
-			const message = errorData.message || "API request failed";
-			const errors = errorData.errors || [];
-			throw new LunchMoneyError(
-				message,
-				response.response.status,
-				response.error,
-				errors,
-			);
+			this.handleError(response);
 		}
-
-		if (!response.data) {
+		if (response.data === undefined) {
 			throw new LunchMoneyError(
-				"No data returned from API",
+				"Expected data in response but received undefined",
 				response.response.status,
 			);
 		}
-
 		return response.data;
+	}
+
+	private handleVoidResponse(response: {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		error?: any;
+		response: { status: number };
+	}): void {
+		if (response.error) {
+			this.handleError(response);
+		}
+		// No data expected, just return void
 	}
 
 	get user() {
@@ -86,7 +104,7 @@ export class LunchMoneyClient {
 			 */
 			getMe: async (): Promise<User> => {
 				const response = await this.client.GET("/me");
-				return this.handleResponse(response);
+				return this.handleDataResponse(response);
 			},
 		};
 	}
@@ -100,7 +118,7 @@ export class LunchMoneyClient {
 				const response = await this.client.GET("/categories", {
 					params: { query: params },
 				});
-				const data = this.handleResponse(response);
+				const data = this.handleDataResponse(response);
 				return data.categories || [];
 			},
 			/**
@@ -110,14 +128,14 @@ export class LunchMoneyClient {
 				const response = await this.client.GET("/categories/{id}", {
 					params: { path: { id } },
 				});
-				return this.handleResponse(response);
+				return this.handleDataResponse(response);
 			},
 			/**
 			 * Create a new category
 			 */
 			create: async (data: CreateCategoryBody): Promise<Category> => {
 				const response = await this.client.POST("/categories", { body: data });
-				return this.handleResponse(response);
+				return this.handleDataResponse(response);
 			},
 			update: async (
 				id: number,
@@ -127,7 +145,7 @@ export class LunchMoneyClient {
 					params: { path: { id } },
 					body: data,
 				});
-				return this.handleResponse(response);
+				return this.handleDataResponse(response);
 			},
 			delete: async (
 				id: number,
@@ -136,7 +154,7 @@ export class LunchMoneyClient {
 				const response = await this.client.DELETE("/categories/{id}", {
 					params: { path: { id }, query: params },
 				});
-				return this.handleResponse(response);
+				return this.handleVoidResponse(response);
 			},
 		};
 	}
@@ -145,24 +163,27 @@ export class LunchMoneyClient {
 		return {
 			getAll: async (
 				params?: GetAllTransactionsParams,
-			): Promise<Transaction[]> => {
+			): Promise<GetAllTransactionsResponse> => {
 				const response = await this.client.GET("/transactions", {
 					params: { query: params },
 				});
-				const data = this.handleResponse(response);
-				return data.transactions || [];
+				const data = this.handleDataResponse(response);
+				return {
+					transactions: data.transactions || [],
+					hasMore: data.has_more || false,
+				};
 			},
 			get: async (id: number): Promise<Transaction> => {
 				const response = await this.client.GET("/transactions/{id}", {
 					params: { path: { id } },
 				});
-				return this.handleResponse(response);
+				return this.handleDataResponse(response);
 			},
 			create: async (data: CreateTransactionBody): Promise<any> => {
 				const response = await this.client.POST("/transactions", {
 					body: data,
 				});
-				return this.handleResponse(response);
+				return this.handleDataResponse(response);
 			},
 			update: async (
 				id: number,
@@ -172,42 +193,42 @@ export class LunchMoneyClient {
 					params: { path: { id } },
 					body: data,
 				});
-				return this.handleResponse(response);
+				return this.handleDataResponse(response);
 			},
 			delete: async (id: number): Promise<void> => {
 				const response = await this.client.DELETE("/transactions/{id}", {
 					params: { path: { id } },
 				});
-				return this.handleResponse(response);
+				return this.handleVoidResponse(response);
 			},
 			updateMany: async (data: UpdateTransactionsBody): Promise<any> => {
 				const response = await this.client.PUT("/transactions", { body: data });
-				return this.handleResponse(response);
+				return this.handleDataResponse(response);
 			},
 			split: async (id: number, data: SplitTransactionBody): Promise<any> => {
 				const response = await this.client.POST("/transactions/split/{id}", {
 					params: { path: { id } },
 					body: data,
 				});
-				return this.handleResponse(response);
+				return this.handleDataResponse(response);
 			},
 			unsplit: async (id: number): Promise<void> => {
 				const response = await this.client.DELETE("/transactions/split/{id}", {
 					params: { path: { id } },
 				});
-				return this.handleResponse(response);
+				return this.handleVoidResponse(response);
 			},
 			group: async (data: GroupTransactionsBody): Promise<any> => {
 				const response = await this.client.POST("/transactions/group", {
 					body: data,
 				});
-				return this.handleResponse(response);
+				return this.handleDataResponse(response);
 			},
 			ungroup: async (id: number): Promise<void> => {
 				const response = await this.client.DELETE("/transactions/group/{id}", {
 					params: { path: { id } },
 				});
-				return this.handleResponse(response);
+				return this.handleVoidResponse(response);
 			},
 		};
 	}
@@ -216,14 +237,14 @@ export class LunchMoneyClient {
 		return {
 			getAll: async (): Promise<ManualAccount[]> => {
 				const response = await this.client.GET("/manual_accounts");
-				const data = this.handleResponse(response);
+				const data = this.handleDataResponse(response);
 				return data.manual_accounts || [];
 			},
 			get: async (id: number): Promise<ManualAccount> => {
 				const response = await this.client.GET("/manual_accounts/{id}", {
 					params: { path: { id } },
 				});
-				return this.handleResponse(response);
+				return this.handleDataResponse(response);
 			},
 		};
 	}
@@ -232,14 +253,14 @@ export class LunchMoneyClient {
 		return {
 			getAll: async (): Promise<PlaidAccount[]> => {
 				const response = await this.client.GET("/plaid_accounts");
-				const data = this.handleResponse(response);
+				const data = this.handleDataResponse(response);
 				return data.plaid_accounts || [];
 			},
 			get: async (id: number): Promise<PlaidAccount> => {
 				const response = await this.client.GET("/plaid_accounts/{id}", {
 					params: { path: { id } },
 				});
-				return this.handleResponse(response);
+				return this.handleDataResponse(response);
 			},
 		};
 	}
@@ -248,31 +269,31 @@ export class LunchMoneyClient {
 		return {
 			getAll: async (): Promise<Tag[]> => {
 				const response = await this.client.GET("/tags");
-				const data = this.handleResponse(response);
+				const data = this.handleDataResponse(response);
 				return data.tags || [];
 			},
 			get: async (id: number): Promise<Tag> => {
 				const response = await this.client.GET("/tags/{id}", {
 					params: { path: { id } },
 				});
-				return this.handleResponse(response);
+				return this.handleDataResponse(response);
 			},
 			create: async (data: CreateTagBody): Promise<Tag> => {
 				const response = await this.client.POST("/tags", { body: data });
-				return this.handleResponse(response);
+				return this.handleDataResponse(response);
 			},
 			update: async (id: number, data: UpdateTagBody): Promise<Tag> => {
 				const response = await this.client.PUT("/tags/{id}", {
 					params: { path: { id } },
 					body: data,
 				});
-				return this.handleResponse(response);
+				return this.handleDataResponse(response);
 			},
 			delete: async (id: number, params?: DeleteTagParams): Promise<void> => {
 				const response = await this.client.DELETE("/tags/{id}", {
 					params: { path: { id }, query: params },
 				});
-				return this.handleResponse(response);
+				return this.handleVoidResponse(response);
 			},
 		};
 	}
@@ -285,14 +306,14 @@ export class LunchMoneyClient {
 				const response = await this.client.GET("/recurring_items", {
 					params: { query: params },
 				});
-				const data = this.handleResponse(response);
+				const data = this.handleDataResponse(response);
 				return data.recurring_items || [];
 			},
 			get: async (id: number): Promise<RecurringItem> => {
 				const response = await this.client.GET("/recurring_items/{id}", {
 					params: { path: { id } },
 				});
-				return this.handleResponse(response);
+				return this.handleDataResponse(response);
 			},
 		};
 	}
@@ -305,7 +326,7 @@ export class LunchMoneyClient {
 				const response = await this.client.GET("/summary", {
 					params: { query: params },
 				});
-				return this.handleResponse(response);
+				return this.handleDataResponse(response);
 			},
 		};
 	}
