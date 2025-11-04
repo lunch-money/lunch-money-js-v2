@@ -30,7 +30,7 @@ import type {
 import { LunchMoneyError, type ErrorResponse } from "./errors";
 
 export interface LunchMoneyClientOptions {
-	apiKey: string;
+	apiKey?: string;
 	baseUrl?: string;
 }
 
@@ -46,7 +46,7 @@ export class LunchMoneyClient {
 		this.client = createClient<paths>({
 			baseUrl,
 			headers: {
-				Authorization: `Bearer ${apiKey}`,
+				Authorization: apiKey ? `Bearer ${apiKey}` : undefined,
 				"Content-Type": "application/json",
 			},
 		});
