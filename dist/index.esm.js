@@ -17,13 +17,17 @@ class LunchMoneyError extends Error {
  */
 class LunchMoneyClient {
     constructor(options) {
-        const { apiKey, baseUrl = "https://dev.lunchmoney.app/v2" } = options;
+        const { apiKey, baseUrl = "https://dev.lunchmoney.app/v2", ...rest } = options;
+        const headers = {
+            "Content-Type": "application/json",
+        };
+        if (apiKey) {
+            headers.Authorization = `Bearer ${apiKey}`;
+        }
         this.client = createClient({
             baseUrl,
-            headers: {
-                Authorization: `Bearer ${apiKey}`,
-                "Content-Type": "application/json",
-            },
+            headers,
+            ...rest,
         });
     }
     handleError(response) {

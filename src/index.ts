@@ -1,4 +1,4 @@
-import createClient from "openapi-fetch";
+import createClient, { ClientOptions } from "openapi-fetch";
 import type { paths } from "./types.generated";
 import type {
 	User,
@@ -29,7 +29,7 @@ import type {
 } from "./types";
 import { LunchMoneyError, type ErrorResponse } from "./errors";
 
-export interface LunchMoneyClientOptions {
+export interface LunchMoneyClientOptions extends ClientOptions {
 	apiKey?: string;
 	baseUrl?: string;
 }
@@ -41,14 +41,24 @@ export class LunchMoneyClient {
 	private client: ReturnType<typeof createClient<paths>>;
 
 	constructor(options: LunchMoneyClientOptions) {
-		const { apiKey, baseUrl = "https://dev.lunchmoney.app/v2" } = options;
+		const {
+			apiKey,
+			baseUrl = "https://dev.lunchmoney.app/v2",
+			...rest
+		} = options;
+
+		const headers: Record<string, string> = {
+			"Content-Type": "application/json",
+		};
+
+		if (apiKey) {
+			headers.Authorization = `Bearer ${apiKey}`;
+		}
 
 		this.client = createClient<paths>({
 			baseUrl,
-			headers: {
-				Authorization: apiKey ? `Bearer ${apiKey}` : undefined,
-				"Content-Type": "application/json",
-			},
+			headers,
+			...rest,
 		});
 	}
 
