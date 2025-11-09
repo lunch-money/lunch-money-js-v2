@@ -4298,6 +4298,9 @@ type GetBudgetSummaryParams = operations["getBudgetSummary"]["parameters"]["quer
 type GetAllRecurringItemsParams = operations["getAllRecurring"]["parameters"]["query"];
 type DeleteCategoryParams = operations["deleteCategory"]["parameters"]["query"];
 type DeleteTagParams = operations["deleteTag"]["parameters"]["query"];
+type CreateManualAccountBody = operations["createManualAccount"]["requestBody"]["content"]["application/json"];
+type UpdateManualAccountBody = operations["updateManualAccount"]["requestBody"]["content"]["application/json"];
+type TriggerPlaidAccountFetchParams = operations["triggerPlaidAccountFetch"]["parameters"]["query"];
 
 type ErrorResponse = components["schemas"]["errorResponseObject"];
 type ErrorDetail = ErrorResponse["errors"][number];
@@ -4358,10 +4361,14 @@ declare class LunchMoneyClient {
     get manualAccounts(): {
         getAll: () => Promise<ManualAccount[]>;
         get: (id: number) => Promise<ManualAccount>;
+        create: (data: CreateManualAccountBody) => Promise<ManualAccount>;
+        update: (id: number, data: UpdateManualAccountBody) => Promise<ManualAccount>;
+        delete: (id: number) => Promise<void>;
     };
     get plaidAccounts(): {
         getAll: () => Promise<PlaidAccount[]>;
         get: (id: number) => Promise<PlaidAccount>;
+        triggerFetch: (params?: TriggerPlaidAccountFetchParams) => Promise<void>;
     };
     get tags(): {
         getAll: () => Promise<Tag[]>;
@@ -4384,4 +4391,4 @@ declare class LunchMoneyClient {
 }
 
 export { LunchMoneyClient, LunchMoneyError, LunchMoneyClient as default };
-export type { AccountType, AlignedSummaryResponse, Category, ChildCategory, ChildTransaction, CreateCategoryBody, CreateTagBody, CreateTransactionBody, Currency, DeleteCategoryParams, DeleteTagParams, ErrorDetail, ErrorResponse, GetAllCategoriesParams, GetAllRecurringItemsParams, GetAllTransactionsParams, GetAllTransactionsResponse, GetBudgetSummaryParams, GroupTransactionsBody, InsertTransaction, InsertTransactionsResponse, LunchMoneyClientOptions, ManualAccount, NonAlignedSummaryResponse, PlaidAccount, RecurringItem, SplitTransaction, SplitTransactionBody, Tag, Transaction, TransactionAttachment, UpdateCategoryBody, UpdateTagBody, UpdateTransaction, UpdateTransactionBody, UpdateTransactionsBody, User, components, operations, paths };
+export type { AccountType, AlignedSummaryResponse, Category, ChildCategory, ChildTransaction, CreateCategoryBody, CreateManualAccountBody, CreateTagBody, CreateTransactionBody, Currency, DeleteCategoryParams, DeleteTagParams, ErrorDetail, ErrorResponse, GetAllCategoriesParams, GetAllRecurringItemsParams, GetAllTransactionsParams, GetAllTransactionsResponse, GetBudgetSummaryParams, GroupTransactionsBody, InsertTransaction, InsertTransactionsResponse, LunchMoneyClientOptions, ManualAccount, NonAlignedSummaryResponse, PlaidAccount, RecurringItem, SplitTransaction, SplitTransactionBody, Tag, Transaction, TransactionAttachment, TriggerPlaidAccountFetchParams, UpdateCategoryBody, UpdateManualAccountBody, UpdateTagBody, UpdateTransaction, UpdateTransactionBody, UpdateTransactionsBody, User, components, operations, paths };

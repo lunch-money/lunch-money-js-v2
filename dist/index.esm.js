@@ -186,6 +186,25 @@ class LunchMoneyClient {
                 });
                 return this.handleDataResponse(response);
             },
+            create: async (data) => {
+                const response = await this.client.POST("/manual_accounts", {
+                    body: data,
+                });
+                return this.handleDataResponse(response);
+            },
+            update: async (id, data) => {
+                const response = await this.client.PUT("/manual_accounts/{id}", {
+                    params: { path: { id } },
+                    body: data,
+                });
+                return this.handleDataResponse(response);
+            },
+            delete: async (id) => {
+                const response = await this.client.DELETE("/manual_accounts/{id}", {
+                    params: { path: { id } },
+                });
+                return this.handleVoidResponse(response);
+            },
         };
     }
     get plaidAccounts() {
@@ -200,6 +219,12 @@ class LunchMoneyClient {
                     params: { path: { id } },
                 });
                 return this.handleDataResponse(response);
+            },
+            triggerFetch: async (params) => {
+                const response = await this.client.POST("/plaid_accounts/fetch", {
+                    params: { query: params },
+                });
+                return this.handleVoidResponse(response);
             },
         };
     }
