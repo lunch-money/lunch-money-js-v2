@@ -69,6 +69,12 @@ export type GetAllRecurringItemsParams =
 export type DeleteCategoryParams =
 	operations["deleteCategory"]["parameters"]["query"];
 export type DeleteTagParams = operations["deleteTag"]["parameters"]["query"];
+export type CreateManualAccountBody =
+	operations["createManualAccount"]["requestBody"]["content"]["application/json"];
+export type UpdateManualAccountBody =
+	operations["updateManualAccount"]["requestBody"]["content"]["application/json"];
+export type TriggerPlaidAccountFetchParams =
+	operations["triggerPlaidAccountFetch"]["parameters"]["query"];
 
 // Re-export the raw OpenAPI types for advanced usage
 export type { paths, operations, components } from "./types.generated";

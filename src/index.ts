@@ -26,6 +26,9 @@ import type {
 	DeleteTagParams,
 	AlignedSummaryResponse,
 	NonAlignedSummaryResponse,
+	CreateManualAccountBody,
+	UpdateManualAccountBody,
+	TriggerPlaidAccountFetchParams,
 } from "./types";
 import { LunchMoneyError, type ErrorResponse } from "./errors";
 
@@ -256,6 +259,28 @@ export class LunchMoneyClient {
 				});
 				return this.handleDataResponse(response);
 			},
+			create: async (data: CreateManualAccountBody): Promise<ManualAccount> => {
+				const response = await this.client.POST("/manual_accounts", {
+					body: data,
+				});
+				return this.handleDataResponse(response);
+			},
+			update: async (
+				id: number,
+				data: UpdateManualAccountBody,
+			): Promise<ManualAccount> => {
+				const response = await this.client.PUT("/manual_accounts/{id}", {
+					params: { path: { id } },
+					body: data,
+				});
+				return this.handleDataResponse(response);
+			},
+			delete: async (id: number): Promise<void> => {
+				const response = await this.client.DELETE("/manual_accounts/{id}", {
+					params: { path: { id } },
+				});
+				return this.handleVoidResponse(response);
+			},
 		};
 	}
 
@@ -271,6 +296,14 @@ export class LunchMoneyClient {
 					params: { path: { id } },
 				});
 				return this.handleDataResponse(response);
+			},
+			triggerFetch: async (
+				params?: TriggerPlaidAccountFetchParams,
+			): Promise<void> => {
+				const response = await this.client.POST("/plaid_accounts/fetch", {
+					params: { query: params },
+				});
+				return this.handleVoidResponse(response);
 			},
 		};
 	}
