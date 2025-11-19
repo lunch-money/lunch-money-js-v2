@@ -9,9 +9,7 @@ function _interopDefault (e) { return e && e.__esModule ? e : { default: e }; }
 var createClient__default = /*#__PURE__*/_interopDefault(createClient);
 
 class LunchMoneyError extends Error {
-    constructor(message, status, 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data, errors) {
+    constructor(message, status, data, errors) {
         super(message);
         this.status = status;
         this.data = data;

@@ -4279,6 +4279,9 @@ type GetAllTransactionsResponse = {
     transactions: Transaction[];
     hasMore: boolean;
 };
+type UpdateTransactionsResponse = {
+    transactions: Transaction[];
+};
 type AlignedSummaryResponse = components["schemas"]["alignedSummaryResponseObject"];
 type NonAlignedSummaryResponse = components["schemas"]["nonAlignedSummaryResponseObject"];
 type Currency = components["schemas"]["currencyEnum"];
@@ -4306,9 +4309,9 @@ type ErrorResponse = components["schemas"]["errorResponseObject"];
 type ErrorDetail = ErrorResponse["errors"][number];
 declare class LunchMoneyError extends Error {
     readonly status?: number | undefined;
-    readonly data?: any | undefined;
+    readonly data?: unknown | undefined;
     readonly errors: ErrorDetail[];
-    constructor(message: string, status?: number | undefined, data?: any | undefined, errors?: ErrorDetail[]);
+    constructor(message: string, status?: number | undefined, data?: unknown | undefined, errors?: ErrorDetail[]);
 }
 
 interface LunchMoneyClientOptions extends ClientOptions {
@@ -4349,13 +4352,13 @@ declare class LunchMoneyClient {
     get transactions(): {
         getAll: (params?: GetAllTransactionsParams) => Promise<GetAllTransactionsResponse>;
         get: (id: number) => Promise<Transaction>;
-        create: (data: CreateTransactionBody) => Promise<any>;
+        create: (data: CreateTransactionBody) => Promise<InsertTransactionsResponse>;
         update: (id: number, data: UpdateTransactionBody) => Promise<Transaction>;
         delete: (id: number) => Promise<void>;
-        updateMany: (data: UpdateTransactionsBody) => Promise<any>;
-        split: (id: number, data: SplitTransactionBody) => Promise<any>;
+        updateMany: (data: UpdateTransactionsBody) => Promise<UpdateTransactionsResponse>;
+        split: (id: number, data: SplitTransactionBody) => Promise<Transaction>;
         unsplit: (id: number) => Promise<void>;
-        group: (data: GroupTransactionsBody) => Promise<any>;
+        group: (data: GroupTransactionsBody) => Promise<Transaction>;
         ungroup: (id: number) => Promise<void>;
     };
     get manualAccounts(): {
@@ -4391,4 +4394,4 @@ declare class LunchMoneyClient {
 }
 
 export { LunchMoneyClient, LunchMoneyError, LunchMoneyClient as default };
-export type { AccountType, AlignedSummaryResponse, Category, ChildCategory, ChildTransaction, CreateCategoryBody, CreateManualAccountBody, CreateTagBody, CreateTransactionBody, Currency, DeleteCategoryParams, DeleteTagParams, ErrorDetail, ErrorResponse, GetAllCategoriesParams, GetAllRecurringItemsParams, GetAllTransactionsParams, GetAllTransactionsResponse, GetBudgetSummaryParams, GroupTransactionsBody, InsertTransaction, InsertTransactionsResponse, LunchMoneyClientOptions, ManualAccount, NonAlignedSummaryResponse, PlaidAccount, RecurringItem, SplitTransaction, SplitTransactionBody, Tag, Transaction, TransactionAttachment, TriggerPlaidAccountFetchParams, UpdateCategoryBody, UpdateManualAccountBody, UpdateTagBody, UpdateTransaction, UpdateTransactionBody, UpdateTransactionsBody, User, components, operations, paths };
+export type { AccountType, AlignedSummaryResponse, Category, ChildCategory, ChildTransaction, CreateCategoryBody, CreateManualAccountBody, CreateTagBody, CreateTransactionBody, Currency, DeleteCategoryParams, DeleteTagParams, ErrorDetail, ErrorResponse, GetAllCategoriesParams, GetAllRecurringItemsParams, GetAllTransactionsParams, GetAllTransactionsResponse, GetBudgetSummaryParams, GroupTransactionsBody, InsertTransaction, InsertTransactionsResponse, LunchMoneyClientOptions, ManualAccount, NonAlignedSummaryResponse, PlaidAccount, RecurringItem, SplitTransaction, SplitTransactionBody, Tag, Transaction, TransactionAttachment, TriggerPlaidAccountFetchParams, UpdateCategoryBody, UpdateManualAccountBody, UpdateTagBody, UpdateTransaction, UpdateTransactionBody, UpdateTransactionsBody, UpdateTransactionsResponse, User, components, operations, paths };

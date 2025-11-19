@@ -9,8 +9,7 @@ export class LunchMoneyError extends Error {
 	constructor(
 		message: string,
 		public readonly status?: number,
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		public readonly data?: any,
+		public readonly data?: unknown,
 		errors?: ErrorDetail[],
 	) {
 		super(message);

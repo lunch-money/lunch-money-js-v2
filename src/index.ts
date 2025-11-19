@@ -29,6 +29,8 @@ import type {
 	CreateManualAccountBody,
 	UpdateManualAccountBody,
 	TriggerPlaidAccountFetchParams,
+	InsertTransactionsResponse,
+	UpdateTransactionsResponse,
 } from "./types";
 import { LunchMoneyError, type ErrorResponse } from "./errors";
 
@@ -66,8 +68,7 @@ export class LunchMoneyClient {
 	}
 
 	private handleError(response: {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		error?: any;
+		error?: unknown;
 		response: { status: number };
 	}): never {
 		const errorData = response.error as ErrorResponse;
@@ -83,8 +84,7 @@ export class LunchMoneyClient {
 
 	private handleDataResponse<T>(response: {
 		data?: T;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		error?: any;
+		error?: unknown;
 		response: { status: number };
 	}): T {
 		if (response.error) {
@@ -100,8 +100,7 @@ export class LunchMoneyClient {
 	}
 
 	private handleVoidResponse(response: {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		error?: any;
+		error?: unknown;
 		response: { status: number };
 	}): void {
 		if (response.error) {
@@ -192,7 +191,9 @@ export class LunchMoneyClient {
 				});
 				return this.handleDataResponse(response);
 			},
-			create: async (data: CreateTransactionBody): Promise<any> => {
+			create: async (
+				data: CreateTransactionBody,
+			): Promise<InsertTransactionsResponse> => {
 				const response = await this.client.POST("/transactions", {
 					body: data,
 				});
@@ -214,11 +215,16 @@ export class LunchMoneyClient {
 				});
 				return this.handleVoidResponse(response);
 			},
-			updateMany: async (data: UpdateTransactionsBody): Promise<any> => {
+			updateMany: async (
+				data: UpdateTransactionsBody,
+			): Promise<UpdateTransactionsResponse> => {
 				const response = await this.client.PUT("/transactions", { body: data });
 				return this.handleDataResponse(response);
 			},
-			split: async (id: number, data: SplitTransactionBody): Promise<any> => {
+			split: async (
+				id: number,
+				data: SplitTransactionBody,
+			): Promise<Transaction> => {
 				const response = await this.client.POST("/transactions/split/{id}", {
 					params: { path: { id } },
 					body: data,
@@ -231,7 +237,7 @@ export class LunchMoneyClient {
 				});
 				return this.handleVoidResponse(response);
 			},
-			group: async (data: GroupTransactionsBody): Promise<any> => {
+			group: async (data: GroupTransactionsBody): Promise<Transaction> => {
 				const response = await this.client.POST("/transactions/group", {
 					body: data,
 				});

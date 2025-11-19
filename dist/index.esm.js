@@ -1,9 +1,7 @@
 import createClient from 'openapi-fetch';
 
 class LunchMoneyError extends Error {
-    constructor(message, status, 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data, errors) {
+    constructor(message, status, data, errors) {
         super(message);
         this.status = status;
         this.data = data;

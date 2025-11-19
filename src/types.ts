@@ -26,6 +26,9 @@ export type GetAllTransactionsResponse = {
 	transactions: Transaction[];
 	hasMore: boolean;
 };
+export type UpdateTransactionsResponse = {
+	transactions: Transaction[];
+};
 export type ErrorResponse = components["schemas"]["errorResponseObject"];
 export type AlignedSummaryResponse =
 	components["schemas"]["alignedSummaryResponseObject"];
