@@ -18,6 +18,8 @@ export type Tag = components["schemas"]["tagObject"];
 export type RecurringItem = components["schemas"]["recurringObject"];
 export type TransactionAttachment =
 	components["schemas"]["transactionAttachmentObject"];
+export type SkippedExistingExternalId =
+	components["schemas"]["skippedExistingExternalIdObject"];
 
 // Response types
 export type InsertTransactionsResponse =
@@ -34,6 +36,31 @@ export type AlignedSummaryResponse =
 	components["schemas"]["alignedSummaryResponseObject"];
 export type NonAlignedSummaryResponse =
 	components["schemas"]["nonAlignedSummaryResponseObject"];
+export type DeleteCategoryResponse =
+	components["schemas"]["deleteCategoryResponseWithDependencies"];
+export type DeleteTagResponse =
+	components["schemas"]["deleteTagResponseWithDependencies"];
+
+// Summary sub-types
+export type SummaryTotals = components["schemas"]["summaryTotalsObject"];
+export type SummaryTotalsBreakdown =
+	components["schemas"]["summaryTotalsBreakdownObject"];
+export type AlignedSummaryCategory =
+	components["schemas"]["alignedSummaryCategoryObject"];
+export type NonAlignedSummaryCategory =
+	components["schemas"]["nonAlignedSummaryCategoryObject"];
+export type SummaryRolloverPoolAdjustment =
+	components["schemas"]["summaryRolloverPoolAdjustmentObject"];
+export type AlignedCategoryTotals =
+	components["schemas"]["alignedCategoryTotalsObject"];
+export type NonAlignedCategoryTotals =
+	components["schemas"]["nonAlignedCategoryTotalsObject"];
+export type SummaryCategoryOccurrence =
+	components["schemas"]["summaryCategoryOccurrenceObject"];
+export type SummaryRecurringTransaction =
+	components["schemas"]["summaryRecurringTransactionObject"];
+export type SummaryRolloverPool =
+	components["schemas"]["summaryRolloverPoolObject"];
 
 // Error detail type from error response
 export type ErrorDetail = ErrorResponse["errors"][number];
@@ -78,6 +105,12 @@ export type UpdateManualAccountBody =
 	operations["updateManualAccount"]["requestBody"]["content"]["application/json"];
 export type TriggerPlaidAccountFetchParams =
 	operations["triggerPlaidAccountFetch"]["parameters"]["query"];
+export type DeleteTransactionsBody =
+	operations["deleteTransactions"]["requestBody"]["content"]["application/json"];
+export type AttachFileToTransactionBody =
+	operations["attachFileToTransaction"]["requestBody"]["content"]["multipart/form-data"];
+export type TransactionAttachmentUrlResponse =
+	operations["getTransactionAttachmentUrl"]["responses"]["200"]["content"]["application/json"];
 
 // Re-export the raw OpenAPI types for advanced usage
 export type { paths, operations, components } from "./types.generated";

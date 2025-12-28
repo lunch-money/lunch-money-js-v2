@@ -452,7 +452,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get a single tags
+         * Get a single tag
          * @description Retrieve the details of a specific tag with the specified ID.
          */
         get: operations["getTagById"];
@@ -584,8 +584,16 @@ export interface components {
              * @description The date and time of when the category was last archived (in the ISO 8601 extended format).
              */
             archived_at: string | null;
-            /** @description An  specifying the position in which the category is displayed on the categories page in the Lunch Money GUI. For categories within a category group the order  is relative to the other categories within the group.<br> This value for this property will be `null` for categories created via the API until they are modified on the Categories page in the Lunch Money GUI.<br> This property cannot be set or updated via the API. */
+            /**
+             * @description An integer specifying the position in which the category is displayed on the categories page in the Lunch Money GUI. For categories within a category group the order is relative to the other categories within the group.<br>Categories with `order: null` will be displayed in alphabetical order by name, prior to any categories with an order
+             * @default null
+             */
             order: number | null;
+            /**
+             * @description If `true`, the category is collapsed in the Lunch Money GUI.
+             * @default false
+             */
+            collapsed: boolean;
         };
         childCategoryObject: {
             /**
@@ -630,8 +638,10 @@ export interface components {
              * @description The date and time of when the category was last archived (in the ISO 8601 extended format).
              */
             archived_at: string | null;
-            /** @description An  specifying the position in which the category is displayed on the categories page in the Lunch Money GUI. For categories within a category group the order  is relative to the other categories within the group.<br> This property cannot be set or updated via the API. */
+            /** @description An index specifying the position in which the category is displayed on the categories page in the Lunch Money GUI. For categories within a category group the order is relative to the other categories within the group.<br> API. */
             order: number | null;
+            /** @description If `true`, the category is collapsed in the Lunch Money GUI. */
+            collapsed?: boolean | null;
         };
         createCategoryRequestObject: {
             /**
@@ -677,6 +687,10 @@ export interface components {
             archived?: boolean;
             /** @description The list of existing category objects, or existing category IDs or names of new categories to add to the new category group. This attribute should only be set if `is_group` is also set to true.<br> The categories or IDs specified must already exist and may not be category groups themselves. Categories that already belong to another category group will be moved. If strings are specified, they will be used as the names of new categories that will be added to the new category group. The request will fail if any names are the same as the name of an existing category.<br> It is permissible to provide both full category objects and IDs as well as strings for names in the same request. */
             children?: (number | string | components["schemas"]["categoryObject"])[];
+            /** @description An index specifying the position in which the category is displayed on the categories page in the Lunch Money GUI. For categories within a category group the order is relative to the other categories within the group.<br>While this property can be set via the API it is generally set by the user in the Lunch Money GUI. API. */
+            order?: number | null;
+            /** @description If `true`, the category is collapsed in the Lunch Money GUI.<br>While this property can be set via the API it is generally set by the user in the Lunch Money GUI. */
+            collapsed?: boolean | null;
         };
         updateCategoryRequestObject: {
             /** @description If set, the new name of the category. Must be between 1 and 100 characters. */
@@ -703,6 +717,10 @@ export interface components {
             is_group?: boolean | null;
             /** @description The list of existing category objects, or existing category IDs or names of new categories to add to the new category group. This attribute should only be set if modifying an existing category group.<br> The categories or IDs specified must already exist and not belong to an existing category group. Categories that already belong to another category group will be moved. If strings are specified, they will be used as the names of new categories that will be added to the new category group. The request will fail if any names are the same as the name of an existing category.<br> It is permissible to provide both full category objects and IDs as well as strings for names in the same request. */
             children?: (number | string | components["schemas"]["categoryObject"])[];
+            /** @description An index specifying the position in which the category is displayed on the categories page in the Lunch Money GUI. For categories within a category group the order is relative to the other categories within the group.<br>While this property can be set via the API it is generally set by the user in the Lunch Money GUI. API. */
+            order?: number | null;
+            /** @description If `true`, the category is collapsed in the Lunch Money GUI.<br>While this property can be set via the API it is generally set by the user in the Lunch Money GUI. */
+            collapsed?: boolean | null;
             /**
              * Format: int64
              * @description System defined unique identifier for the category. Ignored if set.
@@ -720,8 +738,6 @@ export interface components {
              * @description System set date and time of when the category was created (in the ISO 8601 extended format). Ignored if set. (in the ISO 8601 extended format). Ignored if set.
              */
             created_at?: string;
-            /** @description System or GUI set  specifying the position in which the category is displayed on the categories page in the Lunch Money GUI. Ignored if set. */
-            order?: number | null;
         };
         deleteCategoryResponseWithDependencies: {
             /** @description The name of the category */
@@ -970,7 +986,7 @@ export interface components {
             date: string;
             /** @description Numeric value of amount without currency symbol. i.e. $4.25 should be denoted as 4.25. May be a string or a number in double format. Positive values indicate a debit transaction, negative values indicate a credit transaction. */
             amount: number | string;
-            /** @description Three-letter lowercase currency code of the transaction in ISO 4217 format. Must match one of the [supported currencies](). If not set defaults to the user account's primary currency. */
+            /** @description Three-letter lowercase currency code of the transaction in ISO 4217 format. Must match one of the [supported currencies](https://lm-v2-api-next-a7fabcab8e9a.herokuapp.com/v2/currencies). If not set defaults to the user account's primary currency. */
             currency?: components["schemas"]["currencyEnum"];
             /** @description Name of payee for the transaction. */
             payee?: string;
@@ -1038,19 +1054,19 @@ export interface components {
             payee?: string;
             /**
              * Format: int32
-             * @description Unique identifier of the category for this transaction. Set this to 0 to clear the transaction's category.
+             * @description Unique identifier of the category for this transaction. Set this to null to clear the transaction's category.
              */
             category_id?: number | null;
             /** @description New notes for the transaction. Set this to an empty string to clear the existing notes. */
             notes?: string | null;
             /**
              * Format: int32
-             * @description The unique identifier of the manual account associated with this transaction. Set this to zero to disassociate the transaction with an account. If set `plaid_account_id` may not also be set to a non zero value. Moving an existing transaction to to another account will not work if the transaction belongs to a synced account who's "Allow Modifications to Transactions" property is not set.
+             * @description The unique identifier of the manual account associated with this transaction. Set this to null to disassociate the transaction with an account. If set `plaid_account_id` may not also be set to a non null value. Moving an existing transaction to to another account will not work if the transaction belongs to a synced account who's "Allow Modifications to Transactions" property is not set.
              */
             manual_account_id?: number | null;
             /**
              * Format: int32
-             * @description The unique identifier of the plaid account associated with this transaction. If set `manual_account_id` may not also be set to a non zero value. Moving an existing transaction to to an existing Plaid account will not work if the account's "Allow Modifications to Transactions" property is not set.
+             * @description The unique identifier of the plaid account associated with this transaction. If set `manual_account_id` may not also be set to a non null value. Attempting to modify this on a transaction associated with a Plaid account will not work if the account's "Allow Modifications to Transactions" property is not set. Similarly, this cannot be set to an id associated with this type of locked Plaid account.
              */
             plaid_account_id?: number | null;
             /** @description A list of tag_ids for the tags associated with this transaction. If set, this property will overwrite any existing tags. Use `additional_tag_ids` to add tags to the existing transaction's tags. Set this to an empty array to remove all tags from a transaction. If set `additional_tag_ids` may not be set. */
@@ -2453,7 +2469,12 @@ export interface operations {
     };
     deleteManualAccount: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description When set to true will also delete any transactions, rules, and recurring items associated with this account. Use this option with caution, it is irreversible! */
+                delete_items?: boolean;
+                /** @description When set to true will delete any balance history associated with this account. */
+                delete_balance_history?: boolean;
+            };
             header?: never;
             path: {
                 /** @description ID of the manual account to delete */
@@ -2694,7 +2715,7 @@ export interface operations {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
-                     *           "errMsg": "There is no manual account with the id:'9999999999999'`"
+                     *           "errMsg": "There is no plaid account with the id: 9999999999999"
                      *         }
                      *       ]
                      *     }
@@ -2735,46 +2756,11 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /**
-                     * @example {
-                     *       "message": "Request Validation Failure",
-                     *       "errors": [
-                     *         {
-                     *           "errMsg": "must be integer",
-                     *           "instancePath": "/path/id",
-                     *           "schemaPath": "#/properties/path/properties/ids/items/type",
-                     *           "keyword": "type",
-                     *           "params": {
-                     *             "type": "integer"
-                     *           }
-                     *         }
-                     *       ]
-                     *     }
-                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
             401: components["responses"]["unauthorizedToken"];
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    /**
-                     * @example {
-                     *       "message": "Not Found",
-                     *       "errors": [
-                     *         {
-                     *           "errMsg": "There is no manual account with the id:'9999999999999'`"
-                     *         }
-                     *       ]
-                     *     }
-                     */
-                    "application/json": components["schemas"]["errorResponseObject"];
-                };
-            };
-            /** @description A 425 Too Early */
+            /** @description Too Early */
             425: {
                 headers: {
                     [name: string]: unknown;
@@ -2830,9 +2816,9 @@ export interface operations {
                 include_children?: boolean;
                 /** @description By default, the `files` property is not included in the response. Set to true if you'd like the responses to include a list of of  objects that describe any files attached to the transactions. */
                 include_files?: boolean;
-                /** @description Sets the maximum number of transactions to return. If more match the filter criteria, the response will include a `has_more` attribute set to `true`. See [pagination](foo) */
+                /** @description Sets the maximum number of transactions to return. If more match the filter criteria, the response will include a `has_more` attribute set to `true`. See [Pagination](https://lm-v2-api-next-a7fabcab8e9a.herokuapp.com/v2/pagination) */
                 limit?: number;
-                /** @description Sets the offset for the records returned. This is typically set automatically in the header. See [Pagination](/foo) */
+                /** @description Sets the offset for the records returned. This is typically set automatically in the header. See [Pagination](https://lm-v2-api-next-a7fabcab8e9a.herokuapp.com/v2/pagination) */
                 offset?: number;
             };
             header?: never;
@@ -2841,7 +2827,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Returns an array of transactions. <br><br>The `has_more` property is set to `true` if more transactions are available. See [Pagination](/foo) */
+            /** @description Returns an array of transactions. <br><br>The `has_more` property is set to `true` if more transactions are available. See [Pagination](https://lm-v2-api-next-a7fabcab8e9a.herokuapp.com/v2/pagination) */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3020,20 +3006,28 @@ export interface operations {
                      *       "message": "Invalid Request Body",
                      *       "errors": [
                      *         {
-                     *           "errMsg": "Duplicate Transaction ID",
+                     *           "errMsg": "Duplicate transaction ID found: 2112150653",
                      *           "transaction_id": 2112150653,
-                     *           "ids_indices": [
-                     *             0,
-                     *             1
-                     *           ]
+                     *           "ids_index": 0,
+                     *           "invalid_property": "ids"
                      *         },
                      *         {
-                     *           "errMsg": "Duplicate Transaction ID",
+                     *           "errMsg": "Duplicate transaction ID found: 2112150653",
+                     *           "transaction_id": 2112150653,
+                     *           "ids_index": 1,
+                     *           "invalid_property": "ids"
+                     *         },
+                     *         {
+                     *           "errMsg": "Duplicate transaction ID found: 2112150654",
                      *           "transaction_id": 2112150654,
-                     *           "ids_indices": [
-                     *             2,
-                     *             3
-                     *           ]
+                     *           "ids_index": 2,
+                     *           "invalid_property": "ids"
+                     *         },
+                     *         {
+                     *           "errMsg": "Duplicate transaction ID found: 2112150654",
+                     *           "transaction_id": 2112150654,
+                     *           "ids_index": 3,
+                     *           "invalid_property": "ids"
                      *         }
                      *       ]
                      *     }
@@ -3050,17 +3044,17 @@ export interface operations {
                 content: {
                     /**
                      * @example {
-                     *       "message": "Invalid Request Body",
+                     *       "message": "Request Validation Failure",
                      *       "errors": [
                      *         {
-                     *           "errMsg": "Transaction ID Not Found",
-                     *           "ids_": 0,
-                     *           "transaction_id": 8888888888
+                     *           "errMsg": "There is no transaction with the id: 8888888888",
+                     *           "ids_index": 0,
+                     *           "id": 8888888888
                      *         },
                      *         {
-                     *           "errMsg": "Transaction ID Not Found",
-                     *           "ids_": 1,
-                     *           "transaction_id": 9999999999
+                     *           "errMsg": "There is no transaction with the id: 9999999999",
+                     *           "ids_index": 1,
+                     *           "id": 9999999999
                      *         }
                      *       ]
                      *     }
@@ -3434,13 +3428,10 @@ export interface operations {
                 content: {
                     /**
                      * @example {
-                     *       "message": "Invalid Request Body",
+                     *       "message": "Not Found",
                      *       "errors": [
                      *         {
-                     *           "errMsg": "parent_ids 0 transaction ID does not exist. ID: 2112140458",
-                     *           "error": "Invalid Transaction ID",
-                     *           "invalid_property": "parent_ids",
-                     *           "index": 0,
+                     *           "errMsg": "There is no transaction with the id: 2112140458",
                      *           "id": 2112140458
                      *         }
                      *       ]
@@ -3484,7 +3475,7 @@ export interface operations {
         };
         responses: {
             /** @description File attached successfully */
-            200: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };

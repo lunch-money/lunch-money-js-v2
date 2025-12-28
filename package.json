@@ -17,7 +17,7 @@
 		"lint:fix": "eslint src --ext .ts --fix",
 		"format": "prettier --write src/**/*.ts",
 		"format:check": "prettier --check src/**/*.ts",
-		"generate-types": "openapi-typescript https://lm-v2-api-mock-data-f24357049a1b.herokuapp.com/v2/openapi/ -o src/types.generated.ts --default-non-nullable false",
+		"generate-types": "openapi-typescript node_modules/@lunch-money/v2-api-spec/lunch-money-api-v2.yaml -o src/types.generated.ts --default-non-nullable false",
 		"prepare": "npm run generate-types && npm run build"
 	},
 	"keywords": [
@@ -38,6 +38,7 @@
 	},
 	"homepage": "https://github.com/lunch-money/lunch-money-js-v2#readme",
 	"dependencies": {
+		"@lunch-money/v2-api-spec": "^2.8.3",
 		"openapi-fetch": "^0.14.0"
 	},
 	"devDependencies": {
