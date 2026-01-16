@@ -15,9 +15,10 @@ class LunchMoneyError extends Error {
  */
 class LunchMoneyClient {
     constructor(options) {
-        const { apiKey, baseUrl = "https://dev.lunchmoney.app/v2", ...rest } = options;
+        const { apiKey, baseUrl = "https://dev.lunchmoney.app/v2", headers: customHeaders, ...rest } = options;
         const headers = {
             "Content-Type": "application/json",
+            ...customHeaders,
         };
         if (apiKey) {
             headers.Authorization = `Bearer ${apiKey}`;
@@ -140,6 +141,12 @@ class LunchMoneyClient {
                 });
                 return this.handleVoidResponse(response);
             },
+            deleteMany: async (data) => {
+                const response = await this.client.DELETE("/transactions", {
+                    body: data,
+                });
+                return this.handleVoidResponse(response);
+            },
             updateMany: async (data) => {
                 const response = await this.client.PUT("/transactions", { body: data });
                 return this.handleDataResponse(response);
@@ -166,6 +173,25 @@ class LunchMoneyClient {
             ungroup: async (id) => {
                 const response = await this.client.DELETE("/transactions/group/{id}", {
                     params: { path: { id } },
+                });
+                return this.handleVoidResponse(response);
+            },
+            attachFile: async (transactionId, data) => {
+                const response = await this.client.POST("/transactions/{transaction_id}/attachments", {
+                    params: { path: { transaction_id: transactionId } },
+                    body: data,
+                });
+                return this.handleDataResponse(response);
+            },
+            getAttachmentUrl: async (fileId) => {
+                const response = await this.client.GET("/transactions/attachments/{file_id}", {
+                    params: { path: { file_id: fileId } },
+                });
+                return this.handleDataResponse(response);
+            },
+            deleteAttachment: async (fileId) => {
+                const response = await this.client.DELETE("/transactions/attachments/{file_id}", {
+                    params: { path: { file_id: fileId } },
                 });
                 return this.handleVoidResponse(response);
             },

@@ -141,7 +141,7 @@ interface paths {
         /**
          * Update an existing manual account
          * @description Modifies the properties of an existing manual account.<br><br>
-         *     You may submit the response from a `GET /manual_accounts/{id}` as the request body, however only certain properties can be updated using this API. The following system set properties are accepted in the request body but their values will be ignored: `id`, `created_at`, and `updated_at`.<br><br>
+         *     You may submit the response from a `GET /manual_accounts/{id}` as the request body, however only certain properties can be updated using this API. The following system set properties are accepted in the request body but their values will be ignored: `id`, `to_base`, `created_at`, and `updated_at`.<br><br>
          *     It is also possible to provide only the properties to be updated in the request body, as long as the request includes at least one of the properties that is not listed above. For example a request body that contains only a `name` property is valid.<br><br>
          */
         put: operations["updateManualAccount"];
@@ -234,7 +234,7 @@ interface paths {
          * Update multiple transactions
          * @description Modifies the properties of multiple existing transactions in a single request.<br><br>
          *     You may submit complete transaction objects from the response returned by a `GET /transactions` in the request body for each transaction, however only certain properties can be updated using this API. The following system set properties are accepted in the request body, but their values will be ignored: `id`, `to_base`, `is_pending`, `created_at`, `updated_at`, `source`, and `plaid_metadata`.<br><br>
-         *     Transactions that have been previously split or grouped may not be modified by this endpoint. Therefore the `is_parent`, `parent_id`, `is_group`, `group_id`, and `children` properties are also ignored when provided in the request body.<br><br>
+         *     Transactions that have been previously split or grouped may not be modified by this endpoint. Therefore the `is_split_parent`, `split_parent_id`, `is_group_parent`, `group_parent_id`, and `children` properties are also ignored when provided in the request body.<br><br>
          *     Each transaction in the array **must** include an `id` property to identify which transaction to update, along with at least one other property to be updated. For example, a transaction object that contains only an `id` and `category_id` property is valid.<br><br>
          *     The request can include between 1 and 500 transactions to update in a single call.
          */
@@ -276,15 +276,15 @@ interface paths {
          *     - `custom_metadata` will either be `null` or contain any custom_metadata added to transactions that were inserted or updated via the API.
          *     - `files` will be a list of objects that describe any attachments to the transaction.
          *
-         *     If `is_group` is true in the returned transaction, the object will also include the `children` property which will contain a list of the  original transactions that make up the transaction group.<br>
-         *     If `is_parent` is true in the returned transaction, the object will also include the `children` property which will contain a list of the split transactions.
+         *     If `is_group_parent` is true in the returned transaction, the object will also include the `children` property which will contain a list of the  original transactions that make up the transaction group.<br>
+         *     If `is_split_parent` is true in the returned transaction, the object will also include the `children` property which will contain a list of the split transactions.
          */
         get: operations["getTransactionById"];
         /**
          * Update an existing transaction
          * @description Modifies the properties of an existing transaction.<br><br>
          *     You may submit the response from a `GET /transactions/{id}` as the request body, however only certain properties can be updated using this API. The following system set properties are accepted in the request body but their values will be ignored: `id`, `to_base`, `is_pending`, `created_at`, `updated_at`, `source`, and `plaid_metadata`.<br><br>
-         *     Transactions that have been previously split or grouped may not be modified by this endpoint. Therefore the `is_parent`, `parent_id`, `is_group`, `group_id`, and `children` properties are also ignored when provided in the request body.<br><br>
+         *     Transactions that have been previously split or grouped may not be modified by this endpoint. Therefore the `is_split_parent`, `split_parent_id`, `is_group_parent`, `group_parent_id`, and `children` properties are also ignored when provided in the request body.<br><br>
          *     It is also possible to provide only the properties to be updated in the request body, as long as the request includes at least one of the properties that is not listed above. For example a request body that contains only an `category_id` attribute is valid.
          */
         put: operations["updateTransaction"];
@@ -364,13 +364,13 @@ interface paths {
         /**
          * Split a transaction
          * @description Splits an existing transaction into a set of smaller child transactions.<br><br> After a transaction has been split, the original transaction is no longer shown on the transactions page or returned by a `GET /transactions` request. The newly created child transactions are returned instead.
-         *     To see the details of the original parent transaction after it has been split, use the `GET /transactions/{id}` endpoint and pass the value of the `parent_id` of one of the children.
+         *     To see the details of the original parent transaction after it has been split, use the `GET /transactions/{id}` endpoint and pass the value of the `split_parent_id` of one of the children.
          */
         post: operations["splitTransaction"];
         /**
          * Unsplit a previously split transactions
          * @description Deletes the split children of a previously split transactions and restores the parent transactions to the normal unsplit state.<br><br>
-         *     Use the value of the `parent_id`property of a split transaction to specify the parent ID.
+         *     Use the value of the `split_parent_id`property of a split transaction to specify the parent ID.
          */
         delete: operations["unsplitTransaction"];
         options?: never;
@@ -454,7 +454,7 @@ interface paths {
             cookie?: never;
         };
         /**
-         * Get a single tags
+         * Get a single tag
          * @description Retrieve the details of a specific tag with the specified ID.
          */
         get: operations["getTagById"];
@@ -585,8 +585,16 @@ interface components {
              * @description The date and time of when the category was last archived (in the ISO 8601 extended format).
              */
             archived_at: string | null;
-            /** @description An  specifying the position in which the category is displayed on the categories page in the Lunch Money GUI. For categories within a category group the order  is relative to the other categories within the group.<br> This value for this property will be `null` for categories created via the API until they are modified on the Categories page in the Lunch Money GUI.<br> This property cannot be set or updated via the API. */
+            /**
+             * @description An integer specifying the position in which the category is displayed on the categories page in the Lunch Money GUI. For categories within a category group the order is relative to the other categories within the group.<br>Categories with `order: null` will be displayed in alphabetical order by name, prior to any categories with an order
+             * @default null
+             */
             order: number | null;
+            /**
+             * @description If `true`, the category is collapsed in the Lunch Money GUI.
+             * @default false
+             */
+            collapsed: boolean;
         };
         childCategoryObject: {
             /**
@@ -631,8 +639,10 @@ interface components {
              * @description The date and time of when the category was last archived (in the ISO 8601 extended format).
              */
             archived_at: string | null;
-            /** @description An  specifying the position in which the category is displayed on the categories page in the Lunch Money GUI. For categories within a category group the order  is relative to the other categories within the group.<br> This property cannot be set or updated via the API. */
+            /** @description An index specifying the position in which the category is displayed on the categories page in the Lunch Money GUI. For categories within a category group the order is relative to the other categories within the group.<br> API. */
             order: number | null;
+            /** @description If `true`, the category is collapsed in the Lunch Money GUI. */
+            collapsed?: boolean | null;
         };
         createCategoryRequestObject: {
             /**
@@ -678,6 +688,10 @@ interface components {
             archived?: boolean;
             /** @description The list of existing category objects, or existing category IDs or names of new categories to add to the new category group. This attribute should only be set if `is_group` is also set to true.<br> The categories or IDs specified must already exist and may not be category groups themselves. Categories that already belong to another category group will be moved. If strings are specified, they will be used as the names of new categories that will be added to the new category group. The request will fail if any names are the same as the name of an existing category.<br> It is permissible to provide both full category objects and IDs as well as strings for names in the same request. */
             children?: (number | string | components["schemas"]["categoryObject"])[];
+            /** @description An index specifying the position in which the category is displayed on the categories page in the Lunch Money GUI. For categories within a category group the order is relative to the other categories within the group.<br>While this property can be set via the API it is generally set by the user in the Lunch Money GUI. API. */
+            order?: number | null;
+            /** @description If `true`, the category is collapsed in the Lunch Money GUI.<br>While this property can be set via the API it is generally set by the user in the Lunch Money GUI. */
+            collapsed?: boolean | null;
         };
         updateCategoryRequestObject: {
             /** @description If set, the new name of the category. Must be between 1 and 100 characters. */
@@ -704,6 +718,10 @@ interface components {
             is_group?: boolean | null;
             /** @description The list of existing category objects, or existing category IDs or names of new categories to add to the new category group. This attribute should only be set if modifying an existing category group.<br> The categories or IDs specified must already exist and not belong to an existing category group. Categories that already belong to another category group will be moved. If strings are specified, they will be used as the names of new categories that will be added to the new category group. The request will fail if any names are the same as the name of an existing category.<br> It is permissible to provide both full category objects and IDs as well as strings for names in the same request. */
             children?: (number | string | components["schemas"]["categoryObject"])[];
+            /** @description An index specifying the position in which the category is displayed on the categories page in the Lunch Money GUI. For categories within a category group the order is relative to the other categories within the group.<br>While this property can be set via the API it is generally set by the user in the Lunch Money GUI. API. */
+            order?: number | null;
+            /** @description If `true`, the category is collapsed in the Lunch Money GUI.<br>While this property can be set via the API it is generally set by the user in the Lunch Money GUI. */
+            collapsed?: boolean | null;
             /**
              * Format: int64
              * @description System defined unique identifier for the category. Ignored if set.
@@ -721,8 +739,6 @@ interface components {
              * @description System set date and time of when the category was created (in the ISO 8601 extended format). Ignored if set. (in the ISO 8601 extended format). Ignored if set.
              */
             created_at?: string;
-            /** @description System or GUI set  specifying the position in which the category is displayed on the categories page in the Lunch Money GUI. Ignored if set. */
-            order?: number | null;
         };
         deleteCategoryResponseWithDependencies: {
             /** @description The name of the category */
@@ -819,20 +835,20 @@ interface components {
              */
             updated_at: string;
             /** @description If `true`, this transaction has been split into two or more other transactions. By default, parent transactions are not returned in call to `GET /transactions` but they can be queried directly by their ID. */
-            is_parent?: boolean;
+            is_split_parent?: boolean;
             /**
              * Format: int64
              * @description A transaction ID if this is a split transaction. Denotes the transaction ID of the original, or parent, transaction. Is null if this is not a split transaction
              */
-            parent_id: number | null;
-            /** @description `true` if this transaction represents a group of transactions. If so, amount and currency represent the totalled amount of transactions bearing this transaction's id as their group_id. Amount is calculated based on the user's primary currency. */
-            is_group: boolean;
+            split_parent_id: number | null;
+            /** @description `true` if this transaction represents a group of transactions. If so, amount and currency represent the totalled amount of transactions bearing this transaction's id as their group_parent_id. Amount is calculated based on the user's primary currency. */
+            is_group_parent: boolean;
             /**
              * Format: int64
-             * @description Is set if this transaction is part of a group. Denotes the ID of the grouped transaction this is now included in. By default the transactions that were grouped are not returned in a call to `GET /transactions` but they can be queried directly by calling the `GET /transactions/group/{id}`, where the id passed is associated with a transaction where the `is_group` attribute is true
+             * @description Is set if this transaction is part of a group. Denotes the ID of the grouped transaction this is now included in. By default the transactions that were grouped are not returned in a call to `GET /transactions` but they can be queried directly by calling the `GET /transactions/group/{id}`, where the id passed is associated with a transaction where the `is_group_parent` attribute is true
              */
-            group_id: number | null;
-            /** @description Exists only for transactions which are the parent of a split transaction or for transaction groups. It will not exist in the response unless the `include_children` query parameter is set to `true`.<br> For parents of split transactions, it contains a list of the associated transactions that it was split into. For transaction groups, it contains the transactions that were grouped together. Examine the `is_parent` and `is_group` properties to determine which of these it is. */
+            group_parent_id: number | null;
+            /** @description Exists only for transactions which are the parent of a split transaction or for transaction groups. It will not exist in the response unless the `include_children` query parameter is set to `true`.<br> For parents of split transactions, it contains a list of the associated transactions that it was split into. For transaction groups, it contains the transactions that were grouped together. Examine the `is_split_parent` and `is_group_parent` properties to determine which of these it is. */
             children?: components["schemas"]["childTransactionObject"][];
             /** @description If requested, the transaction's plaid_metadata that came when this transaction was obtained. This will be a json object, but the schema is variable. This is only present when the `include_metadata` query parameter is set to true. */
             plaid_metadata?: Record<string, never> | null;
@@ -915,19 +931,19 @@ interface components {
              */
             updated_at: string;
             /** @description If true this transaction has been split into two or more other transactions. By default parent transactions are not returned in call to `GET /transactions` but they can be queried directly by their ID. */
-            is_parent?: boolean;
+            is_split_parent?: boolean;
             /**
              * Format: int64
              * @description A transaction ID if this is a split transaction. Denotes the transaction ID of the original, or parent, transaction. Is null if this is not a split transaction
              */
-            parent_id: number | null;
-            /** @description True if this transaction represents a group of transactions. If so, amount and currency represent the totalled amount of transactions bearing this transaction's id as their group_id. Amount is calculated based on the user's primary currency. */
-            is_group: boolean;
+            split_parent_id: number | null;
+            /** @description True if this transaction represents a group of transactions. If so, amount and currency represent the totalled amount of transactions bearing this transaction's id as their group_parent_id. Amount is calculated based on the user's primary currency. */
+            is_group_parent: boolean;
             /**
              * Format: int64
-             * @description Is set if this transaction is part of a group. Denotes the ID of the grouped transaction this is now included in. By default the transactions that were grouped are not returned in a call to `GET /transactions` but they can be queried directly by calling the `GET /transactions/group/{id}`, where the id passed is associated with a transaction where the `is_group` attribute is true
+             * @description Is set if this transaction is part of a group. Denotes the ID of the grouped transaction this is now included in. By default the transactions that were grouped are not returned in a call to `GET /transactions` but they can be queried directly by calling the `GET /transactions/group/{id}`, where the id passed is associated with a transaction where the `is_group_parent` attribute is true
              */
-            group_id: number | null;
+            group_parent_id: number | null;
             /**
              * Format: int32
              * @description The unique identifier of the manual account associated with this transaction. This will always be null if this transaction is associated with a synced account or if this transaction has no associated account and appears as a "Cash Transaction" in the Lunch Money GUI.
@@ -971,7 +987,7 @@ interface components {
             date: string;
             /** @description Numeric value of amount without currency symbol. i.e. $4.25 should be denoted as 4.25. May be a string or a number in double format. Positive values indicate a debit transaction, negative values indicate a credit transaction. */
             amount: number | string;
-            /** @description Three-letter lowercase currency code of the transaction in ISO 4217 format. Must match one of the [supported currencies](). If not set defaults to the user account's primary currency. */
+            /** @description Three-letter lowercase currency code of the transaction in ISO 4217 format. Must match one of the [supported currencies](https://alpha.lunchmoney.dev/v2/currencies). If not set defaults to the user account's primary currency. */
             currency?: components["schemas"]["currencyEnum"];
             /** @description Name of payee for the transaction. */
             payee?: string;
@@ -1039,19 +1055,19 @@ interface components {
             payee?: string;
             /**
              * Format: int32
-             * @description Unique identifier of the category for this transaction. Set this to 0 to clear the transaction's category.
+             * @description Unique identifier of the category for this transaction. Set this to null to clear the transaction's category.
              */
             category_id?: number | null;
             /** @description New notes for the transaction. Set this to an empty string to clear the existing notes. */
             notes?: string | null;
             /**
              * Format: int32
-             * @description The unique identifier of the manual account associated with this transaction. Set this to zero to disassociate the transaction with an account. If set `plaid_account_id` may not also be set to a non zero value. Moving an existing transaction to to another account will not work if the transaction belongs to a synced account who's "Allow Modifications to Transactions" property is not set.
+             * @description The unique identifier of the manual account associated with this transaction. Set this to null to disassociate the transaction with an account. If set `plaid_account_id` may not also be set to a non null value. Moving an existing transaction to to another account will not work if the transaction belongs to a synced account who's "Allow Modifications to Transactions" property is not set.
              */
             manual_account_id?: number | null;
             /**
              * Format: int32
-             * @description The unique identifier of the plaid account associated with this transaction. If set `manual_account_id` may not also be set to a non zero value. Moving an existing transaction to to an existing Plaid account will not work if the account's "Allow Modifications to Transactions" property is not set.
+             * @description The unique identifier of the plaid account associated with this transaction. If set `manual_account_id` may not also be set to a non null value. Attempting to modify this on a transaction associated with a Plaid account will not work if the account's "Allow Modifications to Transactions" property is not set. Similarly, this cannot be set to an id associated with this type of locked Plaid account.
              */
             plaid_account_id?: number | null;
             /** @description A list of tag_ids for the tags associated with this transaction. If set, this property will overwrite any existing tags. Use `additional_tag_ids` to add tags to the existing transaction's tags. Set this to an empty array to remove all tags from a transaction. If set `additional_tag_ids` may not be set. */
@@ -1071,7 +1087,7 @@ interface components {
             status?: "reviewed" | "unreviewed";
             /**
              * Format: double
-             * @description System defined amount of this transaction in the user's primary currency. Ignored if set.
+             * @description System defined amount of this transaction in the user's primary currency. Ignored if set. Use `amount` to update the amount in the transaction.
              */
             to_base?: number;
             /** @description System defined flag set for pending transactions. Ignored if set. */
@@ -1089,21 +1105,21 @@ interface components {
              */
             updated_at?: string;
             /** @description System defined boolean indicating if this transaction was split. To split or unsplit a transaction use the `/transactions/split` endpoint. Ignored if set. */
-            is_parent?: boolean;
-            /** @description An array of child transactions that exists when a transaction has been split or if the transaction is a group. Split and Grouped transactions may not be modified using this API. Ignored if set. */
+            is_split_parent?: boolean;
+            /** @description An array of child transactions that exists when a transaction has been split or if the transaction is a group. Split */
             children?: components["schemas"]["childTransactionObject"][];
             /**
              * Format: int64
              * @description A transaction ID if this is a split transaction. Split transactions may not be modified this API. Use the `transactions/split` endpoint instead. Ignored if set.
              */
-            parent_id?: number | null;
+            split_parent_id?: number | null;
             /** @description System defined boolean indicating if this transaction represents a group of transactions. Grouped transactions may not be modified with this API. Use the `transactions/group` endpoint instead. Ignored if set. */
-            is_group?: boolean;
+            is_group_parent?: boolean;
             /**
              * Format: int64
              * @description A transaction group ID if this transaction is part of a group. Grouped transactions may not be modified with this API. Use the `transactions/group` endpoint instead. Ignored if set.
              */
-            group_id?: number | null;
+            group_parent_id?: number | null;
             /**
              * @description System defined original source of the transaction. Ignored if set.
              * @enum {string|null}
@@ -1329,6 +1345,8 @@ interface components {
             } | null;
             /** @description If set, transactions may not be assigned to this manual account. */
             exclude_from_transactions?: boolean;
+            /** @description System defined balance converted to the user's primary currency. Ignored if set.  Use `balance` to update the balance in the account. */
+            to_base?: number;
             /**
              * Format: date-time
              * @description System defined date/time the account was created in ISO 8601 extended format. Ignored if set.
@@ -1673,6 +1691,7 @@ interface components {
             category_id: number;
             totals: components["schemas"]["alignedCategoryTotalsObject"];
             occurrences?: components["schemas"]["summaryCategoryOccurrenceObject"][];
+            rollover_pool?: components["schemas"]["summaryRolloverPoolObject"];
         };
         /** @description List of each category's budget configuration and activity for the given date range.<br> Does not include occurrences since the start_date and end_date are not aligned with budget period setting. */
         nonAlignedSummaryCategoryObject: {
@@ -1682,8 +1701,8 @@ interface components {
         };
         /** @description The date and adjusted balance of the rollover pool at the time of the adjustment. */
         summaryRolloverPoolAdjustmentObject: {
-            /** @description true if this is the current rollover pool balance. */
-            current: boolean;
+            /** @description true if this rollover pool adjustment is for a budget period that falls within the given date range. */
+            in_range: boolean;
             /** Format: date */
             date: string;
             /** @description Amount of the rollover pool at the time of the adjustment. */
@@ -1721,8 +1740,8 @@ interface components {
         };
         /** @description Per period budget activity for the each budget period within the given date range.<br> This is only returned if the query parameter `include_occurrences` is set to `true`. */
         summaryCategoryOccurrenceObject: {
-            /** @description true if this occurrence is the current budget period. */
-            current: boolean;
+            /** @description true if this occurrence is within the given date range. */
+            in_range: boolean;
             /**
              * Format: date
              * @description The start date of the budget period.
@@ -1874,8 +1893,12 @@ interface operations {
                 include_exclude_from_budgets?: boolean;
                 /** @description Enable to include an `occurrences` array for each category in an aligned response. Each array will include an object for each budget period that falls within the specified date range which includes details on the activity for the budget period. */
                 include_occurrences?: boolean;
+                /** @description Enable to include the three budget occurrences prior to the start date in the `occurrences` array for each category in an aligned response. This property is ignored if `include_occurrences` is not also set to `true`. */
+                include_past_budget_dates?: boolean;
                 /** @description Enable to include a top-level `totals` section that summarizes the inflow and outflow across all transactions for the specified date range. */
                 include_totals?: boolean;
+                /** @description Enable to include a `rollover_pool` section that summarizes the current rollover pool balance and all previous adjustments. */
+                include_rollover_pool?: boolean;
             };
             header?: never;
             path?: never;
@@ -2453,7 +2476,12 @@ interface operations {
     };
     deleteManualAccount: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description When set to true will also delete any transactions, rules, and recurring items associated with this account. Use this option with caution, it is irreversible! */
+                delete_items?: boolean;
+                /** @description When set to true will delete any balance history associated with this account. */
+                delete_balance_history?: boolean;
+            };
             header?: never;
             path: {
                 /** @description ID of the manual account to delete */
@@ -2694,7 +2722,7 @@ interface operations {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
-                     *           "errMsg": "There is no manual account with the id:'9999999999999'`"
+                     *           "errMsg": "There is no plaid account with the id: 9999999999999"
                      *         }
                      *       ]
                      *     }
@@ -2735,46 +2763,11 @@ interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    /**
-                     * @example {
-                     *       "message": "Request Validation Failure",
-                     *       "errors": [
-                     *         {
-                     *           "errMsg": "must be integer",
-                     *           "instancePath": "/path/id",
-                     *           "schemaPath": "#/properties/path/properties/ids/items/type",
-                     *           "keyword": "type",
-                     *           "params": {
-                     *             "type": "integer"
-                     *           }
-                     *         }
-                     *       ]
-                     *     }
-                     */
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
             401: components["responses"]["unauthorizedToken"];
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    /**
-                     * @example {
-                     *       "message": "Not Found",
-                     *       "errors": [
-                     *         {
-                     *           "errMsg": "There is no manual account with the id:'9999999999999'`"
-                     *         }
-                     *       ]
-                     *     }
-                     */
-                    "application/json": components["schemas"]["errorResponseObject"];
-                };
-            };
-            /** @description A 425 Too Early */
+            /** @description Too Early */
             425: {
                 headers: {
                     [name: string]: unknown;
@@ -2804,9 +2797,13 @@ interface operations {
                 start_date?: string;
                 /** @description Denotes the end of the time period you'd like to get transactions for. Required if start_date exists. */
                 end_date?: string;
-                /** @description Filter transactions to those associated with specified manual account ID or set this to 0 to omit any transactions from manual accounts. Setting both this and `synched_account_id` to 0 will return transactions with no account. These are listed as "Cash Transactions" in the Lunch Money GUI. */
+                /** @description Filter transactions to those created after the specified timestamp. Accepts either a date (YYYY-MM-DD) or ISO 8601 datetime string. Date-only values are interpreted as midnight UTC (00:00:00Z). */
+                created_since?: string;
+                /** @description Filter transactions to those updated after the specified timestamp. Accepts either a date (YYYY-MM-DD) or ISO 8601 datetime string. Date-only values are interpreted as midnight UTC (00:00:00Z). */
+                updated_since?: string;
+                /** @description Filter transactions to those associated with specified manual account ID or set this to 0 to omit any transactions from manual accounts. Setting both this and `plaid_account_id` to 0 will return transactions with no account. These are listed as "Cash Transactions" in the Lunch Money GUI.<br> Note that transaction groups are not associated with any account. If you want the response to include transactions from transaction groups, set the `include_group_children` query parameter to `true` when filtering by manual accounts. */
                 manual_account_id?: number;
-                /** @description Filter transactions to those associated with specified plaid account ID or set this to 0 to omit any transactions from plaid accounts. Setting both this and `manual_account_id` to 0 will return transactions with no account. These are listed as "Cash Transactions" in the Lunch Money GUI. */
+                /** @description Filter transactions to those associated with specified plaid account ID or set this to 0 to omit any transactions from plaid accounts. Setting both this and `manual_account_id` to 0 will return transactions with no account. These are listed as "Cash Transactions" in the Lunch Money GUI.<br> Note that transaction groups are not associated with any account. If you want the response to include transactions from transaction groups, set the `include_group_children` query parameter to `true` when filtering by plaid accounts. */
                 plaid_account_id?: number;
                 /** @description Filter transactions to those associated with specified Recurring  Item ID */
                 recurring_id?: number;
@@ -2815,7 +2812,7 @@ interface operations {
                 /** @description Filter transactions to those that have a tag with the specified Tag ID */
                 tag_id?: number;
                 /** @description Filter by group (returns only transaction groups if `true`) */
-                is_group?: boolean;
+                is_group_parent?: boolean;
                 /** @description Filter transactions to those with the specified status:<br> - `reviewed`: Only user reviewed transactions or those that were automatically marked as reviewed due to reviewed recurring_item logic<br> - `unreviewed`: Only transactions that need to be reviewed<br> - `delete_pending`: Only transactions that require manual intervention because the plaid account deleted this transaction after it was updated by the user. */
                 status?: "reviewed" | "unreviewed" | "delete_pending";
                 /** @description Filter transactions by pending status. Set to `true` to return only pending transactions, or `false` to return only non-pending transactions. When this parameter is set, it takes precedence over `include_pending`. Note: Pending transactions always have a status of `unreviewed`, so when setting this parameter to `true`, either omit the `status` parameter or set it to `unreviewed`. */
@@ -2826,13 +2823,15 @@ interface operations {
                 include_metadata?: boolean;
                 /** @description By default, transactions that were split into multiple transactions are not included in the response. Set to true if you'd like the returned transactions objects to include any  transactions that were split into multiple transactions.  Use with caution as this data is normally not exposed after the split transactions are created. */
                 include_split_parents?: boolean;
+                /** @description By default, individual transactions that joined into a transaction group are not included in the response. Set to true if you'd like the returned transactions objects to include any transactions that joined into a transaction group. */
+                include_group_children?: boolean;
                 /** @description By default, the `children` property is not included in the response. Set to true if you'd like the children property to be populated with the transactions that  make up a transaction group, or, if the `include_split_parents` query param is also set,  the transactions that were split from a parent transaction. */
                 include_children?: boolean;
                 /** @description By default, the `files` property is not included in the response. Set to true if you'd like the responses to include a list of of  objects that describe any files attached to the transactions. */
                 include_files?: boolean;
-                /** @description Sets the maximum number of transactions to return. If more match the filter criteria, the response will include a `has_more` attribute set to `true`. See [pagination](foo) */
+                /** @description Sets the maximum number of transactions to return. If more match the filter criteria, the response will include a `has_more` attribute set to `true`. See [Pagination](https://alpha.lunchmoney.dev/v2/pagination) */
                 limit?: number;
-                /** @description Sets the offset for the records returned. This is typically set automatically in the header. See [Pagination](/foo) */
+                /** @description Sets the offset for the records returned. This is typically set automatically in the header. See [Pagination](https://alpha.lunchmoney.dev/v2/pagination) */
                 offset?: number;
             };
             header?: never;
@@ -2841,7 +2840,7 @@ interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Returns an array of transactions. <br><br>The `has_more` property is set to `true` if more transactions are available. See [Pagination](/foo) */
+            /** @description Returns an array of transactions. <br><br>The `has_more` property is set to `true` if more transactions are available. See [Pagination](https://alpha.lunchmoney.dev/v2/pagination) */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3020,20 +3019,28 @@ interface operations {
                      *       "message": "Invalid Request Body",
                      *       "errors": [
                      *         {
-                     *           "errMsg": "Duplicate Transaction ID",
+                     *           "errMsg": "Duplicate transaction ID found: 2112150653",
                      *           "transaction_id": 2112150653,
-                     *           "ids_indices": [
-                     *             0,
-                     *             1
-                     *           ]
+                     *           "ids_index": 0,
+                     *           "invalid_property": "ids"
                      *         },
                      *         {
-                     *           "errMsg": "Duplicate Transaction ID",
+                     *           "errMsg": "Duplicate transaction ID found: 2112150653",
+                     *           "transaction_id": 2112150653,
+                     *           "ids_index": 1,
+                     *           "invalid_property": "ids"
+                     *         },
+                     *         {
+                     *           "errMsg": "Duplicate transaction ID found: 2112150654",
                      *           "transaction_id": 2112150654,
-                     *           "ids_indices": [
-                     *             2,
-                     *             3
-                     *           ]
+                     *           "ids_index": 2,
+                     *           "invalid_property": "ids"
+                     *         },
+                     *         {
+                     *           "errMsg": "Duplicate transaction ID found: 2112150654",
+                     *           "transaction_id": 2112150654,
+                     *           "ids_index": 3,
+                     *           "invalid_property": "ids"
                      *         }
                      *       ]
                      *     }
@@ -3050,17 +3057,17 @@ interface operations {
                 content: {
                     /**
                      * @example {
-                     *       "message": "Invalid Request Body",
+                     *       "message": "Request Validation Failure",
                      *       "errors": [
                      *         {
-                     *           "errMsg": "Transaction ID Not Found",
-                     *           "ids_": 0,
-                     *           "transaction_id": 8888888888
+                     *           "errMsg": "There is no transaction with the id: 8888888888",
+                     *           "ids_index": 0,
+                     *           "id": 8888888888
                      *         },
                      *         {
-                     *           "errMsg": "Transaction ID Not Found",
-                     *           "ids_": 1,
-                     *           "transaction_id": 9999999999
+                     *           "errMsg": "There is no transaction with the id: 9999999999",
+                     *           "ids_index": 1,
+                     *           "id": 9999999999
                      *         }
                      *       ]
                      *     }
@@ -3434,13 +3441,10 @@ interface operations {
                 content: {
                     /**
                      * @example {
-                     *       "message": "Invalid Request Body",
+                     *       "message": "Not Found",
                      *       "errors": [
                      *         {
-                     *           "errMsg": "parent_ids 0 transaction ID does not exist. ID: 2112140458",
-                     *           "error": "Invalid Transaction ID",
-                     *           "invalid_property": "parent_ids",
-                     *           "index": 0,
+                     *           "errMsg": "There is no transaction with the id: 2112140458",
                      *           "id": 2112140458
                      *         }
                      *       ]
@@ -3484,7 +3488,7 @@ interface operations {
         };
         responses: {
             /** @description File attached successfully */
-            200: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4274,6 +4278,7 @@ type PlaidAccount = components["schemas"]["plaidAccountObject"];
 type Tag = components["schemas"]["tagObject"];
 type RecurringItem = components["schemas"]["recurringObject"];
 type TransactionAttachment = components["schemas"]["transactionAttachmentObject"];
+type SkippedExistingExternalId = components["schemas"]["skippedExistingExternalIdObject"];
 type InsertTransactionsResponse = components["schemas"]["insertTransactionsResponseObject"];
 type GetAllTransactionsResponse = {
     transactions: Transaction[];
@@ -4284,6 +4289,18 @@ type UpdateTransactionsResponse = {
 };
 type AlignedSummaryResponse = components["schemas"]["alignedSummaryResponseObject"];
 type NonAlignedSummaryResponse = components["schemas"]["nonAlignedSummaryResponseObject"];
+type DeleteCategoryResponse = components["schemas"]["deleteCategoryResponseWithDependencies"];
+type DeleteTagResponse = components["schemas"]["deleteTagResponseWithDependencies"];
+type SummaryTotals = components["schemas"]["summaryTotalsObject"];
+type SummaryTotalsBreakdown = components["schemas"]["summaryTotalsBreakdownObject"];
+type AlignedSummaryCategory = components["schemas"]["alignedSummaryCategoryObject"];
+type NonAlignedSummaryCategory = components["schemas"]["nonAlignedSummaryCategoryObject"];
+type SummaryRolloverPoolAdjustment = components["schemas"]["summaryRolloverPoolAdjustmentObject"];
+type AlignedCategoryTotals = components["schemas"]["alignedCategoryTotalsObject"];
+type NonAlignedCategoryTotals = components["schemas"]["nonAlignedCategoryTotalsObject"];
+type SummaryCategoryOccurrence = components["schemas"]["summaryCategoryOccurrenceObject"];
+type SummaryRecurringTransaction = components["schemas"]["summaryRecurringTransactionObject"];
+type SummaryRolloverPool = components["schemas"]["summaryRolloverPoolObject"];
 type Currency = components["schemas"]["currencyEnum"];
 type AccountType = components["schemas"]["accountTypeEnum"];
 type GetAllCategoriesParams = operations["getAllCategories"]["parameters"]["query"];
@@ -4304,6 +4321,9 @@ type DeleteTagParams = operations["deleteTag"]["parameters"]["query"];
 type CreateManualAccountBody = operations["createManualAccount"]["requestBody"]["content"]["application/json"];
 type UpdateManualAccountBody = operations["updateManualAccount"]["requestBody"]["content"]["application/json"];
 type TriggerPlaidAccountFetchParams = operations["triggerPlaidAccountFetch"]["parameters"]["query"];
+type DeleteTransactionsBody = operations["deleteTransactions"]["requestBody"]["content"]["application/json"];
+type AttachFileToTransactionBody = operations["attachFileToTransaction"]["requestBody"]["content"]["multipart/form-data"];
+type TransactionAttachmentUrlResponse = operations["getTransactionAttachmentUrl"]["responses"]["200"]["content"]["application/json"];
 
 type ErrorResponse = components["schemas"]["errorResponseObject"];
 type ErrorDetail = ErrorResponse["errors"][number];
@@ -4355,11 +4375,15 @@ declare class LunchMoneyClient {
         create: (data: CreateTransactionBody) => Promise<InsertTransactionsResponse>;
         update: (id: number, data: UpdateTransactionBody) => Promise<Transaction>;
         delete: (id: number) => Promise<void>;
+        deleteMany: (data: DeleteTransactionsBody) => Promise<void>;
         updateMany: (data: UpdateTransactionsBody) => Promise<UpdateTransactionsResponse>;
         split: (id: number, data: SplitTransactionBody) => Promise<Transaction>;
         unsplit: (id: number) => Promise<void>;
         group: (data: GroupTransactionsBody) => Promise<Transaction>;
         ungroup: (id: number) => Promise<void>;
+        attachFile: (transactionId: number, data: AttachFileToTransactionBody) => Promise<TransactionAttachment>;
+        getAttachmentUrl: (fileId: number) => Promise<TransactionAttachmentUrlResponse>;
+        deleteAttachment: (fileId: number) => Promise<void>;
     };
     get manualAccounts(): {
         getAll: () => Promise<ManualAccount[]>;
@@ -4394,4 +4418,4 @@ declare class LunchMoneyClient {
 }
 
 export { LunchMoneyClient, LunchMoneyError, LunchMoneyClient as default };
-export type { AccountType, AlignedSummaryResponse, Category, ChildCategory, ChildTransaction, CreateCategoryBody, CreateManualAccountBody, CreateTagBody, CreateTransactionBody, Currency, DeleteCategoryParams, DeleteTagParams, ErrorDetail, ErrorResponse, GetAllCategoriesParams, GetAllRecurringItemsParams, GetAllTransactionsParams, GetAllTransactionsResponse, GetBudgetSummaryParams, GroupTransactionsBody, InsertTransaction, InsertTransactionsResponse, LunchMoneyClientOptions, ManualAccount, NonAlignedSummaryResponse, PlaidAccount, RecurringItem, SplitTransaction, SplitTransactionBody, Tag, Transaction, TransactionAttachment, TriggerPlaidAccountFetchParams, UpdateCategoryBody, UpdateManualAccountBody, UpdateTagBody, UpdateTransaction, UpdateTransactionBody, UpdateTransactionsBody, UpdateTransactionsResponse, User, components, operations, paths };
+export type { AccountType, AlignedCategoryTotals, AlignedSummaryCategory, AlignedSummaryResponse, AttachFileToTransactionBody, Category, ChildCategory, ChildTransaction, CreateCategoryBody, CreateManualAccountBody, CreateTagBody, CreateTransactionBody, Currency, DeleteCategoryParams, DeleteCategoryResponse, DeleteTagParams, DeleteTagResponse, DeleteTransactionsBody, ErrorDetail, ErrorResponse, GetAllCategoriesParams, GetAllRecurringItemsParams, GetAllTransactionsParams, GetAllTransactionsResponse, GetBudgetSummaryParams, GroupTransactionsBody, InsertTransaction, InsertTransactionsResponse, LunchMoneyClientOptions, ManualAccount, NonAlignedCategoryTotals, NonAlignedSummaryCategory, NonAlignedSummaryResponse, PlaidAccount, RecurringItem, SkippedExistingExternalId, SplitTransaction, SplitTransactionBody, SummaryCategoryOccurrence, SummaryRecurringTransaction, SummaryRolloverPool, SummaryRolloverPoolAdjustment, SummaryTotals, SummaryTotalsBreakdown, Tag, Transaction, TransactionAttachment, TransactionAttachmentUrlResponse, TriggerPlaidAccountFetchParams, UpdateCategoryBody, UpdateManualAccountBody, UpdateTagBody, UpdateTransaction, UpdateTransactionBody, UpdateTransactionsBody, UpdateTransactionsResponse, User, components, operations, paths };
