@@ -13,7 +13,7 @@ import type {
 	UpdateCategoryBody,
 	GetAllTransactionsParams,
 	GetAllTransactionsResponse,
-	CreateTransactionBody,
+	CreateTransactionsBody,
 	UpdateTransactionBody,
 	UpdateTransactionsBody,
 	SplitTransactionBody,
@@ -198,7 +198,7 @@ export class LunchMoneyClient {
 				return this.handleDataResponse(response);
 			},
 			create: async (
-				data: CreateTransactionBody,
+				data: CreateTransactionsBody,
 			): Promise<InsertTransactionsResponse> => {
 				const response = await this.client.POST("/transactions", {
 					body: data,

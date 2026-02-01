@@ -78,7 +78,7 @@ export type UpdateCategoryBody =
 	operations["updateCategory"]["requestBody"]["content"]["application/json"];
 export type GetAllTransactionsParams =
 	operations["getAllTransactions"]["parameters"]["query"];
-export type CreateTransactionBody =
+export type CreateTransactionsBody =
 	operations["createNewTransactions"]["requestBody"]["content"]["application/json"];
 export type UpdateTransactionBody =
 	operations["updateTransaction"]["requestBody"]["content"]["application/json"];

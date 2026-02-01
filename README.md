@@ -1,11 +1,32 @@
 # Lunch Money JS v2
 
+[![npm version](https://img.shields.io/npm/v/lunch-money-js-v2.svg)](https://www.npmjs.com/package/lunch-money-js-v2)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
+
 A TypeScript client library for the Lunch Money API v2, built with openapi-ts and openapi-fetch.
+
+## Table of Contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [API Coverage](#api-coverage)
+- [Error Handling](#error-handling)
+- [Type Safety](#type-safety)
+- [Available Types](#available-types)
+- [Requirements](#requirements)
+- [Documentation](#documentation)
+- [Development](#development)
+- [Support](#support)
 
 ## Installation
 
 ```bash
 npm install lunch-money-js-v2
+# or
+pnpm add lunch-money-js-v2
+# or
+yarn add lunch-money-js-v2
 ```
 
 ## Usage
@@ -59,7 +80,47 @@ const updatedCategory: Category = await client.categories.update(123, {
 // Delete a category
 await client.categories.delete(123);
 
-// Error handling - all methods throw LunchMoneyError on failure
+// Access the raw openapi-fetch client for advanced usage (returns full response)
+const rawResponse = await client.rawClient.GET('/me');
+console.log(rawResponse.data, rawResponse.error, rawResponse.response);
+```
+
+## Configuration
+
+The `LunchMoneyClient` constructor accepts the following options:
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `apiKey` | `string` | (required) | Your Lunch Money API key. Get it from the [developers page](https://my.lunchmoney.app/developers). |
+| `baseUrl` | `string` | `'https://dev.lunchmoney.app/v2'` | API base URL. Only change this if directed by Lunch Money. |
+
+## API Coverage
+
+This library provides convenient methods for:
+
+- **User**: Get current user details (`user.getMe()`)
+- **Categories**: CRUD operations (`categories.getAll()`, `categories.get()`, `categories.create()`, `categories.update()`, `categories.delete()`)
+- **Transactions**: Full transaction management (`transactions.getAll()`, `transactions.create()`, `transactions.split()`, `transactions.group()`)
+- **Accounts**: Get manual account information (`accounts.getAll()`, `accounts.get()`)
+- **Plaid Accounts**: Get Plaid-connected accounts (`plaidAccounts.getAll()`, `plaidAccounts.get()`)
+- **Tags**: CRUD operations (`tags.getAll()`, `tags.create()`, `tags.update()`, `tags.delete()`)
+- **Recurring Items**: Get recurring patterns (`recurringItems.getAll()`, `recurringItems.get()`)
+- **Summary**: Get budget summaries (`summary.get()`)
+
+## Error Handling
+
+All methods throw `LunchMoneyError` on API failure. The error object provides detailed information:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `message` | `string` | Error message from the API |
+| `status` | `number` | HTTP status code |
+| `data` | `unknown` | Raw error response data |
+| `errors` | `ErrorDetail[]` | Array of detailed error objects |
+
+```typescript
+import { LunchMoneyError } from 'lunch-money-js-v2';
+
 try {
   await client.transactions.create({
     transactions: [{
@@ -82,24 +143,7 @@ try {
     }
   }
 }
-
-// Access the raw openapi-fetch client for advanced usage (returns full response)
-const rawResponse = await client.rawClient.GET('/me');
-console.log(rawResponse.data, rawResponse.error, rawResponse.response);
 ```
-
-## API Coverage
-
-This library provides convenient methods for:
-
-- **User**: Get current user details (`user.getMe()`)
-- **Categories**: CRUD operations (`categories.getAll()`, `categories.get()`, `categories.create()`, `categories.update()`, `categories.delete()`)
-- **Transactions**: Full transaction management (`transactions.getAll()`, `transactions.create()`, `transactions.split()`, `transactions.group()`)
-- **Accounts**: Get manual account information (`accounts.getAll()`, `accounts.get()`)
-- **Plaid Accounts**: Get Plaid-connected accounts (`plaidAccounts.getAll()`, `plaidAccounts.get()`)
-- **Tags**: CRUD operations (`tags.getAll()`, `tags.create()`, `tags.update()`, `tags.delete()`)
-- **Recurring Items**: Get recurring patterns (`recurringItems.getAll()`, `recurringItems.get()`)
-- **Summary**: Get budget summaries (`summary.get()`)
 
 ## Type Safety
 
@@ -146,7 +190,7 @@ import {
   type CreateCategoryBody,
   type UpdateCategoryBody,
   type GetAllTransactionsParams,
-  type CreateTransactionBody
+  type CreateTransactionsBody
 } from 'lunch-money-js-v2';
 ```
 
@@ -155,6 +199,18 @@ For advanced usage, you can also import the raw OpenAPI types:
 ```typescript
 import { type paths, type operations, type components } from 'lunch-money-js-v2';
 ```
+
+## Requirements
+
+- Node.js 18 or later (LTS versions recommended)
+- TypeScript 4.9+ (if using TypeScript)
+
+## Documentation
+
+This library wraps the Lunch Money API v2, which is currently in open alpha and expected to reach general availability (GA) in early 2026.
+
+- [Lunch Money API Documentation](https://lunchmoney.dev/)
+- [Get your API key](https://my.lunchmoney.app/developers) from the Lunch Money app
 
 ## Development
 
@@ -172,6 +228,8 @@ npm run build
 npm run dev
 ```
 
-## License
+## Support
 
-MIT
+- [GitHub Issues](https://github.com/lunch-money/lunch-money-js-v2/issues)
+- [Discord Community](https://discord.gg/lunchmoney) - `#developer-api` channel
+- [Lunch Money Support](https://lunchmoney.app)

@@ -38,7 +38,7 @@
 	},
 	"homepage": "https://github.com/lunch-money/lunch-money-js-v2#readme",
 	"dependencies": {
-		"@lunch-money/v2-api-spec": "2.8.4",
+		"@lunch-money/v2-api-spec": "2.8.5",
 		"openapi-fetch": "^0.14.0"
 	},
 	"devDependencies": {
