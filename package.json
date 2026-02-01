@@ -1,14 +1,27 @@
 {
 	"name": "lunch-money-js-v2",
-	"version": "0.0.1",
+	"version": "2.8.5",
 	"type": "module",
 	"description": "TypeScript client library for Lunch Money API v2",
 	"main": "dist/index.js",
 	"module": "dist/index.esm.js",
 	"types": "dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.esm.js",
+			"require": "./dist/index.js"
+		}
+	},
+	"sideEffects": false,
 	"files": [
-		"dist"
+		"dist",
+		"README.md",
+		"LICENSE"
 	],
+	"engines": {
+		"node": ">=18.0.0"
+	},
 	"scripts": {
 		"build": "rollup -c",
 		"dev": "rollup -c -w",
@@ -38,10 +51,10 @@
 	},
 	"homepage": "https://github.com/lunch-money/lunch-money-js-v2#readme",
 	"dependencies": {
-		"@lunch-money/v2-api-spec": "2.8.5",
-		"openapi-fetch": "^0.14.0"
+		"openapi-fetch": "^0.15.0"
 	},
 	"devDependencies": {
+		"@lunch-money/v2-api-spec": "2.8.5",
 		"@rollup/plugin-commonjs": "^28.0.6",
 		"@rollup/plugin-node-resolve": "^16.0.1",
 		"@rollup/plugin-typescript": "^12.1.4",

@@ -4347,7 +4347,7 @@ type GetAllCategoriesParams = operations["getAllCategories"]["parameters"]["quer
 type CreateCategoryBody = operations["createCategory"]["requestBody"]["content"]["application/json"];
 type UpdateCategoryBody = operations["updateCategory"]["requestBody"]["content"]["application/json"];
 type GetAllTransactionsParams = operations["getAllTransactions"]["parameters"]["query"];
-type CreateTransactionBody = operations["createNewTransactions"]["requestBody"]["content"]["application/json"];
+type CreateTransactionsBody = operations["createNewTransactions"]["requestBody"]["content"]["application/json"];
 type UpdateTransactionBody = operations["updateTransaction"]["requestBody"]["content"]["application/json"];
 type UpdateTransactionsBody = operations["updateTransactions"]["requestBody"]["content"]["application/json"];
 type SplitTransactionBody = operations["splitTransaction"]["requestBody"]["content"]["application/json"];
@@ -4412,7 +4412,7 @@ declare class LunchMoneyClient {
     get transactions(): {
         getAll: (params?: GetAllTransactionsParams) => Promise<GetAllTransactionsResponse>;
         get: (id: number) => Promise<Transaction>;
-        create: (data: CreateTransactionBody) => Promise<InsertTransactionsResponse>;
+        create: (data: CreateTransactionsBody) => Promise<InsertTransactionsResponse>;
         update: (id: number, data: UpdateTransactionBody) => Promise<Transaction>;
         delete: (id: number) => Promise<void>;
         deleteMany: (data: DeleteTransactionsBody) => Promise<void>;
@@ -4454,8 +4454,8 @@ declare class LunchMoneyClient {
     /**
      * Access to the raw openapi-fetch client for advanced usage
      */
-    get rawClient(): openapi_fetch.Client<paths, MediaType>;
+    get rawClient(): openapi_fetch.Client<paths, `${string}/${string}`>;
 }
 
 export { LunchMoneyClient, LunchMoneyError, LunchMoneyClient as default };
-export type { AccountType, AlignedCategoryTotals, AlignedSummaryCategory, AlignedSummaryResponse, AttachFileToTransactionBody, Category, ChildCategory, ChildTransaction, CreateCategoryBody, CreateManualAccountBody, CreateTagBody, CreateTransactionBody, Currency, DeleteCategoryParams, DeleteCategoryResponse, DeleteTagParams, DeleteTagResponse, DeleteTransactionsBody, ErrorDetail, ErrorResponse, GetAllCategoriesParams, GetAllRecurringItemsParams, GetAllTransactionsParams, GetAllTransactionsResponse, GetBudgetSummaryParams, GroupTransactionsBody, InsertTransaction, InsertTransactionsResponse, LunchMoneyClientOptions, ManualAccount, NonAlignedCategoryTotals, NonAlignedSummaryCategory, NonAlignedSummaryResponse, PlaidAccount, RecurringItem, SkippedExistingExternalId, SplitTransaction, SplitTransactionBody, SummaryCategoryOccurrence, SummaryRecurringTransaction, SummaryRolloverPool, SummaryRolloverPoolAdjustment, SummaryTotals, SummaryTotalsBreakdown, Tag, Transaction, TransactionAttachment, TransactionAttachmentUrlResponse, TriggerPlaidAccountFetchParams, UpdateCategoryBody, UpdateManualAccountBody, UpdateTagBody, UpdateTransaction, UpdateTransactionBody, UpdateTransactionsBody, UpdateTransactionsResponse, User, components, operations, paths };
+export type { AccountType, AlignedCategoryTotals, AlignedSummaryCategory, AlignedSummaryResponse, AttachFileToTransactionBody, Category, ChildCategory, ChildTransaction, CreateCategoryBody, CreateManualAccountBody, CreateTagBody, CreateTransactionsBody, Currency, DeleteCategoryParams, DeleteCategoryResponse, DeleteTagParams, DeleteTagResponse, DeleteTransactionsBody, ErrorDetail, ErrorResponse, GetAllCategoriesParams, GetAllRecurringItemsParams, GetAllTransactionsParams, GetAllTransactionsResponse, GetBudgetSummaryParams, GroupTransactionsBody, InsertTransaction, InsertTransactionsResponse, LunchMoneyClientOptions, ManualAccount, NonAlignedCategoryTotals, NonAlignedSummaryCategory, NonAlignedSummaryResponse, PlaidAccount, RecurringItem, SkippedExistingExternalId, SplitTransaction, SplitTransactionBody, SummaryCategoryOccurrence, SummaryRecurringTransaction, SummaryRolloverPool, SummaryRolloverPoolAdjustment, SummaryTotals, SummaryTotalsBreakdown, Tag, Transaction, TransactionAttachment, TransactionAttachmentUrlResponse, TriggerPlaidAccountFetchParams, UpdateCategoryBody, UpdateManualAccountBody, UpdateTagBody, UpdateTransaction, UpdateTransactionBody, UpdateTransactionsBody, UpdateTransactionsResponse, User, components, operations, paths };
