@@ -1,5 +1,5 @@
 {
-	"name": "lunch-money-js-v2",
+	"name": "@lunch-money/lunch-money-js-v2",
 	"version": "2.8.5",
 	"type": "module",
 	"description": "TypeScript client library for Lunch Money API v2",
