@@ -212,22 +212,6 @@ This library wraps the Lunch Money API v2, which is currently in open alpha and 
 - [Lunch Money API Documentation](https://lunchmoney.dev/)
 - [Get your API key](https://my.lunchmoney.app/developers) from the Lunch Money app
 
-## Development
-
-```bash
-# Install dependencies
-npm install
-
-# Generate types from OpenAPI spec
-npm run generate-types
-
-# Build the library
-npm run build
-
-# Watch mode for development
-npm run dev
-```
-
 ## Support
 
 - [GitHub Issues](https://github.com/lunch-money/lunch-money-js-v2/issues)
