@@ -22,11 +22,11 @@ A TypeScript client library for the Lunch Money API v2, built with openapi-ts an
 ## Installation
 
 ```bash
-npm install lunch-money-js-v2
+npm install @lunch-money/lunch-money-js-v2
 # or
-pnpm add lunch-money-js-v2
+pnpm add @lunch-money/lunch-money-js-v2
 # or
-yarn add lunch-money-js-v2
+yarn add @lunch-money/lunch-money-js-v2
 ```
 
 ## Usage
