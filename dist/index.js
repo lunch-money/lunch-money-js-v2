@@ -23,7 +23,7 @@ class LunchMoneyError extends Error {
  */
 class LunchMoneyClient {
     constructor(options) {
-        const { apiKey, baseUrl = "https://dev.lunchmoney.app/v2", headers: customHeaders, ...rest } = options;
+        const { apiKey, baseUrl = "https://api.lunchmoney.dev/v2", headers: customHeaders, ...rest } = options;
         const headers = {
             "Content-Type": "application/json",
             ...customHeaders,
@@ -38,10 +38,39 @@ class LunchMoneyClient {
         });
     }
     handleError(response) {
-        const errorData = response.error;
-        const message = errorData.message || "API request failed";
-        const errors = errorData.errors || [];
+        const { message, errors } = this.normalizeErrorPayload(response.error);
         throw new LunchMoneyError(message, response.response.status, response.error, errors);
+    }
+    isRecord(value) {
+        return typeof value === "object" && value !== null;
+    }
+    isErrorDetailArray(value) {
+        return (Array.isArray(value) &&
+            value.every((item) => this.isRecord(item) && typeof item.errMsg === "string"));
+    }
+    normalizeErrorPayload(error) {
+        if (!this.isRecord(error)) {
+            return { message: "API request failed", errors: [] };
+        }
+        const message = typeof error.message === "string" ? error.message : undefined;
+        if (this.isErrorDetailArray(error.errors)) {
+            return {
+                message: message || "API request failed",
+                errors: error.errors,
+            };
+        }
+        if (typeof error.errMsg === "string") {
+            const detailFields = { ...error };
+            delete detailFields.message;
+            return {
+                message: message || error.errMsg,
+                errors: [{ ...detailFields, errMsg: error.errMsg }],
+            };
+        }
+        return {
+            message: message || "API request failed",
+            errors: [],
+        };
     }
     handleDataResponse(response) {
         if (response.error) {
@@ -316,6 +345,24 @@ class LunchMoneyClient {
                     params: { query: params },
                 });
                 return this.handleDataResponse(response);
+            },
+        };
+    }
+    get budgets() {
+        return {
+            getSettings: async () => {
+                const response = await this.client.GET("/budgets/settings");
+                return this.handleDataResponse(response);
+            },
+            upsert: async (data) => {
+                const response = await this.client.PUT("/budgets", { body: data });
+                return this.handleDataResponse(response);
+            },
+            delete: async (params) => {
+                const response = await this.client.DELETE("/budgets", {
+                    params: { query: params },
+                });
+                return this.handleVoidResponse(response);
             },
         };
     }

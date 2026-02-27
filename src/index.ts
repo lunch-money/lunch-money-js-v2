@@ -21,11 +21,15 @@ import type {
 	CreateTagBody,
 	UpdateTagBody,
 	GetBudgetSummaryParams,
+	UpsertBudgetBody,
+	DeleteBudgetParams,
 	GetAllRecurringItemsParams,
 	DeleteCategoryParams,
 	DeleteTagParams,
 	AlignedSummaryResponse,
 	NonAlignedSummaryResponse,
+	BudgetSettingsResponse,
+	BudgetUpsertResponse,
 	CreateManualAccountBody,
 	UpdateManualAccountBody,
 	TriggerPlaidAccountFetchParams,
@@ -52,7 +56,7 @@ export class LunchMoneyClient {
 	constructor(options: LunchMoneyClientOptions) {
 		const {
 			apiKey,
-			baseUrl = "https://dev.lunchmoney.app/v2",
+			baseUrl = "https://api.lunchmoney.dev/v2",
 			headers: customHeaders,
 			...rest
 		} = options;
@@ -77,15 +81,59 @@ export class LunchMoneyClient {
 		error?: unknown;
 		response: { status: number };
 	}): never {
-		const errorData = response.error as ErrorResponse;
-		const message = errorData.message || "API request failed";
-		const errors = errorData.errors || [];
+		const { message, errors } = this.normalizeErrorPayload(response.error);
 		throw new LunchMoneyError(
 			message,
 			response.response.status,
 			response.error,
 			errors,
 		);
+	}
+
+	private isRecord(value: unknown): value is Record<string, unknown> {
+		return typeof value === "object" && value !== null;
+	}
+
+	private isErrorDetailArray(value: unknown): value is ErrorResponse["errors"] {
+		return (
+			Array.isArray(value) &&
+			value.every(
+				(item) => this.isRecord(item) && typeof item.errMsg === "string",
+			)
+		);
+	}
+
+	private normalizeErrorPayload(error: unknown): {
+		message: string;
+		errors: ErrorResponse["errors"];
+	} {
+		if (!this.isRecord(error)) {
+			return { message: "API request failed", errors: [] };
+		}
+
+		const message =
+			typeof error.message === "string" ? error.message : undefined;
+
+		if (this.isErrorDetailArray(error.errors)) {
+			return {
+				message: message || "API request failed",
+				errors: error.errors,
+			};
+		}
+
+		if (typeof error.errMsg === "string") {
+			const detailFields: Record<string, unknown> = { ...error };
+			delete detailFields.message;
+			return {
+				message: message || error.errMsg,
+				errors: [{ ...detailFields, errMsg: error.errMsg }],
+			};
+		}
+
+		return {
+			message: message || "API request failed",
+			errors: [],
+		};
 	}
 
 	private handleDataResponse<T>(response: {
@@ -421,6 +469,25 @@ export class LunchMoneyClient {
 					params: { query: params },
 				});
 				return this.handleDataResponse(response);
+			},
+		};
+	}
+
+	get budgets() {
+		return {
+			getSettings: async (): Promise<BudgetSettingsResponse> => {
+				const response = await this.client.GET("/budgets/settings");
+				return this.handleDataResponse(response);
+			},
+			upsert: async (data: UpsertBudgetBody): Promise<BudgetUpsertResponse> => {
+				const response = await this.client.PUT("/budgets", { body: data });
+				return this.handleDataResponse(response);
+			},
+			delete: async (params: DeleteBudgetParams): Promise<void> => {
+				const response = await this.client.DELETE("/budgets", {
+					params: { query: params },
+				});
+				return this.handleVoidResponse(response);
 			},
 		};
 	}

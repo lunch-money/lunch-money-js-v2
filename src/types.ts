@@ -33,28 +33,34 @@ export type UpdateTransactionsResponse = {
 };
 export type ErrorResponse = components["schemas"]["errorResponseObject"];
 export type AlignedSummaryResponse =
-	components["schemas"]["alignedSummaryResponseObject"];
+	components["schemas"]["summaryResponseObject"];
 export type NonAlignedSummaryResponse =
-	components["schemas"]["nonAlignedSummaryResponseObject"];
+	components["schemas"]["summaryResponseObject"];
 export type DeleteCategoryResponse =
 	components["schemas"]["deleteCategoryResponseWithDependencies"];
 export type DeleteTagResponse =
 	components["schemas"]["deleteTagResponseWithDependencies"];
+export type BudgetSettingsResponse =
+	components["schemas"]["budgetSettingsResponseObject"];
+export type BudgetUpsertResponse =
+	components["schemas"]["budgetUpsertResponseObject"];
+export type BudgetInvalidPeriodError =
+	components["schemas"]["budgetInvalidPeriodErrorObject"];
 
 // Summary sub-types
 export type SummaryTotals = components["schemas"]["summaryTotalsObject"];
 export type SummaryTotalsBreakdown =
 	components["schemas"]["summaryTotalsBreakdownObject"];
 export type AlignedSummaryCategory =
-	components["schemas"]["alignedSummaryCategoryObject"];
+	components["schemas"]["summaryCategoryObject"];
 export type NonAlignedSummaryCategory =
-	components["schemas"]["nonAlignedSummaryCategoryObject"];
+	components["schemas"]["summaryCategoryObject"];
 export type SummaryRolloverPoolAdjustment =
 	components["schemas"]["summaryRolloverPoolAdjustmentObject"];
 export type AlignedCategoryTotals =
-	components["schemas"]["alignedCategoryTotalsObject"];
+	components["schemas"]["summaryCategoryTotalsObject"];
 export type NonAlignedCategoryTotals =
-	components["schemas"]["nonAlignedCategoryTotalsObject"];
+	components["schemas"]["summaryCategoryTotalsObject"];
 export type SummaryCategoryOccurrence =
 	components["schemas"]["summaryCategoryOccurrenceObject"];
 export type SummaryRecurringTransaction =
@@ -94,6 +100,10 @@ export type UpdateTagBody =
 	operations["updateTag"]["requestBody"]["content"]["application/json"];
 export type GetBudgetSummaryParams =
 	operations["getBudgetSummary"]["parameters"]["query"];
+export type UpsertBudgetBody =
+	operations["upsertBudget"]["requestBody"]["content"]["application/json"];
+export type DeleteBudgetParams =
+	operations["deleteBudget"]["parameters"]["query"];
 export type GetAllRecurringItemsParams =
 	operations["getAllRecurring"]["parameters"]["query"];
 export type DeleteCategoryParams =

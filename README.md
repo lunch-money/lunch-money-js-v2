@@ -37,7 +37,7 @@ import { LunchMoneyClient, LunchMoneyError, type ErrorResponse, type ErrorDetail
 // Initialize the client
 const client = new LunchMoneyClient({
   apiKey: 'your-api-key-here',
-  baseUrl: 'https://dev.lunchmoney.app/v2' // Optional
+  baseUrl: 'https://api.lunchmoney.dev/v2' // Optional
 });
 
 // Get current user
@@ -49,11 +49,11 @@ const categories: Category[] = await client.categories.getAll();
 console.log(`Found ${categories.length} categories`);
 
 // Get transactions with filters
-const transactions: Transaction[] = await client.transactions.getAll({
+const transactionsResponse = await client.transactions.getAll({
   start_date: '2024-01-01',
   end_date: '2024-12-31'
 });
-console.log(`Found ${transactions.length} transactions`);
+console.log(`Found ${transactionsResponse.transactions.length} transactions`);
 
 // Create a category with full type checking
 const newCategory: Category = await client.categories.create({
@@ -80,6 +80,26 @@ const updatedCategory: Category = await client.categories.update(123, {
 // Delete a category
 await client.categories.delete(123);
 
+// Get budget settings
+const budgetSettings = await client.budgets.getSettings();
+console.log(budgetSettings.budget_period_granularity);
+
+// Upsert a budget
+const budget = await client.budgets.upsert({
+  start_date: '2025-01-01',
+  category_id: 123,
+  amount: 500,
+  currency: 'usd',
+  notes: 'Monthly groceries'
+});
+console.log(budget.amount, budget.currency);
+
+// Delete a budget
+await client.budgets.delete({
+  category_id: 123,
+  start_date: '2025-01-01'
+});
+
 // Access the raw openapi-fetch client for advanced usage (returns full response)
 const rawResponse = await client.rawClient.GET('/me');
 console.log(rawResponse.data, rawResponse.error, rawResponse.response);
@@ -92,7 +112,7 @@ The `LunchMoneyClient` constructor accepts the following options:
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `apiKey` | `string` | (required) | Your Lunch Money API key. Get it from the [developers page](https://my.lunchmoney.app/developers). |
-| `baseUrl` | `string` | `'https://dev.lunchmoney.app/v2'` | API base URL. Only change this if directed by Lunch Money. |
+| `baseUrl` | `string` | `'https://api.lunchmoney.dev/v2'` | API base URL. Only change this if directed by Lunch Money. |
 
 ## API Coverage
 
@@ -101,11 +121,12 @@ This library provides convenient methods for:
 - **User**: Get current user details (`user.getMe()`)
 - **Categories**: CRUD operations (`categories.getAll()`, `categories.get()`, `categories.create()`, `categories.update()`, `categories.delete()`)
 - **Transactions**: Full transaction management (`transactions.getAll()`, `transactions.create()`, `transactions.split()`, `transactions.group()`)
-- **Accounts**: Get manual account information (`accounts.getAll()`, `accounts.get()`)
+- **Manual Accounts**: CRUD operations (`manualAccounts.getAll()`, `manualAccounts.get()`, `manualAccounts.create()`, `manualAccounts.update()`, `manualAccounts.delete()`)
 - **Plaid Accounts**: Get Plaid-connected accounts (`plaidAccounts.getAll()`, `plaidAccounts.get()`)
 - **Tags**: CRUD operations (`tags.getAll()`, `tags.create()`, `tags.update()`, `tags.delete()`)
 - **Recurring Items**: Get recurring patterns (`recurringItems.getAll()`, `recurringItems.get()`)
 - **Summary**: Get budget summaries (`summary.get()`)
+- **Budgets**: Manage budget settings and period budgets (`budgets.getSettings()`, `budgets.upsert()`, `budgets.delete()`)
 
 ## Error Handling
 
@@ -117,6 +138,8 @@ All methods throw `LunchMoneyError` on API failure. The error object provides de
 | `status` | `number` | HTTP status code |
 | `data` | `unknown` | Raw error response data |
 | `errors` | `ErrorDetail[]` | Array of detailed error objects |
+
+The client normalizes API error payloads so `error.errors` remains useful even when an endpoint returns a top-level `errMsg` instead of an `errors[]` array. The original payload is always available in `error.data`.
 
 ```typescript
 import { LunchMoneyError } from 'lunch-money-js-v2';

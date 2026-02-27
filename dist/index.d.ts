@@ -35,7 +35,7 @@ interface paths {
         };
         /**
          * Get summary
-         * @description Returns a summary of the budget activity for the specified date range
+         * @description Retrieves a summary of the user's budget. Use this endpoint to access budget configuration details and performance for a specified date range.<p> Use the [/budgets](#tag/budgets) endpoint to manage budget objects.
          */
         get: operations["getBudgetSummary"];
         put?: never;
@@ -55,7 +55,7 @@ interface paths {
         };
         /**
          * Get all categories
-         * @description Retrieve a list of all categories associated with the user's account
+         * @description Retrieve a list of all categories associated with the user's account.
          */
         get: operations["getAllCategories"];
         put?: never;
@@ -79,7 +79,7 @@ interface paths {
         };
         /**
          * Get a single category
-         * @description Retrieve details of a specific category or category group by its ID
+         * @description Retrieve details of a specific category or category group by its ID.
          */
         get: operations["getCategoryById"];
         /**
@@ -117,7 +117,7 @@ interface paths {
         put?: never;
         /**
          * Create a manual account
-         * @description Creates a new manually-managed account
+         * @description Create a new manually-managed account.
          */
         post: operations["createManualAccount"];
         delete?: never;
@@ -135,7 +135,7 @@ interface paths {
         };
         /**
          * Get a single manual account
-         * @description Retrieve the details of the manual account with the specified ID
+         * @description Retrieve the details of the manual account with the specified ID.
          */
         get: operations["getManualAccountById"];
         /**
@@ -185,7 +185,7 @@ interface paths {
         };
         /**
          * Get a single account that is synced via Plaid
-         * @description Retrieve the details of the plaid account with the specified ID
+         * @description Retrieve the details of the plaid account with the specified ID.
          */
         get: operations["getPlaidAccountById"];
         put?: never;
@@ -241,17 +241,17 @@ interface paths {
         put: operations["updateTransactions"];
         /**
          * Insert one or more transactions.
-         * @description Use this endpoint to add transactions to a budget.<br><br>
-         *     The request body for this endpoint must include a list of transactions with at least one transaction and not more than 500 transactions to insert.<br><br>
-         *     The successful request to this endpoint will return a response body which will include two arrays: <br>  - `transactions`: A list of transactions that were successfully inserted.<br> - `skipped_duplicates`: A list of transactions that were duplicates of existing transactions and were not inserted.
+         * @description Use this endpoint to add transactions to a budget.<p>
+         *     The request body for this endpoint must include a list of transactions with at least one transaction and not more than 500 transactions to insert.<p>
+         *     The successful request to this endpoint will return a response body which will include two arrays:<br>  - `transactions`: A list of transactions that were successfully inserted.<br> - `skipped_duplicates`: A list of transactions that were duplicates of existing transactions and were not inserted.
          */
         post: operations["createNewTransactions"];
         /**
          * Bulk delete existing transactions
-         * @description Deletes the transaction with the IDs specified in the request body.<br>
-         *     If any of the specified transactions are a split transaction or a split parent, or if any are a grouped transactions or part of a transaction group, the request will fail with a suggestion on how to unsplit or ungroup the transaction(s) prior to deletion. This will also fail if any of the specified transaction IDs do not exist.<br>
-         *     Otherwise, the specified transactions are deleted.<br><br>
-         *     **Use with caution. This action is not reversible!**
+         * @description Deletes the transaction with the IDs specified in the request body.<p>
+         *     If any of the specified transactions are a split transaction or a split parent, or if any are a grouped transactions or part of a transaction group, the request will fail with a suggestion on how to unsplit or ungroup the transaction(s) prior to deletion. This will also fail if any of the specified transaction IDs do not exist.<p>
+         *     Otherwise, the specified transactions are deleted.<p>
+         *     <span class="red-text"><strong>Use with caution. This action is not reversible!</strong></span>
          */
         delete: operations["deleteTransactions"];
         options?: never;
@@ -289,9 +289,9 @@ interface paths {
         post?: never;
         /**
          * Delete a transaction
-         * @description Deletes the transaction with the ID specified on the path.<br>
-         *     If the specified transaction is a split transaction or a split parent, or if it is a grouped transactions or part of a transaction group, the request will fail with a suggestion on how to unsplit or ungroup the transaction(s) prior to deletion. Otherwise, the specified transaction is deleted. <br>
-         *     This action is not reversible!
+         * @description Deletes the transaction with the ID specified on the path.<p>
+         *     If the specified transaction is a split transaction or a split parent, or if it is a grouped transactions or part of a transaction group, the request will fail with a suggestion on how to unsplit or ungroup the transaction(s) prior to deletion. Otherwise, the specified transaction is deleted. <p>
+         *     <span class="red-text"><strong>Use with caution. This action is not reversible!</strong></span>
          */
         delete: operations["deleteTransactionById"];
         options?: never;
@@ -515,41 +515,93 @@ interface paths {
         patch?: never;
         trace?: never;
     };
+    "/budgets/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get budget settings
+         * @description Returns the budget-related settings for the user's account.
+         */
+        get: operations["getBudgetSettings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/budgets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Upsert budget
+         * @description Create or update a budget for a category and period.<p>
+         *     If a budget already exists for the specified `start_date` and `category_id`, the `amount` (and optional `currency` and `notes`) are updated; otherwise a new budget entry is created.<p>
+         *
+         *     Note that `start_date` **must** be a valid budget period start for the account (based on the account's
+         *     budget period settings). If an invalid `start_date` is provided, the request will fail with an error that indicates what the previous and next valid start dates are.<p>
+         *
+         *     Use the [budgets/settings](#tag/budgets/GET/budgets/settings) endpoint to view the account's budget settings.<br>
+         *     To view existing budgets details use the [summary](#tag/summary) endpoint.
+         */
+        put: operations["upsertBudget"];
+        post?: never;
+        /**
+         * Delete budget
+         * @description Removes the budget for the given category and period. If there already is no budget set for that period, the request still succeeds (idempotent).<p> Note that `start_date` **must** be a valid budget period start for the account (based on the account's budget period settings). If an invalid `start_date` is provided, the request will fail with an error that indicates what the previous and next valid start dates are.<p> Use the [budgets/settings](#tag/budgets/GET/budgets/settings) endpoint to view the account's budget settings.<br> To view existing budgets details use the [summary](#tag/summary) endpoint.
+         */
+        delete: operations["deleteBudget"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 interface components {
     schemas: {
+        /** user object (returned by /me) */
         userObject: {
-            /** @description User's name */
+            /** @description The user's name */
             name: string;
-            /** @description User's email */
+            /** @description The user's email */
             email: string;
             /**
              * Format: int32
-             * @description Unique identifier for user
+             * @description Unique ID for the user
              */
             id: number;
             /**
              * Format: int64
-             * @description Unique identifier for the associated budgeting account
+             * @description Unique ID for the linked budgeting account
              */
             account_id: number;
-            /** @description Name of the associated budgeting account */
+            /** @description Name of the linked budgeting account */
             budget_name: string;
-            /** @description Primary currency from user's settings */
+            /** @description Primary currency set in the user's settings */
             primary_currency: components["schemas"]["currencyEnum"];
-            /** @description User-defined label of the developer API key used. Returns null if nothing has been set. */
+            /** @description Label assigned by the user to the API key being used. Returns null if no label is set */
             api_key_label: string | null;
         };
         /** category object */
         categoryObject: {
             /**
              * Format: int32
-             * @description A system defined unique identifier for the category
+             * @description System defined unique ID for the category
              */
             id: number;
-            /** @description The name of the category */
+            /** @description The name of the category. */
             name: string;
-            /** @description The description of the category or `null` if not set */
+            /** @description The description of the category or `null` if not set. */
             description: string | null;
             /** @description If `true`, the transactions in this category will be treated as income. (See <a href="https://support.lunchmoney.app/setup/categories/category-properties">Category Properties</a> for more details) */
             is_income: boolean;
@@ -572,7 +624,7 @@ interface components {
              * @description The ID of the category group this category belongs to or `null` if the category doesn't belong to a group, or is itself a category group.
              */
             group_id: number | null;
-            /** @description If `true`, the category is created as a category group */
+            /** @description If `true`, the category is created as a category group. */
             is_group: boolean;
             /** @description For category groups, this will populate with details about the categories that belong to this group. The objects in this array are similar to Category Objects but do not include the `is_income`, `exclude_from_budget`, and `exclude_from_totals` properties as these are inherited from the category group. In addition, the `is_group` property will always be `false`, and there will be no `children` attribute. */
             children?: components["schemas"]["childCategoryObject"][];
@@ -589,7 +641,7 @@ interface components {
              */
             order: number | null;
             /**
-             * @description If `true`, the category is collapsed in the Lunch Money GUI
+             * @description If `true`, the category is collapsed in the Lunch Money GUI.
              * @default false
              */
             collapsed: boolean;
@@ -597,12 +649,12 @@ interface components {
         childCategoryObject: {
             /**
              * Format: int32
-             * @description A system defined unique identifier for the category
+             * @description A system defined unique identifier for the category.
              */
             id: number;
-            /** @description The name of the category */
+            /** @description The name of the category. */
             name: string;
-            /** @description The description of the category or `null` if not set */
+            /** @description The description of the category or `null` if not set. */
             description: string | null;
             /** @description If true, the transactions in this category will be treated as income. Inherited from Category Group. */
             is_income: boolean;
@@ -626,7 +678,7 @@ interface components {
              */
             group_id: number | null;
             /**
-             * @description Will always be false for a category that is part of category group
+             * @description Will always be false for a category that is part of category group.
              * @enum {boolean}
              */
             is_group: false;
@@ -639,8 +691,8 @@ interface components {
             archived_at: string | null;
             /** @description An index specifying the position in which the category is displayed on the categories page in the Lunch Money GUI. For categories within a category group the order is relative to the other categories within the group.<br> API. */
             order: number | null;
-            /** @description Always `false` for a child category. Child categories cannot be collapsed. */
-            collapsed: boolean;
+            /** @description If `true`, the category is collapsed in the Lunch Money GUI. */
+            collapsed?: boolean | null;
         };
         createCategoryRequestObject: {
             /**
@@ -669,7 +721,7 @@ interface components {
              */
             exclude_from_totals?: boolean;
             /**
-             * @description If `true`, the category is created as a category group
+             * @description If `true`, the category is created as a category group.
              * @default false
              */
             is_group?: boolean;
@@ -688,7 +740,7 @@ interface components {
             children?: (number | string | components["schemas"]["categoryObject"])[];
             /** @description An index specifying the position in which the category is displayed on the categories page in the Lunch Money GUI. For categories within a category group the order is relative to the other categories within the group.<br>While this property can be set via the API it is generally set by the user in the Lunch Money GUI. API. */
             order?: number | null;
-            /** @description If `true`, the category group is collapsed in the Lunch Money GUI. This property can only be set to `true` for category groups (`is_group: true`). While this property can be set via the API, it is generally set by the user in the Lunch Money GUI. */
+            /** @description If `true`, the category is collapsed in the Lunch Money GUI.<br>While this property can be set via the API it is generally set by the user in the Lunch Money GUI. */
             collapsed?: boolean | null;
         };
         updateCategoryRequestObject: {
@@ -702,7 +754,7 @@ interface components {
             exclude_from_budget?: boolean;
             /** @description If set, will indicate if this category will be excluded from totals. (See <a href="https://support.lunchmoney.app/setup/categories/category-properties">Category Properties</a> for more details) */
             exclude_from_totals?: boolean;
-            /** @description If set, will indicate if this category is archived */
+            /** @description If set, will indicate if this category is archived. */
             archived?: boolean;
             /**
              * Format: int64
@@ -718,11 +770,11 @@ interface components {
             children?: (number | string | components["schemas"]["categoryObject"])[];
             /** @description An index specifying the position in which the category is displayed on the categories page in the Lunch Money GUI. For categories within a category group the order is relative to the other categories within the group.<br>While this property can be set via the API it is generally set by the user in the Lunch Money GUI. API. */
             order?: number | null;
-            /** @description If `true`, the category group is collapsed in the Lunch Money GUI. This property can only be set to `true` for category groups (`is_group: true`). While this property can be set via the API, it is generally set by the user in the Lunch Money GUI. */
+            /** @description If `true`, the category is collapsed in the Lunch Money GUI.<br>While this property can be set via the API it is generally set by the user in the Lunch Money GUI. */
             collapsed?: boolean | null;
             /**
              * Format: int64
-             * @description System defined unique identifier for the category. Ignored if set
+             * @description System defined unique identifier for the category. Ignored if set.
              */
             id?: number;
             /** @description System set date and time of when the category was last archived (in the ISO 8601 extended format). Ignored if set. */
@@ -756,456 +808,10 @@ interface components {
                 plaid_cats: number;
             };
         };
-        transactionObject: {
-            /**
-             * Format: int64
-             * @description System created unique identifier for transaction
-             */
-            id: number;
-            /**
-             * Format: date
-             * @description Date of transaction in ISO 8601 format
-             */
-            date: string;
-            /** @description Amount of the transaction in numeric format to 4 decimal places. Positive values indicate a debit transaction, negative values indicate a credit transaction. */
-            amount: string;
-            /** @description Three-letter lowercase currency code of the transaction in ISO 4217 format. */
-            currency: components["schemas"]["currencyEnum"];
-            /**
-             * Format: double
-             * @description The amount converted to the user's primary currency. If the multi-currency feature is not being used, to_base and amount will be the same. Positive values indicate a debit transaction, negative values indicate a credit transaction.
-             */
-            to_base: number;
-            /**
-             * Format: int32
-             * @description The unique identifier of the associated recurring item that this transaction matched.
-             */
-            recurring_id: number | null;
-            /**
-             * @description Name of payee set by the user, the financial institution, or by
-             *     a matched recurring item. This will match the value
-             *     displayed in payee field on the transactions page in the GUI.
-             */
-            payee: string;
-            /** @description Original payee name from the source (financial institution, CSV, etc.). For Plaid transactions, this is the raw name before normalization. For manual/API transactions, this typically matches `payee`. May be null for older transactions. */
-            original_name?: string | null;
-            /**
-             * Format: int32
-             * @description Unique identifier of associated category set by the user or by a matched recurring_item.<br> Category details can be obtained by passing the value of this property to the [Get A Single Category](../operations/getCategoryById) API
-             */
-            category_id: number | null;
-            /**
-             * Format: int32
-             * @description The unique identifier of the plaid account associated with this transaction. This will always be null if this transaction is associated with a manual account or if this transaction has no associated account and appears as a "Cash Transaction" in the Lunch Money GUI.
-             */
-            plaid_account_id: number | null;
-            /**
-             * Format: int32
-             * @description The unique identifier of the manual account associated with this transaction. This will always be null if this transaction is associated with a synced account or if this transaction has no associated account and appears as a "Cash Transaction" in the Lunch Money GUI.
-             */
-            manual_account_id: number | null;
-            /** @description A user-defined external ID for any transaction that was added via csv import, `POST /transactions` API call, or manually added via the Lunch Money GUI. No external ID exists for transactions associated with synced accounts, and they cannot be added. For transactions associated with manual accounts, the external ID must be unique as attempts to add a subsequent transaction with the same external_id and manual_account_id will be flagged as duplicates and fail. */
-            external_id: string | null;
-            /** @description A list of tag_ids for the tags associated with this transaction. If the transaction has no tags this will be an empty list.<br> Tag details can be obtained by passing the value of this attribute as the `ids` query parameter to the [List Tags](../operations/getTags) API */
-            tag_ids: number[];
-            /**
-             * @description Any transaction notes set by the user or by
-             *     a matched recurring item. This will match the value
-             *     displayed in notes field on the transactions page in the GUI.
-             */
-            notes: string | null;
-            /**
-             * @description Status of the transaction:
-             *     - `reviewed`: User has reviewed the transaction, or it was automatically marked as reviewed due to reviewed recurring_item logic
-             *     - `unreviewed`: User has not reviewed the transaction and it does not match any reviewed recurring_items. Note that any transactions  where `is_pending` is true will be returned with a status of unreviewed.
-             *     - `delete_pending`: The synced account deleted this transaction after it was updated by the user. Requires manual intervention.
-             * @enum {string}
-             */
-            status: "reviewed" | "unreviewed" | "delete_pending";
-            /** @description Denotes if the transaction is pending (not posted). Applies only to transactions in synced accounts and will always be false for transactions associated with manual accounts. */
-            is_pending: boolean;
-            /**
-             * Format: date-time
-             * @description The date and time of when the transaction was created (in the ISO 8601 extended format).
-             */
-            created_at: string;
-            /**
-             * Format: date-time
-             * @description The date and time of when the transaction was last updated (in the ISO 8601 extended format).
-             */
-            updated_at: string;
-            /** @description If `true`, this transaction has been split into two or more other transactions. By default, parent transactions are not returned in call to `GET /transactions` but they can be queried directly by their ID. */
-            is_split_parent?: boolean;
-            /**
-             * Format: int64
-             * @description A transaction ID if this is a split transaction. Denotes the transaction ID of the original, or parent, transaction. Is null if this is not a split transaction
-             */
-            split_parent_id: number | null;
-            /** @description `true` if this transaction represents a group of transactions. If so, amount and currency represent the totalled amount of transactions bearing this transaction's id as their group_parent_id. Amount is calculated based on the user's primary currency. */
-            is_group_parent: boolean;
-            /**
-             * Format: int64
-             * @description Is set if this transaction is part of a group. Denotes the ID of the grouped transaction this is now included in. By default the transactions that were grouped are not returned in a call to `GET /transactions` but they can be queried directly by calling the `GET /transactions/group/{id}`, where the id passed is associated with a transaction where the `is_group_parent` attribute is true
-             */
-            group_parent_id: number | null;
-            /** @description Exists only for transactions which are the parent of a split transaction or for transaction groups. It will not exist in the response unless the `include_children` query parameter is set to `true`.<br> For parents of split transactions, it contains a list of the associated transactions that it was split into. For transaction groups, it contains the transactions that were grouped together. Examine the `is_split_parent` and `is_group_parent` properties to determine which of these it is. */
-            children?: components["schemas"]["childTransactionObject"][];
-            /** @description If requested, the transaction's plaid_metadata that came when this transaction was obtained. This will be a json object, but the schema is variable. This is only present when the `include_metadata` query parameter is set to true. */
-            plaid_metadata?: Record<string, never> | null;
-            /** @description If requested, the transaction's custom_metadata that was included when the transaction was inserted via the API. This will be a json object, but the schema is variable. This is only present when the `include_metadata` query parameter is set to true. */
-            custom_metadata?: Record<string, never> | null;
-            /** @description A list of objects that describe any attachments to the Transactions This is only present when the `include_files` query parameter is set to true. */
-            files?: components["schemas"]["transactionAttachmentObject"][];
-            /**
-             * @description Source of the transaction:
-             *     - `api`: Transaction was added by a call to the [POST /transactions](../operations/createTransaction) API
-             *     - `csv`: Transaction was added via a CSV Import
-             *     - `manual`: Transaction was created via the "Add to Cash" button on the Transactions page
-             *     - `merge`: Transactions were originally in an account that was merged into another account
-             *     - `plaid`: Transaction came from a Financial Institution synced via Plaid
-             *     - `recurring`: Transaction was created from the Recurring page
-             *     - `rule`: Transaction was created by a rule to split a transaction
-             *     - `split`: Transaction was created by splitting another transaction
-             *     - `user`: This is a legacy value and is replaced by either csv or manual
-             * @enum {string|null}
-             */
-            source: "api" | "csv" | "manual" | "merge" | "plaid" | "recurring" | "rule" | "split" | "user" | null;
-        };
-        childTransactionObject: {
-            /**
-             * Format: int64
-             * @description System created unique identifier for transaction
-             */
-            id: number;
-            /**
-             * Format: date
-             * @description Date of transaction in ISO 8601 format
-             */
-            date: string;
-            /** @description Amount of the transaction in numeric format to 4 decimal places. Positive values indicate a debit transaction, negative values indicate a credit transaction */
-            amount: string;
-            /** @description Three-letter lowercase currency code of the transaction in ISO 4217 format */
-            currency: components["schemas"]["currencyEnum"];
-            /**
-             * Format: double
-             * @description The amount converted to the user's primary currency. If the transaction currency is the same as the user's primary currency, to_base and amount will be the same. Positive values indicate a debit transaction, negative values indicate a credit transaction.
-             */
-            to_base: number;
-            /**
-             * Format: int32
-             * @description The unique identifier of the associated recurring item that this transaction matched.
-             */
-            recurring_id: number | null;
-            /**
-             * @description Name of payee set by the user, the financial institution, or by
-             *     a matched recurring item. This will match the value
-             *     displayed in payee field on the transactions page in the GUI.
-             */
-            payee: string;
-            /** @description Original payee name from the source (financial institution, CSV, etc.). For Plaid transactions, this is the raw name before normalization. For manual/API transactions, this typically matches `payee`. May be null for older transactions. */
-            original_name?: string | null;
-            /**
-             * Format: int32
-             * @description Unique identifier of associated category set by the user or by a matched recurring item.<br> Category details can be obtained by passing the value of this property to the [Get A Single Category](../operations/getCategoryById) API
-             */
-            category_id: number | null;
-            /**
-             * @description Any transaction notes set by the user or by
-             *     a matched recurring item. This will match the value
-             *     displayed in notes field on the transactions page in the GUI.
-             */
-            notes: string | null;
-            /**
-             * @description Status of the transaction.  Will be one of the following values:
-             * @enum {string}
-             */
-            status: "reviewed" | "unreviewed" | "delete_pending";
-            /** @description Denotes if the transaction is pending (not posted). Applies only to transactions in synced accounts and will always be false for transactions associated with manual accounts. */
-            is_pending: boolean;
-            /**
-             * Format: date-time
-             * @description The date and time of when the transaction was created (in the ISO 8601 extended format).
-             */
-            created_at: string;
-            /**
-             * Format: date-time
-             * @description The date and time of when the transaction was last updated (in the ISO 8601 extended format).
-             */
-            updated_at: string;
-            /** @description If true this transaction has been split into two or more other transactions. By default parent transactions are not returned in call to `GET /transactions` but they can be queried directly by their ID. */
-            is_split_parent?: boolean;
-            /**
-             * Format: int64
-             * @description A transaction ID if this is a split transaction. Denotes the transaction ID of the original, or parent, transaction. Is null if this is not a split transaction
-             */
-            split_parent_id: number | null;
-            /** @description True if this transaction represents a group of transactions. If so, amount and currency represent the totalled amount of transactions bearing this transaction's id as their group_parent_id. Amount is calculated based on the user's primary currency. */
-            is_group_parent: boolean;
-            /**
-             * Format: int64
-             * @description Is set if this transaction is part of a group. Denotes the ID of the grouped transaction this is now included in. By default the transactions that were grouped are not returned in a call to `GET /transactions` but they can be queried directly by calling the `GET /transactions/group/{id}`, where the id passed is associated with a transaction where the `is_group_parent` attribute is true
-             */
-            group_parent_id: number | null;
-            /**
-             * Format: int32
-             * @description The unique identifier of the manual account associated with this transaction. This will always be null if this transaction is associated with a synced account or if this transaction has no associated account and appears as a "Cash Transaction" in the Lunch Money GUI.
-             */
-            manual_account_id: number | null;
-            /**
-             * Format: int32
-             * @description The unique identifier of the plaid account associated with this transaction. This will always be null if this transaction is associated with a manual account or if this transaction has no associated account and appears as a "Cash Transaction" in the Lunch Money GUI.
-             */
-            plaid_account_id: number | null;
-            /** @description A list of tag_ids for the tags associated with this transaction. If the transaction has no tags this will be an empty list.<br> Tag details can be obtained by passing the value of this attribute as the `ids` query parameter to the [List Tags](../operations/getTags) API */
-            tag_ids: number[];
-            /**
-             * @description Source of the transaction:
-             *     - `api`: Transaction was added by a call to the [POST /transactions](../operations/createTransaction) API
-             *     - `csv`: Transaction was added via a CSV Import
-             *     - `manual`: Transaction was created via the "Add to Cash" button on the Transactions page
-             *     - `merge`: Transactions were originally in an account that was merged into another account
-             *     - `plaid`: Transaction came from a Financial Institution synced via Plaid
-             *     - `recurring`: Transaction was created from the Recurring page
-             *     - `rule`: Transaction was created by a rule to split a transaction
-             *     - `split`: This is a transaction created by splitting another transaction
-             *     - `user`: This is a legacy value and is replaced by either csv or manual
-             * @enum {string|null}
-             */
-            source: "api" | "csv" | "manual" | "merge" | "plaid" | "recurring" | "rule" | "split" | "user" | null;
-            /** @description A user-defined external ID for any transaction that was added via csv import, `POST /transactions` API call, or manually added via the Lunch Money GUI. No external ID exists for transactions associated with synced accounts, and they cannot be added. For transactions associated with manual accounts, the external ID must be unique as attempts to add a subsequent transaction with the same external_id and manual_account_id will be flagged as duplicates and fail. */
-            external_id: string | null;
-            /** @description If requested, the transaction's plaid_metadata that came when this transaction was obtained. This will be a json object, but the schema is variable. This will only be present for transactions associated with a plaid account. */
-            plaid_metadata?: Record<string, never> | null;
-            /** @description If requested, the transaction's custom_metadata that was included when the transaction was inserted via the API. This will be a json object, but the schema is variable. */
-            custom_metadata?: Record<string, never> | null;
-            /** @description A list of objects that describe any attachments to the transaction */
-            files?: components["schemas"]["transactionAttachmentObject"][];
-        };
-        insertTransactionObject: {
-            /**
-             * Format: date
-             * @description Date of transaction in ISO 8601 format
-             */
-            date: string;
-            /** @description Numeric value of amount without currency symbol. i.e. $4.25 should be denoted as 4.25. May be a string or a number in double format. Positive values indicate a debit transaction, negative values indicate a credit transaction. */
-            amount: number | string;
-            /** @description Three-letter lowercase currency code of the transaction in ISO 4217 format. Must match one of the [supported currencies](https://alpha.lunchmoney.dev/v2/currencies). If not set defaults to the user account's primary currency. */
-            currency?: components["schemas"]["currencyEnum"];
-            /** @description Name of payee for the transaction */
-            payee?: string;
-            /** @description Original payee name. If not provided, defaults to `payee` value. */
-            original_name?: string | null;
-            /**
-             * Format: int32
-             * @description The ID of the category associated with the transactions. If set, the category ID must exist for the user's account and it cannot be a category group.
-             */
-            category_id?: number | null;
-            /**
-             * @description Any transaction notes set by the user or by
-             *     a matched recurring item. This will match the value
-             *     displayed in notes field on the transactions page in the GUI.
-             */
-            notes?: string | null;
-            /**
-             * Format: int32
-             * @description The unique identifier for the associated manually managed account If set, this must match an existing manual account id associated with the user's account. If not set, and `plaid_account_id` is also not set, no account is associated with the transaction and it will appear as a "Cash Transaction" in the Lunch Money GUI. It is an error if this, and `plaid_account_id` is also set on the same transaction.
-             */
-            manual_account_id?: number | null;
-            /**
-             * Format: int32
-             * @description The Unique identifier for the associated plaid synced account. If set, this must match an existing plaid account id associated with the user's account. If not set, and `manual_account_id` is also not set, no account is associated with the transaction and it will appear as a "Cash Transaction" in the Lunch Money GUI. It is an error if this, and `manual_account_id` is also set on the same transaction. In addition the specified plaid account must have the "Allow Modifications To Transactions" property set (which is enabled by default), or the insert will fail.
-             */
-            plaid_account_id?: number | null;
-            /**
-             * Format: int32
-             * @description Unique identifier for associated recurring item. Recurring item must be associated with the same account.
-             */
-            recurring_id?: number | null;
-            /**
-             * @description If set must be either `reviewed` or `unreviewed`. If not set, defaults to `unreviewed`.
-             * @enum {string}
-             */
-            status?: "reviewed" | "unreviewed";
-            /** @description A list of IDs for the tags associated with this transaction. Each ID must match an existing tag associated with the user's account. If not set, no tags will be associated with the created transaction. */
-            tag_ids?: number[];
-            /** @description A user-defined external ID for the transaction. If set, and `manual_account_id` is set, the creation of the new transaction will fail if a transaction with this id already exists for the specified manual account. */
-            external_id?: string | null;
-            /** @description An optional JSON object that includes additional data related to this transaction. This must be a valid JSON object and, when stringified, must not exceed 4096 characters. This data may be available in the future for processing by rules. */
-            custom_metadata?: {
-                [key: string]: unknown;
-            } | null;
-        };
-        updateTransactionObject: {
-            /**
-             * Format: int64
-             * @description System defined unique identifier of this transaction. Ignored if set
-             */
-            id?: number;
-            /**
-             * Format: date
-             * @description Date of transaction in ISO 8601 format
-             */
-            date?: string;
-            /** @description Numeric value of amount without currency symbol. i.e. $4.25 should be denoted as 4.25. May be a string or a number in double format. Positive values indicate a debit transaction, negative values indicate a credit transaction. <br> May not be updated on transactions that belong to a synced account with the "Allow Modifications to Transactions" property disabled. */
-            amount?: number | string;
-            /** @description Three-letter lowercase currency code of the transaction in ISO 4217 format.<br> May not be updated on transactions that belong to a synced account with the "Allow Modifications to Transactions" property disabled. */
-            currency?: components["schemas"]["currencyEnum"];
-            /**
-             * Format: int32
-             * @description The unique identifier of the associated recurring item that this transaction matches.
-             */
-            recurring_id?: number | null;
-            /** @description The new payee for the transaction. */
-            payee?: string;
-            /** @description Original payee name. Cannot be changed. Ignored if set. */
-            original_name?: string | null;
-            /**
-             * Format: int32
-             * @description Unique identifier of the category for this transaction. Set this to null to clear the transaction's category.
-             */
-            category_id?: number | null;
-            /** @description New notes for the transaction. Set this to an empty string to clear the existing notes. */
-            notes?: string | null;
-            /**
-             * Format: int32
-             * @description The unique identifier of the manual account associated with this transaction. Set this to null to disassociate the transaction with an account. If set `plaid_account_id` may not also be set to a non null value. Moving an existing transaction to to another account will not work if the transaction belongs to a synced account who's "Allow Modifications to Transactions" property is not set.
-             */
-            manual_account_id?: number | null;
-            /**
-             * Format: int32
-             * @description The unique identifier of the plaid account associated with this transaction. If set `manual_account_id` may not also be set to a non null value. Attempting to modify this on a transaction associated with a Plaid account will not work if the account's "Allow Modifications to Transactions" property is not set. Similarly, this cannot be set to an id associated with this type of locked Plaid account.
-             */
-            plaid_account_id?: number | null;
-            /** @description A list of tag_ids for the tags associated with this transaction. If set, this property will overwrite any existing tags. Use `additional_tag_ids` to add tags to the existing transaction's tags. Set this to an empty array to remove all tags from a transaction. If set `additional_tag_ids` may not be set. */
-            tag_ids?: number[];
-            /** @description A list of tag_ids for the tags associated with this transaction. If set, the tags listed in this property be added to any existing transaction tags. Use `tag_ids` to overwrite or clear transaction tags. If set `tag_ids` may not be set. */
-            additional_tag_ids?: number[];
-            /** @description A user-defined external ID for the transaction. The update will fail if the transaction does not also have a `manual_account_id` or if there is already an existing transaction with the same `manual_account_id`/`external_id` combination. */
-            external_id?: string | null;
-            /** @description User defined JSON data that can be set or cleared via the API */
-            custom_metadata?: Record<string, never> | null;
-            /**
-             * @description Status of the transaction, may be one of:
-             *     - `reviewed`: User has reviewed the transaction, or it was automatically marked as reviewed due to reviewed recurring_item logic
-             *     - `unreviewed`: User has not reviewed the transaction and it does not match any reviewed recurring_items.
-             * @enum {string}
-             */
-            status?: "reviewed" | "unreviewed";
-            /**
-             * Format: double
-             * @description System defined amount of this transaction in the user's primary currency. Ignored if set. Use `amount` to update the amount in the transaction.
-             */
-            to_base?: number;
-            /** @description System defined flag set for pending transactions. Ignored if set */
-            is_pending?: boolean;
-            /** @description System set metadata from a Plaid account sync. Ignored if set */
-            plaid_metadata?: Record<string, never> | null;
-            /**
-             * Format: date-time
-             * @description System defined date and time of when the transaction was created Ignored if set.
-             */
-            created_at?: string;
-            /**
-             * Format: date-time
-             * @description System defined date and time of when the transaction was last updated. Ignored if set.
-             */
-            updated_at?: string;
-            /** @description System defined boolean indicating if this transaction was split To split or unsplit a transaction use the `/transactions/split` endpoint. Ignored if set. */
-            is_split_parent?: boolean;
-            /** @description An array of child transactions that exists when a transaction has been split or if the transaction is a group. Split */
-            children?: components["schemas"]["childTransactionObject"][];
-            /**
-             * Format: int64
-             * @description A transaction ID if this is a split transaction. Split transactions may not be modified this API. Use the `transactions/split` endpoint instead. Ignored if set.
-             */
-            split_parent_id?: number | null;
-            /** @description System defined boolean indicating if this transaction represents a group of transactions. Grouped transactions may not be modified with this API. Use the `transactions/group` endpoint instead. Ignored if set. */
-            is_group_parent?: boolean;
-            /**
-             * Format: int64
-             * @description A transaction group ID if this transaction is part of a group. Grouped transactions may not be modified with this API. Use the `transactions/group` endpoint instead. Ignored if set.
-             */
-            group_parent_id?: number | null;
-            /**
-             * @description System defined original source of the transaction. Ignored if set.
-             * @enum {string|null}
-             */
-            source?: "api" | "csv" | "manual" | "merge" | "plaid" | "recurring" | "rule" | "split" | "user" | null;
-        };
-        /** @description The object representing a split transaction */
-        splitTransactionObject: {
-            /** @description Individual amount of split. Currency will inherit from parent transaction. All amounts must sum up to parent transaction amount. */
-            amount: number | string;
-            /** @description The payee for the child transaction. Will inherit the original payee from the parent if not defined. */
-            payee?: string;
-            /**
-             * Format: date
-             * @description Must be in ISO 8601 format (YYYY-MM-DD). Will inherit from the parent if not defined.
-             */
-            date?: string;
-            /**
-             * Format: int32
-             * @description Unique identifier for associated category_id. Category must already exist for the account. Will inherit category from the parent if not defined.
-             */
-            category_id?: number;
-            /** @description Will inherit notes from parent if not defined */
-            notes?: string;
-        };
-        /** @description The object returned when a new transaction has an external_id that already exists */
-        skippedExistingExternalIdObject: {
-            /**
-             * @description The reason the transaction was skipped, may be one of:
-             *     - `duplicate_external_id`: The transaction has the same `manual_account_id` and `external_id` as an existing transaction
-             *     - `duplicate_payee_amount_date`: The `skip_duplicates` request body property was set to `true` and the transaction has the same `amount`, `payee`, and `date` as an existing transaction associated with the same account.
-             * @enum {string}
-             */
-            reason?: "duplicate_external_id" | "duplicate_payee_amount_date";
-            /**
-             * Format: int64
-             * @description The  of the transaction in the request body's transactions array that was skipped.
-             */
-            request_transactions_index?: number;
-            /**
-             * Format: int64
-             * @description The id of the existing transactions that the requested transaction duplicates.
-             */
-            existing_transaction_id?: number;
-            /** @description The requested transaction that was skipped */
-            request_transaction?: components["schemas"]["insertTransactionObject"];
-        };
-        /** @description The object returned from a successful POST /transactions request */
-        insertTransactionsResponseObject: {
-            /** @description An array of the inserted transactions */
-            transactions: components["schemas"]["transactionObject"][];
-            /** @description An array of the requested transactions that were duplicates of existing transactions and were not inserted. */
-            skipped_duplicates: components["schemas"]["skippedExistingExternalIdObject"][];
-        };
-        transactionAttachmentObject: {
-            /**
-             * Format: int32
-             * @description The unique identifier of the attachment
-             */
-            id?: number;
-            /**
-             * Format: int64
-             * @description The id of the user who uploaded the attachment
-             */
-            uploaded_by?: number;
-            /** @description The name of the file */
-            name?: string;
-            /** @description The MIME type of the file */
-            type?: string;
-            /** @description The size of the file in kilobytes */
-            size?: number;
-            /** @description Optional notes about the attachment */
-            notes?: string | null;
-            /**
-             * Format: date-time
-             * @description The date and time when the attachment was created in ISO 8601 format
-             */
-            created_at?: string;
-        };
-        /** @description An object containing information about a manual account */
+        /**
+         * manual account object
+         * @description An object containing information about a manual account
+         */
         manualAccountObject: {
             /**
              * Format: int32
@@ -1351,7 +957,7 @@ interface components {
             /** @description A new date for the `updated_at` property.  May be set as a date, ie: YYYY-MM-DD, or date-time string in ISO 8601 extended format. This property is ignored if `balance` is not also set. If `balance` is set and this property is not set the current time is used. */
             balance_as_of?: string & (unknown | unknown);
             /**
-             * @description If set, the status of the manual account. If set to `closed`, the the `closed_on_date` date will be set to the current date, unless it is also set.
+             * @description If set, the status of the manual account. If set to `closed`, the `closed_on_date` date will be set to the current date, unless it is also set.
              * @enum {string}
              */
             status?: "active" | "closed";
@@ -1380,7 +986,10 @@ interface components {
             /** @description System defined name of the user who created the account. Ignored if set */
             created_by_name?: string;
         };
-        /** @description An object containing information about an account synced via Plaid */
+        /**
+         * plaid account object
+         * @description An object containing information about an account synced via Plaid
+         */
         plaidAccountObject: {
             /**
              * Format: int32
@@ -1449,19 +1058,135 @@ interface components {
              */
             plaid_last_successful_update: string | null;
         };
+        /** recurring item object */
+        recurringObject: {
+            /**
+             * Format: int32
+             * @description The unique identifier of this recurring item
+             */
+            id: number;
+            /** @description An optional description of this recurring item. */
+            description: string | null;
+            /**
+             * @description The status of this recurring item. `suggested` recurring items are generated by Lunch Money, but only `reviewed` recurring items will be applied to matching transactions.
+             * @enum {string}
+             */
+            status: "suggested" | "reviewed";
+            /** @description The set of properties used to identify matching transactions. */
+            transaction_criteria: {
+                /**
+                 * Format: date
+                 * @description The beginning of the date range for matching transactions. If `null`, any transactions before end_date may be considered.
+                 */
+                start_date: string | null;
+                /**
+                 * Format: date
+                 * @description The end of the date range for matching transactions. If `null`, any transactions after start_date may be considered.
+                 */
+                end_date: string | null;
+                /**
+                 * @description The unit of time used to define the cadence of the recurring item.
+                 * @enum {string}
+                 */
+                granularity: "day" | "week" | "month" | "year";
+                /** @description The number of granularity units between each recurrence. */
+                quantity: number;
+                /**
+                 * Format: date
+                 * @description The date used in conjunction with the `quantity` and `granularity` properties to calculate expected occurrences of recurring transactions.
+                 */
+                anchor_date: string;
+                /** @description If set, represents the original transaction payee name that triggered this recurring item's creation. */
+                payee: string | null;
+                /** @description The expected amount for a transaction that will match this recurring item. For recurring items that have a flexible amount this is the average of the specified min and max amounts. */
+                amount: string;
+                /** @description The amount converted to the user's primary currency */
+                to_base: number;
+                /** @description Three-letter lowercase currency code of the recurring item. */
+                currency: string;
+                /**
+                 * Format: int64
+                 * @description The Plaid account ID associated with the recurring item, if any.
+                 */
+                plaid_account_id: number | null;
+                /**
+                 * Format: int64
+                 * @description The manual account ID associated with the recurring item, if any.
+                 */
+                manual_account_id: number | null;
+            };
+            /** @description The values that will be applied to matching transactions. */
+            overrides: {
+                /** @description If present, the payee name that will be displayed for any matching transactions. */
+                payee?: string;
+                /** @description If present, the notes that will be displayed for any matching transactions. */
+                notes?: string;
+                /** @description If present, the ID of the category that matching transactions will be assigned to. */
+                category_id?: number;
+            };
+            /** @description Details on expected, found and missing transactions for the specified range. This will be `null` for recurring items with a `status` of `suggested`. */
+            matches: {
+                /**
+                 * Format: date
+                 * @description The beginning of the date range that this request used to find matching transactions.
+                 */
+                request_start_date?: string;
+                /**
+                 * Format: date
+                 * @description The beginning of the date range that this request used to find matching transactions.
+                 */
+                request_end_date?: string;
+                /** @description A list of dates within the specified range where a recurring transactions is expected. */
+                expected_occurrence_dates?: string[];
+                /** @description A list with the dates and IDs of matching transactions. */
+                found_transactions?: {
+                    /**
+                     * Format: date
+                     * @description The date for a matching transaction within the specified range.
+                     */
+                    date?: string;
+                    /** @description The ID of a matching transaction within the specified range. */
+                    transaction_id?: number;
+                }[];
+                /** @description A list of dates within the range of where a recurring transaction was expected but none was found. */
+                missing_transaction_dates?: string[];
+            } | null;
+            /** @description The ID of the user who created the recurring item. */
+            created_by: number;
+            /**
+             * Format: date-time
+             * @description Date/time the recurring item was created in ISO 8601 extended format.
+             */
+            created_at: string;
+            /**
+             * Format: date-time
+             * @description Date/time the recurring item was updated in ISO 8601 extended format.
+             */
+            updated_at: string;
+            /**
+             * @description This can be one of four values:
+             *     - `manual`: User created this recurring item manually from the Recurring Items page
+             *     - `transaction`: User created this by converting a transaction from the Transactions page
+             *     - `system`: Recurring item was created by the system on transaction import
+             *     - `null`: Some older recurring items may not have a source.
+             * @enum {string}
+             */
+            source: "manual" | "transaction" | "system";
+        };
+        /** tag object */
         tagObject: {
             /**
              * Format: int32
-             * @description Unique identifier for the tag
+             * @description Unique identifier for the tag.
              */
             id: number;
-            /** @description Name of the tag */
+            /** @description Name of the tag. */
             name: string;
-            /** @description Description of the tag */
+            /** @description Description of the tag. */
             description: string | null;
-            /** @description The text color of the tag */
+            /** @description The text color of the tag. */
             text_color: string | null;
-            /** @description The background color of the tag */
+            /** @description The background color of the tag. */
             background_color: string | null;
             /**
              * Format: date-time
@@ -1488,13 +1213,13 @@ interface components {
              */
             name: string;
             /**
-             * @description The description of the tag. Must not exceed 200 characters
+             * @description The description of the tag. Must not exceed 200 characters.
              * @default null
              */
             description?: string | null;
-            /** @description The text color of the tag */
+            /** @description The text color of the tag. */
             text_color?: string | null;
-            /** @description The background color of the tag */
+            /** @description The background color of the tag. */
             background_color?: string | null;
             /**
              * @description If `true`, the tag is archived and not displayed in relevant areas of the Lunch Money app.
@@ -1507,15 +1232,15 @@ interface components {
             name?: string;
             /** @description If set, the new description of the category. Must not exceed 200 characters. */
             description?: string | null;
-            /** @description The text color of the tag */
+            /** @description The text color of the tag. */
             text_color?: string | null;
-            /** @description The background color of the tag */
+            /** @description The background color of the tag. */
             background_color?: string | null;
-            /** @description If set, will indicate if this category is archived */
+            /** @description If set, will indicate if this category is archived. */
             archived?: boolean;
             /**
              * Format: int32
-             * @description System-defined unique identifier for the category. Ignored if set
+             * @description System-defined unique identifier for the category. Ignored if set.
              */
             id?: number;
             /**
@@ -1525,12 +1250,12 @@ interface components {
             updated_at?: string;
             /**
              * Format: date-time
-             * @description System-set time the tag was created. Ignored if set
+             * @description System-set time the tag was created. Ignored if set.
              */
             created_at?: string;
             /**
              * Format: date-time
-             * @description System-set time the tag was archived. Ignored if set
+             * @description System-set time the tag was archived. Ignored if set.
              */
             archived_at?: string | null;
         };
@@ -1544,153 +1269,627 @@ interface components {
                 transactions: number;
             };
         };
-        recurringObject: {
+        /** transaction object */
+        transactionObject: {
             /**
-             * Format: int32
-             * @description The unique identifier of this recurring item
+             * Format: int64
+             * @description System created unique identifier for transaction
              */
             id: number;
-            /** @description An optional description of this recurring item */
-            description: string | null;
             /**
-             * @description The status of this recurring item. `suggested` recurring items are generated by Lunch Money, but only `reviewed` recurring items will be applied to matching transactions.
+             * Format: date
+             * @description Date of transaction in ISO 8601 format
+             */
+            date: string;
+            /** @description Amount of the transaction in numeric format to 4 decimal places. Positive values indicate a debit transaction, negative values indicate a credit transaction. */
+            amount: string;
+            /** @description Three-letter lowercase currency code of the transaction in ISO 4217 format. */
+            currency: components["schemas"]["currencyEnum"];
+            /**
+             * Format: double
+             * @description The amount converted to the user's primary currency. If the multi-currency feature is not being used, to_base and amount will be the same. Positive values indicate a debit transaction, negative values indicate a credit transaction.
+             */
+            to_base: number;
+            /**
+             * Format: int32
+             * @description The unique identifier of the associated recurring item that this transaction matched.
+             */
+            recurring_id: number | null;
+            /**
+             * @description Name of payee set by the user, the financial institution, or by
+             *     a matched recurring item. This will match the value
+             *     displayed in payee field on the transactions page in the GUI.
+             */
+            payee: string;
+            /** @description Original payee name from the source (financial institution, CSV, etc.). For Plaid transactions, this is the raw name before normalization. For manual/API transactions, this typically matches `payee`. May be null for older transactions. */
+            original_name?: string | null;
+            /**
+             * Format: int32
+             * @description Unique identifier of associated category set by the user or by a matched recurring_item.<br> Category details can be obtained by passing the value of this property to the [Get A Single Category](../operations/getCategoryById) API
+             */
+            category_id: number | null;
+            /**
+             * Format: int32
+             * @description The unique identifier of the plaid account associated with this transaction. This will always be null if this transaction is associated with a manual account or if this transaction has no associated account and appears as a "Cash Transaction" in the Lunch Money GUI.
+             */
+            plaid_account_id: number | null;
+            /**
+             * Format: int32
+             * @description The unique identifier of the manual account associated with this transaction. This will always be null if this transaction is associated with a synced account or if this transaction has no associated account and appears as a "Cash Transaction" in the Lunch Money GUI.
+             */
+            manual_account_id: number | null;
+            /** @description A user-defined external ID for any transaction that was added via csv import, `POST /transactions` API call, or manually added via the Lunch Money GUI. No external ID exists for transactions associated with synced accounts, and they cannot be added. For transactions associated with manual accounts, the external ID must be unique as attempts to add a subsequent transaction with the same external_id and manual_account_id will be flagged as duplicates and fail. */
+            external_id: string | null;
+            /** @description A list of tag_ids for the tags associated with this transaction. If the transaction has no tags this will be an empty list.<br> Tag details can be obtained by passing the value of this attribute as the `ids` query parameter to the [List Tags](../operations/getTags) API */
+            tag_ids: number[];
+            /**
+             * @description Any transaction notes set by the user or by
+             *     a matched recurring item. This will match the value
+             *     displayed in notes field on the transactions page in the GUI.
+             */
+            notes: string | null;
+            /**
+             * @description Status of the transaction:
+             *     - `reviewed`: User has reviewed the transaction, or it was automatically marked as reviewed due to reviewed recurring_item logic
+             *     - `unreviewed`: User has not reviewed the transaction and it does not match any reviewed recurring_items. Note that any transactions  where `is_pending` is true will be returned with a status of unreviewed.
+             *     - `delete_pending`: The synced account deleted this transaction after it was updated by the user. Requires manual intervention.
              * @enum {string}
              */
-            status: "suggested" | "reviewed";
-            /** @description The set of properties used to identify matching transactions */
-            transaction_criteria: {
-                /**
-                 * Format: date
-                 * @description The beginning of the date range for matching transactions. If `null`, any transactions before end_date may be considered.
-                 */
-                start_date: string | null;
-                /**
-                 * Format: date
-                 * @description The end of the date range for matching transactions. If `null`, any transactions after start_date may be considered.
-                 */
-                end_date: string | null;
-                /**
-                 * @description The unit of time used to define the cadence of the recurring item
-                 * @enum {string}
-                 */
-                granularity: "day" | "week" | "month" | "year";
-                /** @description The number of granularity units between each recurrence */
-                quantity: number;
-                /**
-                 * Format: date
-                 * @description The date used in conjunction with the `quantity` and `granularity` properties to calculate expected occurrences of recurring transactions.
-                 */
-                anchor_date: string;
-                /** @description If set, represents the original transaction payee name that triggered this recurring item's creation. */
-                payee: string | null;
-                /** @description The expected amount for a transaction that will match this recurring item. For recurring items that have a flexible amount this is the average of the specified min and max amounts. */
-                amount: string;
-                /** @description The amount converted to the user's primary currency */
-                to_base: number;
-                /** @description Three-letter lowercase currency code of the recurring item */
-                currency: string;
-                /**
-                 * Format: int64
-                 * @description The Plaid account ID associated with the recurring item, if any
-                 */
-                plaid_account_id: number | null;
-                /**
-                 * Format: int64
-                 * @description The manual account ID associated with the recurring item, if any
-                 */
-                manual_account_id: number | null;
-            };
-            /** @description The values that will be applied to matching transactions */
-            overrides: {
-                /** @description If present, the payee name that will be displayed for any matching transactions. */
-                payee?: string;
-                /** @description If present, the notes that will be displayed for any matching transactions. */
-                notes?: string;
-                /** @description If present, the ID of the category that matching transactions will be assigned to. */
-                category_id?: number;
-            };
-            /** @description Details on expected, found and missing transactions for the specified range. This will be `null` for recurring items with a `status` of `suggested`. */
-            matches: {
-                /**
-                 * Format: date
-                 * @description The beginning of the date range that this request used to find matching transactions.
-                 */
-                request_start_date?: string;
-                /**
-                 * Format: date
-                 * @description The beginning of the date range that this request used to find matching transactions.
-                 */
-                request_end_date?: string;
-                /** @description A list of dates within the specified range where a recurring transactions is expected. */
-                expected_occurrence_dates?: string[];
-                /** @description A list with the dates and IDs of matching transactions */
-                found_transactions?: {
-                    /**
-                     * Format: date
-                     * @description The date for a matching transaction within the specified range
-                     */
-                    date?: string;
-                    /** @description The ID of a matching transaction within the specified range */
-                    transaction_id?: number;
-                }[];
-                /** @description A list of dates within the range of where a recurring transaction was expected but none was found. */
-                missing_transaction_dates?: string[];
-            } | null;
-            /** @description The ID of the user who created the recurring item */
-            created_by: number;
+            status: "reviewed" | "unreviewed" | "delete_pending";
+            /** @description Denotes if the transaction is pending (not posted). Applies only to transactions in synced accounts and will always be false for transactions associated with manual accounts. */
+            is_pending: boolean;
             /**
              * Format: date-time
-             * @description Date/time the recurring item was created in ISO 8601 extended format
+             * @description The date and time of when the transaction was created (in the ISO 8601 extended format).
              */
             created_at: string;
             /**
              * Format: date-time
-             * @description Date/time the recurring item was updated in ISO 8601 extended format
+             * @description The date and time of when the transaction was last updated (in the ISO 8601 extended format).
              */
             updated_at: string;
+            /** @description If `true`, this transaction has been split into two or more other transactions. By default, parent transactions are not returned in call to `GET /transactions` but they can be queried directly by their ID. */
+            is_split_parent?: boolean;
             /**
-             * @description This can be one of four values:
-             *     - `manual`: User created this recurring item manually from the Recurring Items page
-             *     - `transaction`: User created this by converting a transaction from the Transactions page
-             *     - `system`: Recurring item was created by the system on transaction import
-             *     - `null`: Some older recurring items may not have a source.
+             * Format: int64
+             * @description A transaction ID if this is a split transaction. Denotes the transaction ID of the original, or parent, transaction. Is null if this is not a split transaction
+             */
+            split_parent_id: number | null;
+            /** @description `true` if this transaction represents a group of transactions. If so, amount and currency represent the totalled amount of transactions bearing this transaction's id as their group_parent_id. Amount is calculated based on the user's primary currency. */
+            is_group_parent: boolean;
+            /**
+             * Format: int64
+             * @description Is set if this transaction is part of a group. Denotes the ID of the grouped transaction this is now included in. By default the transactions that were grouped are not returned in a call to `GET /transactions` but they can be queried directly by calling the `GET /transactions/group/{id}`, where the id passed is associated with a transaction where the `is_group_parent` attribute is true
+             */
+            group_parent_id: number | null;
+            /** @description Exists only for transactions which are the parent of a split transaction or for transaction groups. It will not exist in the response unless the `include_children` query parameter is set to `true`.<br> For parents of split transactions, it contains a list of the associated transactions that it was split into. For transaction groups, it contains the transactions that were grouped together. Examine the `is_split_parent` and `is_group_parent` properties to determine which of these it is. */
+            children?: components["schemas"]["childTransactionObject"][];
+            /** @description If requested, the transaction's plaid_metadata that came when this transaction was obtained. This will be a json object, but the schema is variable. This is only present when the `include_metadata` query parameter is set to true. */
+            plaid_metadata?: Record<string, never> | null;
+            /** @description If requested, the transaction's custom_metadata that was included when the transaction was inserted via the API. This will be a json object, but the schema is variable. This is only present when the `include_metadata` query parameter is set to true. */
+            custom_metadata?: Record<string, never> | null;
+            /** @description A list of objects that describe any attachments to the Transactions. This is only present when the `include_files` query parameter is set to true. */
+            files?: components["schemas"]["transactionAttachmentObject"][];
+            /**
+             * @description Source of the transaction:
+             *     - `api`: Transaction was added by a call to the [POST /transactions](../operations/createTransaction) API
+             *     - `csv`: Transaction was added via a CSV Import
+             *     - `manual`: Transaction was created via the "Add to Cash" button on the Transactions page
+             *     - `merge`: Transactions were originally in an account that was merged into another account
+             *     - `plaid`: Transaction came from a Financial Institution synced via Plaid
+             *     - `recurring`: Transaction was created from the Recurring page
+             *     - `rule`: Transaction was created by a rule to split a transaction
+             *     - `split`: Transaction was created by splitting another transaction
+             *     - `user`: This is a legacy value and is replaced by either csv or manual
+             * @enum {string|null}
+             */
+            source: "api" | "csv" | "manual" | "merge" | "plaid" | "recurring" | "rule" | "split" | "user" | null;
+        };
+        childTransactionObject: {
+            /**
+             * Format: int64
+             * @description System created unique identifier for transaction
+             */
+            id: number;
+            /**
+             * Format: date
+             * @description Date of transaction in ISO 8601 format
+             */
+            date: string;
+            /** @description Amount of the transaction in numeric format to 4 decimal places. Positive values indicate a debit transaction, negative values indicate a credit transaction. */
+            amount: string;
+            /** @description Three-letter lowercase currency code of the transaction in ISO 4217 format */
+            currency: components["schemas"]["currencyEnum"];
+            /**
+             * Format: double
+             * @description The amount converted to the user's primary currency. If the transaction currency is the same as the user's primary currency, to_base and amount will be the same. Positive values indicate a debit transaction, negative values indicate a credit transaction.
+             */
+            to_base: number;
+            /**
+             * Format: int32
+             * @description The unique identifier of the associated recurring item that this transaction matched.
+             */
+            recurring_id: number | null;
+            /**
+             * @description Name of payee set by the user, the financial institution, or by
+             *     a matched recurring item. This will match the value
+             *     displayed in payee field on the transactions page in the GUI.
+             */
+            payee: string;
+            /** @description Original payee name from the source (financial institution, CSV, etc.). For Plaid transactions, this is the raw name before normalization. For manual/API transactions, this typically matches `payee`. May be null for older transactions. */
+            original_name?: string | null;
+            /**
+             * Format: int32
+             * @description Unique identifier of associated category set by the user or by a matched recurring item.<br> Category details can be obtained by passing the value of this property to the [Get A Single Category](../operations/getCategoryById) API
+             */
+            category_id: number | null;
+            /**
+             * @description Any transaction notes set by the user or by
+             *     a matched recurring item. This will match the value
+             *     displayed in notes field on the transactions page in the GUI.
+             */
+            notes: string | null;
+            /**
+             * @description Status of the transaction.  Will be one of the following values:
              * @enum {string}
              */
-            source: "manual" | "transaction" | "system";
+            status: "reviewed" | "unreviewed" | "delete_pending";
+            /** @description Denotes if the transaction is pending (not posted). Applies only to transactions in synced accounts and will always be false for transactions associated with manual accounts. */
+            is_pending: boolean;
+            /**
+             * Format: date-time
+             * @description The date and time of when the transaction was created (in the ISO 8601 extended format).
+             */
+            created_at: string;
+            /**
+             * Format: date-time
+             * @description The date and time of when the transaction was last updated (in the ISO 8601 extended format).
+             */
+            updated_at: string;
+            /** @description If true this transaction has been split into two or more other transactions. By default parent transactions are not returned in call to `GET /transactions` but they can be queried directly by their ID. */
+            is_split_parent?: boolean;
+            /**
+             * Format: int64
+             * @description A transaction ID if this is a split transaction. Denotes the transaction ID of the original, or parent, transaction. Is null if this is not a split transaction
+             */
+            split_parent_id: number | null;
+            /** @description True if this transaction represents a group of transactions. If so, amount and currency represent the totalled amount of transactions bearing this transaction's id as their group_parent_id. Amount is calculated based on the user's primary currency. */
+            is_group_parent: boolean;
+            /**
+             * Format: int64
+             * @description Is set if this transaction is part of a group. Denotes the ID of the grouped transaction this is now included in. By default the transactions that were grouped are not returned in a call to `GET /transactions` but they can be queried directly by calling the `GET /transactions/group/{id}`, where the id passed is associated with a transaction where the `is_group_parent` attribute is true
+             */
+            group_parent_id: number | null;
+            /**
+             * Format: int32
+             * @description The unique identifier of the manual account associated with this transaction. This will always be null if this transaction is associated with a synced account or if this transaction has no associated account and appears as a "Cash Transaction" in the Lunch Money GUI.
+             */
+            manual_account_id: number | null;
+            /**
+             * Format: int32
+             * @description The unique identifier of the plaid account associated with this transaction. This will always be null if this transaction is associated with a manual account or if this transaction has no associated account and appears as a "Cash Transaction" in the Lunch Money GUI.
+             */
+            plaid_account_id: number | null;
+            /** @description A list of tag_ids for the tags associated with this transaction. If the transaction has no tags this will be an empty list.<br> Tag details can be obtained by passing the value of this attribute as the `ids` query parameter to the [List Tags](../operations/getTags) API */
+            tag_ids: number[];
+            /**
+             * @description Source of the transaction:
+             *     - `api`: Transaction was added by a call to the [POST /transactions](../operations/createTransaction) API
+             *     - `csv`: Transaction was added via a CSV Import
+             *     - `manual`: Transaction was created via the "Add to Cash" button on the Transactions page
+             *     - `merge`: Transactions were originally in an account that was merged into another account
+             *     - `plaid`: Transaction came from a Financial Institution synced via Plaid
+             *     - `recurring`: Transaction was created from the Recurring page
+             *     - `rule`: Transaction was created by a rule to split a transaction
+             *     - `split`: This is a transaction created by splitting another transaction
+             *     - `user`: This is a legacy value and is replaced by either csv or manual
+             * @enum {string|null}
+             */
+            source: "api" | "csv" | "manual" | "merge" | "plaid" | "recurring" | "rule" | "split" | "user" | null;
+            /** @description A user-defined external ID for any transaction that was added via csv import, `POST /transactions` API call, or manually added via the Lunch Money GUI. No external ID exists for transactions associated with synced accounts, and they cannot be added. For transactions associated with manual accounts, the external ID must be unique as attempts to add a subsequent transaction with the same external_id and manual_account_id will be flagged as duplicates and fail. */
+            external_id: string | null;
+            /** @description If requested, the transaction's plaid_metadata that came when this transaction was obtained. This will be a json object, but the schema is variable. This will only be present for transactions associated with a plaid account. */
+            plaid_metadata?: Record<string, never> | null;
+            /** @description If requested, the transaction's custom_metadata that was included when the transaction was inserted via the API. This will be a json object, but the schema is variable. */
+            custom_metadata?: Record<string, never> | null;
+            /** @description A list of objects that describe any attachments to the transaction */
+            files?: components["schemas"]["transactionAttachmentObject"][];
         };
-        errorResponseObject: {
-            /** @description overall error message */
-            message: string;
-            errors: ({
-                /** @description Human-readable error message */
-                errMsg: string;
-            } & {
+        insertTransactionObject: {
+            /**
+             * Format: date
+             * @description Date of transaction in ISO 8601 format
+             */
+            date: string;
+            /** @description Numeric value of amount without currency symbol. i.e. $4.25 should be denoted as 4.25. May be a string or a number in double format. Positive values indicate a debit transaction, negative values indicate a credit transaction. */
+            amount: number | string;
+            /** @description Three-letter lowercase currency code of the transaction in ISO 4217 format. Must match one of the [supported currencies](https://alpha.lunchmoney.dev/v2/currencies). If not set defaults to the user account's primary currency. */
+            currency?: components["schemas"]["currencyEnum"];
+            /** @description Name of payee for the transaction */
+            payee?: string;
+            /** @description Original payee name. If not provided, defaults to `payee` value. */
+            original_name?: string | null;
+            /**
+             * Format: int32
+             * @description The ID of the category associated with the transactions. If set, the category ID must exist for the user's account and it cannot be a category group.
+             */
+            category_id?: number | null;
+            /**
+             * @description Any transaction notes set by the user or by
+             *     a matched recurring item. This will match the value
+             *     displayed in notes field on the transactions page in the GUI.
+             */
+            notes?: string | null;
+            /**
+             * Format: int32
+             * @description The Unique identifier for the associated manually managed account. If set, this must match an existing manual account id associated with the user's account. If not set, and `plaid_account_id` is also not set, no account is associated with the transaction and it will appear as a "Cash Transaction" in the Lunch Money GUI. It is an error if this, and `plaid_account_id` is also set on the same transaction.
+             */
+            manual_account_id?: number | null;
+            /**
+             * Format: int32
+             * @description The Unique identifier for the associated plaid synced account. If set, this must match an existing plaid account id associated with the user's account. If not set, and `manual_account_id` is also not set, no account is associated with the transaction and it will appear as a "Cash Transaction" in the Lunch Money GUI. It is an error if this, and `manual_account_id` is also set on the same transaction. In addition the specified plaid account must have the "Allow Modifications To Transactions" property set (which is enabled by default), or the insert will fail.
+             */
+            plaid_account_id?: number | null;
+            /**
+             * Format: int32
+             * @description Unique identifier for associated recurring item. Recurring item must be associated with the same account.
+             */
+            recurring_id?: number | null;
+            /**
+             * @description If set must be either `reviewed` or `unreviewed`. If not set, defaults to `unreviewed`.
+             * @enum {string}
+             */
+            status?: "reviewed" | "unreviewed";
+            /** @description A list of IDs for the tags associated with this transaction. Each ID must match an existing tag associated with the user's account. If not set, no tags will be associated with the created transaction. */
+            tag_ids?: number[];
+            /** @description A user-defined external ID for the transaction. If set, and `manual_account_id` is set, the creation of the new transaction will fail if a transaction with this id already exists for the specified manual account. */
+            external_id?: string | null;
+            /** @description An optional JSON object that includes additional data related to this transaction. This must be a valid JSON object and, when stringified, must not exceed 4096 characters. This data may be available in the future for processing by rules. */
+            custom_metadata?: {
                 [key: string]: unknown;
-            })[];
+            } | null;
         };
-        /** @enum {string} */
-        accountTypeEnum: "cash" | "credit" | "cryptocurrency" | "employee compensation" | "investment" | "loan" | "other liability" | "other asset" | "real estate" | "vehicle";
-        /** @enum {string} */
-        currencyEnum: "aed" | "afn" | "all" | "amd" | "ang" | "aoa" | "ars" | "aud" | "awg" | "azn" | "bam" | "bbd" | "bdt" | "bgn" | "bhd" | "bif" | "bmd" | "bnd" | "bob" | "brl" | "bsd" | "btc" | "btn" | "bwp" | "byn" | "bzd" | "cad" | "cdf" | "chf" | "clp" | "cny" | "cop" | "crc" | "cuc" | "cup" | "cve" | "czk" | "djf" | "dkk" | "dop" | "dzd" | "egp" | "ern" | "etb" | "eur" | "fjd" | "fkp" | "gbp" | "gel" | "ggp" | "ghs" | "gip" | "gmd" | "gnf" | "gtq" | "gyd" | "hkd" | "hnl" | "hrk" | "htg" | "huf" | "idr" | "ils" | "imp" | "inr" | "iqd" | "irr" | "isk" | "jep" | "jmd" | "jod" | "jpy" | "kes" | "kgs" | "khr" | "kmf" | "kpw" | "krw" | "kwd" | "kyd" | "kzt" | "lak" | "lbp" | "lkr" | "lrd" | "lsl" | "ltl" | "lvl" | "lyd" | "mad" | "mdl" | "mga" | "mkd" | "mmk" | "mnt" | "mop" | "mro" | "mur" | "mvr" | "mwk" | "mxn" | "myr" | "mzn" | "nad" | "ngn" | "nio" | "nok" | "npr" | "nzd" | "omr" | "pab" | "pen" | "pgk" | "php" | "pkr" | "pln" | "pyg" | "qar" | "ron" | "rsd" | "rub" | "rwf" | "sar" | "sbd" | "scr" | "sdg" | "sek" | "sgd" | "shp" | "sll" | "sos" | "srd" | "std" | "svc" | "syp" | "szl" | "thb" | "tjs" | "tmt" | "tnd" | "top" | "try" | "ttd" | "twd" | "tzs" | "uah" | "ugx" | "usd" | "uyu" | "uzs" | "vef" | "vnd" | "vuv" | "wst" | "xaf" | "xcd" | "xof" | "xpf" | "yer" | "zar" | "zmw" | "zwl";
-        /** aligned summary response object */
-        alignedSummaryResponseObject: {
-            totals?: components["schemas"]["summaryTotalsObject"];
+        updateTransactionObject: {
             /**
-             * @description `true` if start_date and end_date are aligned with budget period setting
-             * @enum {boolean}
+             * Format: int64
+             * @description System defined unique identifier of this transaction. Ignored if set.
              */
-            aligned: true;
-            categories: components["schemas"]["alignedSummaryCategoryObject"][];
+            id?: number;
+            /**
+             * Format: date
+             * @description Date of transaction in ISO 8601 format
+             */
+            date?: string;
+            /** @description Numeric value of amount without currency symbol. i.e. $4.25 should be denoted as 4.25. May be a string or a number in double format. Positive values indicate a debit transaction, negative values indicate a credit transaction. <br> May not be updated on transactions that belong to a synced account with the "Allow Modifications to Transactions" property disabled. */
+            amount?: number | string;
+            /** @description Three-letter lowercase currency code of the transaction in ISO 4217 format.<br> May not be updated on transactions that belong to a synced account with the "Allow Modifications to Transactions" property disabled. */
+            currency?: components["schemas"]["currencyEnum"];
+            /**
+             * Format: int32
+             * @description The unique identifier of the associated recurring item that this transaction matches.
+             */
+            recurring_id?: number | null;
+            /** @description The new payee for the transaction. */
+            payee?: string;
+            /** @description Original payee name. Cannot be changed. Ignored if set. */
+            original_name?: string | null;
+            /**
+             * Format: int32
+             * @description Unique identifier of the category for this transaction. Set this to null to clear the transaction's category.
+             */
+            category_id?: number | null;
+            /** @description New notes for the transaction. Set this to an empty string to clear the existing notes. */
+            notes?: string | null;
+            /**
+             * Format: int32
+             * @description The unique identifier of the manual account associated with this transaction. Set this to null to disassociate the transaction with an account. If set `plaid_account_id` may not also be set to a non null value. Moving an existing transaction to to another account will not work if the transaction belongs to a synced account who's "Allow Modifications to Transactions" property is not set.
+             */
+            manual_account_id?: number | null;
+            /**
+             * Format: int32
+             * @description The unique identifier of the plaid account associated with this transaction. If set `manual_account_id` may not also be set to a non null value. Attempting to modify this on a transaction associated with a Plaid account will not work if the account's "Allow Modifications to Transactions" property is not set. Similarly, this cannot be set to an id associated with this type of locked Plaid account.
+             */
+            plaid_account_id?: number | null;
+            /** @description A list of tag_ids for the tags associated with this transaction. If set, this property will overwrite any existing tags. Use `additional_tag_ids` to add tags to the existing transaction's tags. Set this to an empty array to remove all tags from a transaction. If set `additional_tag_ids` may not be set. */
+            tag_ids?: number[];
+            /** @description A list of tag_ids for the tags associated with this transaction. If set, the tags listed in this property be added to any existing transaction tags. Use `tag_ids` to overwrite or clear transaction tags. If set `tag_ids` may not be set. */
+            additional_tag_ids?: number[];
+            /** @description A user-defined external ID for the transaction. The update will fail if the transaction does not also have a `manual_account_id` or if there is already an existing transaction with the same `manual_account_id`/`external_id` combination. */
+            external_id?: string | null;
+            /** @description User defined JSON data that can be set or cleared via the API. */
+            custom_metadata?: Record<string, never> | null;
+            /**
+             * @description Status of the transaction, may be one of:
+             *     - `reviewed`: User has reviewed the transaction, or it was automatically marked as reviewed due to reviewed recurring_item logic
+             *     - `unreviewed`: User has not reviewed the transaction and it does not match any reviewed recurring_items.
+             * @enum {string}
+             */
+            status?: "reviewed" | "unreviewed";
+            /**
+             * Format: double
+             * @description System defined amount of this transaction in the user's primary currency. Ignored if set. Use `amount` to update the amount in the transaction.
+             */
+            to_base?: number;
+            /** @description System defined flag set for pending transactions. Ignored if set. */
+            is_pending?: boolean;
+            /** @description System set metadata from a Plaid account sync. Ignored if set. */
+            plaid_metadata?: Record<string, never> | null;
+            /**
+             * Format: date-time
+             * @description System defined date and time of when the transaction was created. Ignored if set.
+             */
+            created_at?: string;
+            /**
+             * Format: date-time
+             * @description System defined date and time of when the transaction was last updated. Ignored if set.
+             */
+            updated_at?: string;
+            /** @description System defined boolean indicating if this transaction was split. To split or unsplit a transaction use the `/transactions/split` endpoint. Ignored if set. */
+            is_split_parent?: boolean;
+            /** @description An array of child transactions that exists when a transaction has been split or if the transaction is a group. Split */
+            children?: components["schemas"]["childTransactionObject"][];
+            /**
+             * Format: int64
+             * @description A transaction ID if this is a split transaction. Split transactions may not be modified this API. Use the `transactions/split` endpoint instead. Ignored if set.
+             */
+            split_parent_id?: number | null;
+            /** @description System defined boolean indicating if this transaction represents a group of transactions. Grouped transactions may not be modified with this API. Use the `transactions/group` endpoint instead. Ignored if set. */
+            is_group_parent?: boolean;
+            /**
+             * Format: int64
+             * @description A transaction group ID if this transaction is part of a group. Grouped transactions may not be modified with this API. Use the `transactions/group` endpoint instead. Ignored if set.
+             */
+            group_parent_id?: number | null;
+            /**
+             * @description System defined original source of the transaction. Ignored if set.
+             * @enum {string|null}
+             */
+            source?: "api" | "csv" | "manual" | "merge" | "plaid" | "recurring" | "rule" | "split" | "user" | null;
         };
-        /** non-aligned summary response object */
-        nonAlignedSummaryResponseObject: {
-            totals?: components["schemas"]["summaryTotalsObject"];
+        /** @description The object representing a split transaction */
+        splitTransactionObject: {
+            /** @description Individual amount of split. Currency will inherit from parent transaction. All amounts must sum up to parent transaction amount. */
+            amount: number | string;
+            /** @description The payee for the child transaction. Will inherit the original payee from the parent if not defined. */
+            payee?: string;
             /**
-             * @description `true` if start_date and end_date are aligned with budget period setting
-             * @enum {boolean}
+             * Format: date
+             * @description Must be in ISO 8601 format (YYYY-MM-DD). Will inherit from the parent if not defined.
              */
-            aligned: false;
-            categories: components["schemas"]["nonAlignedSummaryCategoryObject"][];
+            date?: string;
+            /**
+             * Format: int32
+             * @description Unique identifier for associated category_id. Category must already exist for the account. Will inherit category from the parent if not defined.
+             */
+            category_id?: number;
+            /** @description The IDs of any tags to apply to this split child transaction. Each ID must match an existing tag. */
+            tag_ids?: number[];
+            /** @description Will inherit notes from parent if not defined. */
+            notes?: string;
+        };
+        /** @description The object returned when a new transaction has an external_id that already exists */
+        skippedExistingExternalIdObject: {
+            /**
+             * @description The reason the transaction was skipped, may be one of:
+             *     - `duplicate_external_id`: The transaction has the same `manual_account_id` and `external_id` as an existing transaction
+             *     - `duplicate_payee_amount_date`: The `skip_duplicates` request body property was set to `true` and the transaction has the same `amount`, `payee`, and `date` as an existing transaction associated with the same account.
+             * @enum {string}
+             */
+            reason?: "duplicate_external_id" | "duplicate_payee_amount_date";
+            /**
+             * Format: int64
+             * @description The  of the transaction in the request body's transactions array that was skipped.
+             */
+            request_transactions_index?: number;
+            /**
+             * Format: int64
+             * @description The id of the existing transactions that the requested transaction duplicates.
+             */
+            existing_transaction_id?: number;
+            /** @description The requested transaction that was skipped. */
+            request_transaction?: components["schemas"]["insertTransactionObject"];
+        };
+        /** @description The object returned from a successful POST /transactions request */
+        insertTransactionsResponseObject: {
+            /** @description An array of the inserted transactions. */
+            transactions: components["schemas"]["transactionObject"][];
+            /** @description An array of the requested transactions that were duplicates of existing transactions and were not inserted. */
+            skipped_duplicates: components["schemas"]["skippedExistingExternalIdObject"][];
+        };
+        /** transaction attachment object */
+        transactionAttachmentObject: {
+            /**
+             * Format: int32
+             * @description The unique identifier of the attachment
+             */
+            id?: number;
+            /**
+             * Format: int64
+             * @description The id of the user who uploaded the attachment
+             */
+            uploaded_by?: number;
+            /** @description The name of the file */
+            name?: string;
+            /** @description The MIME type of the file */
+            type?: string;
+            /** @description The size of the file in kilobytes */
+            size?: number;
+            /** @description Optional notes about the attachment */
+            notes?: string | null;
+            /**
+             * Format: date-time
+             * @description The date and time when the attachment was created in ISO 8601 format
+             */
+            created_at?: string;
+        };
+        /**
+         * budget object
+         * @description A budget object represents a budgeted amount for a specific category and budget period. Each budget entry is tied to a specific time period defined by its `start_date`. The budget object includes information about the budget amount, currency, period settings, and how future periods will be automatically calculated.
+         */
+        budgetObject: {
+            /**
+             * Format: int64
+             * @description System created unique identifier for the budget entry.
+             */
+            id: number;
+            /**
+             * Format: int32
+             * @description The ID of the category this budget applies to.
+             */
+            category_id: number;
+            /**
+             * Format: double
+             * @description The budgeted amount for this period.
+             */
+            amount: number;
+            /** @description The currency of the budgeted amount in ISO 4217 format. */
+            currency: components["schemas"]["currencyEnum"];
+            /**
+             * Format: date
+             * @description The start date of the budget period in ISO 8601 format (YYYY-MM-DD). This represents the beginning of the period for which this budget applies.
+             */
+            start_date: string;
+            /**
+             * Format: date
+             * @description The calculated start date of the next budget period based on the category's period settings (granularity, quantity, and anchor_date). This is useful for determining when the next budget period begins.
+             */
+            readonly next_start_date: string;
+            /** @description Optional notes associated with this budget period. */
+            notes?: string | null;
+            /**
+             * @description The budget preset type that determines how future periods will be automatically calculated. `nothing` means no automatic calculation (budgets must be set manually for each period). `fixed` uses a fixed amount for all future periods. `spend` uses the previous period's spending amount. `budget` uses the previous period's budgeted amount.
+             * @enum {string}
+             */
+            readonly auto_budget_type: "nothing" | "fixed" | "spend" | "budget";
+            /**
+             * Format: double
+             * @description If `auto_budget_type` is `fixed`, this is the fixed amount that will be used for future periods.
+             */
+            readonly auto_budget_amount?: number | null;
+            /** @description If `auto_budget_type` is `fixed`, this is the currency of the fixed amount. */
+            readonly auto_budget_currency?: components["schemas"]["currencyEnum"] | null;
+            /**
+             * @description The rollover setting for this category. `same category` means unspent funds roll over to the next period for this category. `available funds` means unspent funds are added to the available funds pool. `null` means rollover is disabled.
+             * @enum {string|null}
+             */
+            readonly rollover_option?: "same category" | "available funds" | null;
+            /**
+             * @description The granularity of the budget period (e.g., monthly, weekly, twice a month). This is determined by the category's custom budget settings or the account's default budget period settings.
+             * @enum {string}
+             */
+            readonly granularity: "month" | "week" | "twice a month";
+            /**
+             * Format: int32
+             * @description The quantity of granularity units that make up each budget period. For example, if granularity is `week` and quantity is `2`, each budget period is 2 weeks.
+             */
+            readonly quantity: number;
+            /** @description Whether the category is a category group. Category groups can have their own budgets that apply to all subcategories, or subcategories can have individual budgets. */
+            readonly is_group: boolean;
+            /**
+             * Format: int32
+             * @description If this budget is for a subcategory, this is the ID of the parent category group. `null` if this is not a subcategory.
+             */
+            readonly group_id?: number | null;
+            /**
+             * Format: date-time
+             * @description The date and time when this budget entry was created (in ISO 8601 extended format).
+             */
+            created_at: string;
+            /**
+             * Format: date-time
+             * @description The date and time when this budget entry was last updated (in ISO 8601 extended format).
+             */
+            updated_at: string;
+        };
+        upsertBudgetRequestObject: {
+            /**
+             * Format: date
+             * @description Start date of the budget period in ISO 8601 date format (YYYY-MM-DD). Must be a valid budget period start for the account.
+             */
+            start_date: string;
+            /**
+             * Format: int32
+             * @description Category ID for the budget
+             */
+            category_id: number;
+            /** @description Budget amount. May be a string or a number in double format. */
+            amount: number | string;
+            /** @description Three-letter currency code. If omitted, the primary currency for the user's account is used. */
+            currency?: components["schemas"]["currencyEnum"];
+            /** @description Optional notes for the budget period */
+            notes?: string | null;
+        };
+        budgetUpsertResponseObject: {
+            /**
+             * Format: int32
+             * @description Category ID
+             */
+            category_id?: number;
+            /**
+             * Format: date
+             * @description Start date of the budget period
+             */
+            start_date?: string;
+            /** @description Budget amount in the stored currency (string for consistency with other amount fields in the API) */
+            amount?: string;
+            /** @description Currency code for the budget */
+            currency?: string;
+            /**
+             * Format: float
+             * @description Amount converted to the user's primary currency
+             */
+            to_base?: number;
+            /** @description Notes for the budget period */
+            notes?: string | null;
+        };
+        /** @description Budget period and display settings */
+        budgetSettingsResponseObject: {
+            /**
+             * @description Budget period granularity
+             * @enum {string}
+             */
+            budget_period_granularity: "day" | "week" | "month" | "year" | "twice a month";
+            /**
+             * Format: double
+             * @description The number of `granularity` units that make up a single budgeting period.
+             */
+            budget_period_quantity: number;
+            /**
+             * Format: date
+             * @description The date from which the budgeting period is calculated. All future (and past) periods are derived by applying `quantity` × `granularity` forward and backward from this date.
+             */
+            budget_period_anchor_date: string;
+            /**
+             * @description The display preference for hiding categories in budget view that have no activity and no budgeted value
+             * @default false
+             */
+            budget_hide_no_activity: boolean;
+            /**
+             * @description The display preference for using the last day of the month as the period end for monthly periods
+             * @default false
+             */
+            budget_use_last_day_of_month: boolean;
+            /**
+             * @description Determines which income value is used as the base when calculating available funds for a budgeting period
+             * @enum {string}
+             */
+            budget_income_option: "max" | "budgeted" | "activity";
+            /**
+             * @description Determines whether the remaining unallocated funds (“Left to Budget”) at the end of a budgeting period are carried forward to the next period
+             * @default false
+             */
+            budget_rollover_left_to_budget: boolean;
+        };
+        /**
+         * summary object
+         * @description Budget summary for the requested range
+         */
+        summaryResponseObject: {
+            /** @description `true` if start_date and end_date are aligned with the user's budget period setting; `false` otherwise.<p> When the response is not aligned, category `totals` will not include values for the `budgeted` and `available` properties, so aligned responses are usually preferred.<p> If unsure how to set an aligned date range, set a range of at least one month and set the  `include_occurrences` parameter to `true`.  Then examine the objects in the `occurrences` array for the first category to find  start and end dates that will produce aligned responses.  Setting `include_past_budget_dates` to `true` will add the three budget periods prior to the range in the `occurrences` array. */
+            aligned: boolean;
+            categories: components["schemas"]["summaryCategoryObject"][];
+            totals?: components["schemas"]["summaryTotalsObject"];
+            rollover_pool?: components["schemas"]["summaryRolloverPoolObject"];
         };
         /** @description Total inflow and outflow for the given date range.  This object is returned when the query parameter `include_totals` is set to `true`. */
         summaryTotalsObject: {
@@ -1704,6 +1903,8 @@ interface components {
             recurring_activity?: number;
             /** @description Total amount, in the user's default currency, of expected recurring activity that has not yet occurred */
             recurring_remaining?: number;
+            /** @description Total amount, in the user's default currency, of expected recurring activity for the given date range */
+            recurring_expected?: number;
             /** @description Total amount, in the user's default currency, of non recurring activity coming from un-categorized transactions */
             uncategorized?: number;
             /** @description Number of un-categorized transactions for the given date range */
@@ -1711,62 +1912,48 @@ interface components {
             /** @description Total amount, in the user's default currency, of recurring activity coming from un-categorized transactions. */
             uncategorized_recurring?: number;
         };
-        /** @description List of each category's budget configuration and activity for the given date range. */
-        alignedSummaryCategoryObject: {
+        /** @description List of each category's budget configuration and activity for the date range. */
+        summaryCategoryObject: {
             /** @description ID of the category associated with the totals. */
             category_id: number;
-            totals: components["schemas"]["alignedCategoryTotalsObject"];
+            totals: components["schemas"]["summaryCategoryTotalsObject"];
+            /** @description A list of objects describing the budget activity for each period within the range. This property is only present when `include_occurrences` is true.<p> For aligned ranges, there is one occurrence for each budget period in the range; for non-aligned, only periods fully contained in the range are included.<p> If `include_past_budget_dates` is also `true`, the three budget periods prior to the range are also included. */
             occurrences?: components["schemas"]["summaryCategoryOccurrenceObject"][];
             rollover_pool?: components["schemas"]["summaryRolloverPoolObject"];
-        };
-        /** @description List of each category's budget configuration and activity for the given date range.<br> Does not include occurrences since the start_date and end_date are not aligned with budget period setting. */
-        nonAlignedSummaryCategoryObject: {
-            /** @description ID of the category associated with the totals. */
-            category_id: number;
-            totals: components["schemas"]["nonAlignedCategoryTotalsObject"];
         };
         /** @description The date and adjusted balance of the rollover pool at the time of the adjustment. */
         summaryRolloverPoolAdjustmentObject: {
             /** @description true if this rollover pool adjustment is for a budget period that falls within the given date range. */
             in_range: boolean;
-            /** Format: date */
+            /**
+             * Format: date
+             * @description Date the adjustment was made.
+             */
             date: string;
-            /** @description Amount of the rollover pool at the time of the adjustment. */
+            /** @description Amount of the rollover pool, in the budgets currency, at the time of the adjustment. */
             amount: string;
             /** @description Currency of the rollover pool at the time of the adjustment. */
             currency: components["schemas"]["currencyEnum"];
-            /** @description Amount of the rollover pool converted to the user's default currency. */
+            /** @description Amount of the rollover pool, in the user's default currency, at the time of the adjustment. */
             to_base: number;
         };
         /** @description Total activity for the given category within the given date range which is aligned with budget period setting. */
-        alignedCategoryTotalsObject: {
+        summaryCategoryTotalsObject: {
             /** @description Total non recurring activity, in the user's default currency, for the category within the given date range.<br> The total activity for the category is the sum of this and the recurring_activity. */
             other_activity: number;
             /** @description Total recurring activity, in the user's default currency, for the category within the given date range.<br> The total activity for the category is the sum of this and the other_activity. */
             recurring_activity: number;
-            /** @description Total budgeted amount, in the user's default currency, for the category within the given date range or null if the category is not budgeted. */
-            budgeted: number | null;
-            /** @description Total amount of funds available, in the user's default currency, for the category within the given date range. */
-            available: number | null;
+            /** @description Total budgeted amount, in the user's default currency, for the category within the given date range or null if the category is not budgeted. This property will not be present in a non-aligned response. */
+            budgeted?: number | null;
+            /** @description Total amount of funds available, in the user's default currency, for the category within the given date range. This property will not be present in a non-aligned response. */
+            available?: number | null;
             /** @description Total expected recurring activity, in the user's default currency, that has not yet occurred for the category within the given date range. */
             recurring_remaining: number;
             /** @description Total expected recurring activity for the category within the given date range. */
             recurring_expected: number;
         };
-        /** @description Total activity for the given category within the given date range which is not aligned with budget period setting. */
-        nonAlignedCategoryTotalsObject: {
-            /** @description Total non recurring activity, in the user's default currency, for the category within the given date range.<br> The total activity for the category is the sum of this and the recurring_activity. */
-            other_activity: number;
-            /** @description Total recurring activity, in the user's default currency, for the category within the given date range.<br> The total activity for the category is the sum of this and the other_activity. */
-            recurring_activity: number;
-            /** @description Total expected recurring activity, in the user's default currency, that has not yet occurred for the category within the given date range. */
-            recurring_remaining: number;
-            /** @description Total expected recurring activity for the category within the given date range. */
-            recurring_expected: number;
-        };
-        /** @description Per period budget activity for the each budget period within the given date range.<br> This is only returned if the query parameter `include_occurrences` is set to `true`. */
         summaryCategoryOccurrenceObject: {
-            /** @description true if this occurrence is within the given date range */
+            /** @description `true` if this occurrence is within the given date range, `false` if it was included because the `include_past_budget_periods` parameter was set to `true`. */
             in_range: boolean;
             /**
              * Format: date
@@ -1778,17 +1965,17 @@ interface components {
              * @description The end date of the budget period
              */
             end_date: string;
-            /** @description Total non recurring activity, in the user's default currency, for the category within the given date range. The total activity for the category is the sum of this and the recurring_activity */
+            /** @description Total non recurring activity, in the user's default currency, for the budget period. The total activity for this category in the period is the sum of this and the recurring_activity. */
             other_activity: number;
-            /** @description Total recurring activity, in the user's default currency, for the category within the given date range. The total activity for the category is the sum of this and the other_activity. */
+            /** @description Total recurring activity, in the user's default currency, for the budget period. The total activity for this category in the budget period is the sum of this and the other_activity. */
             recurring_activity: number;
-            /** @description Total budgeted amount, in the user's default currency, for the category within the given date range, or null if the category is not budgeted. */
+            /** @description Total budgeted amount, in the user's primary currency, for the period, or `null` if no budget was set. */
             budgeted: number | null;
-            /** @description Total budgeted amount in the budgeted currency for the category within the given date or null if the category is not budgeted */
+            /** @description Total budgeted amount, in the budgeted currency, for the category within the period, or `null` if no budget was set. */
             budgeted_amount: string | null;
             /** @description Currency of the budgeted amount */
             budgeted_currency: components["schemas"]["currencyEnum"] | null;
-            /** @description Any notes added in the Web UI for the budget period. */
+            /** @description Any notes set for the budget period. */
             notes: string | null;
         };
         /** @description A single transaction associated with a recurring item. I don't think we will expose this in the summary since it's gettable by querying the recurring_id */
@@ -1808,6 +1995,53 @@ interface components {
             /** @description List of previous adjustments to the rollover pool */
             all_adjustments: components["schemas"]["summaryRolloverPoolAdjustmentObject"][];
         };
+        /**
+         * error response object
+         * @description The object returned will any 4XX error response. Each response is guaranteed to have a `message` and at least one `error` object.
+         */
+        errorResponseObject: {
+            /** @description High level error type, for example 'Not Found' or 'Request Validation Failure' */
+            message: string;
+            /** @description An list of objects that describe the errors encountered while processing the request.<br> If multiple errors were encountered, the list will contain multiple objects.<br> Each `error` object is guaranteed to have an `errMsg`, but it may also contain other error specific properties. */
+            errors: ({
+                /** @description A message to help the developer determine the problem with the request. */
+                errMsg: string;
+            } & {
+                [key: string]: unknown;
+            })[];
+        };
+        /** @description Returned when the requested start_date is not a valid budget period start for the account. */
+        budgetInvalidPeriodErrorObject: {
+            /** @description Overall error message (e.g. Invalid Request) */
+            message: string;
+            /**
+             * Format: date
+             * @description The start_date value that was rejected
+             */
+            requested_start_date: string;
+            /**
+             * Format: date
+             * @description The previous valid budget period start date before the requested date
+             */
+            previous_valid_start_date?: string | null;
+            /**
+             * Format: date
+             * @description The next valid budget period start date after the requested date
+             */
+            next_valid_start_date?: string | null;
+            /** @description Human-readable error message */
+            errMsg: string;
+        };
+        /**
+         * manual account type enum
+         * @enum {string}
+         */
+        accountTypeEnum: "cash" | "credit" | "cryptocurrency" | "employee compensation" | "investment" | "loan" | "other liability" | "other asset" | "real estate" | "vehicle";
+        /**
+         * currency enum
+         * @enum {string}
+         */
+        currencyEnum: "aed" | "afn" | "all" | "amd" | "ang" | "aoa" | "ars" | "aud" | "awg" | "azn" | "bam" | "bbd" | "bdt" | "bgn" | "bhd" | "bif" | "bmd" | "bnd" | "bob" | "brl" | "bsd" | "btc" | "btn" | "bwp" | "byn" | "bzd" | "cad" | "cdf" | "chf" | "clp" | "cny" | "cop" | "crc" | "cuc" | "cup" | "cve" | "czk" | "djf" | "dkk" | "dop" | "dzd" | "egp" | "ern" | "etb" | "eur" | "fjd" | "fkp" | "gbp" | "gel" | "ggp" | "ghs" | "gip" | "gmd" | "gnf" | "gtq" | "gyd" | "hkd" | "hnl" | "hrk" | "htg" | "huf" | "idr" | "ils" | "imp" | "inr" | "iqd" | "irr" | "isk" | "jep" | "jmd" | "jod" | "jpy" | "kes" | "kgs" | "khr" | "kmf" | "kpw" | "krw" | "kwd" | "kyd" | "kzt" | "lak" | "lbp" | "lkr" | "lrd" | "lsl" | "ltl" | "lvl" | "lyd" | "mad" | "mdl" | "mga" | "mkd" | "mmk" | "mnt" | "mop" | "mro" | "mur" | "mvr" | "mwk" | "mxn" | "myr" | "mzn" | "nad" | "ngn" | "nio" | "nok" | "npr" | "nzd" | "omr" | "pab" | "pen" | "pgk" | "php" | "pkr" | "pln" | "pyg" | "qar" | "ron" | "rsd" | "rub" | "rwf" | "sar" | "sbd" | "scr" | "sdg" | "sek" | "sgd" | "shp" | "sll" | "sos" | "srd" | "std" | "svc" | "syp" | "szl" | "thb" | "tjs" | "tmt" | "tnd" | "top" | "try" | "ttd" | "twd" | "tzs" | "uah" | "ugx" | "usd" | "uyu" | "uzs" | "vef" | "vnd" | "vuv" | "wst" | "xaf" | "xcd" | "xof" | "xpf" | "yer" | "zar" | "zmw" | "zwl";
     };
     responses: {
         /** @description Unauthorized. This error occurs when an invalid API token is passed to the request. */
@@ -1848,7 +2082,7 @@ interface components {
                 "application/json": components["schemas"]["errorResponseObject"];
             };
         };
-        /** @description Internal Server Error. Contact support */
+        /** @description Internal Server Error. Contact support. */
         serverError: {
             headers: {
                 [name: string]: unknown;
@@ -1883,7 +2117,7 @@ interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The User Object associated with the authorized token */
+            /** @description The User Object associated with the authorized token. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1911,11 +2145,11 @@ interface operations {
     getBudgetSummary: {
         parameters: {
             query: {
-                /** @description Start of date range in ISO 8601 date format (YYYY-MM-DD) */
+                /** @description Start of date range in ISO 8601 date format (YYYY-MM-DD). */
                 start_date: string;
                 /** @description End of date range in ISO 8601 date format (YYYY-MM-DD). */
                 end_date: string;
-                /** @description Enable to include categories that have the 'Exclude from Budgets' flag set in the returned `categories` array */
+                /** @description Enable to include categories that have the 'Exclude from Budgets' flag set in the returned `categories` array. */
                 include_exclude_from_budgets?: boolean;
                 /** @description Enable to include an `occurrences` array for each category in an aligned response. Each array will include an object for each budget period that falls within the specified date range which includes details on the activity for the budget period. */
                 include_occurrences?: boolean;
@@ -1932,13 +2166,13 @@ interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Budget summary for the requested range */
+            /** @description Summary of the user's budget for the specified date range. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["alignedSummaryResponseObject"] | components["schemas"]["nonAlignedSummaryResponseObject"];
+                    "application/json": components["schemas"]["summaryResponseObject"];
                 };
             };
             401: components["responses"]["unauthorizedToken"];
@@ -2062,7 +2296,7 @@ interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Category Object with the requested category or category group */
+            /** @description Category Object with the requested category or category group. */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -2691,7 +2925,7 @@ interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Plaid Account Object with the requested account */
+            /** @description Plaid Account Object with the requested account. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2777,7 +3011,7 @@ interface operations {
     triggerPlaidAccountFetch: {
         parameters: {
             query?: {
-                /** @description Denotes the beginning of the time period to fetch transactions for If omitted, the most recent transactions will be returned. <br> Required if end_date exists. <br> */
+                /** @description Denotes the beginning of the time period to fetch transactions for. If omitted, the most recent transactions will be returned. <br> Required if end_date exists. <br> */
                 start_date?: string;
                 /** @description Denotes the end of the time period you'd like to get transactions for. Required if start_date exists. */
                 end_date?: string;
@@ -2833,7 +3067,7 @@ interface operations {
     getAllTransactions: {
         parameters: {
             query?: {
-                /** @description Denotes the beginning of the time period to fetch transactions for If omitted, the most recent transactions will be returned. See `limit`. Required if end_date exists. <br> */
+                /** @description Denotes the beginning of the time period to fetch transactions for. If omitted, the most recent transactions will be returned. See `limit`. Required if end_date exists. <br> */
                 start_date?: string;
                 /** @description Denotes the end of the time period you'd like to get transactions for. Required if start_date exists. */
                 end_date?: string;
@@ -4021,7 +4255,7 @@ interface operations {
             query?: {
                 /** @description Denotes the beginning of the range used to populate the `matching` object in the recurring items. If omitted, the current month will be used as the range.<br> Required if end_date exists. */
                 start_date?: string;
-                /** @description Denotes the end of the the range used to populate the `matching` object in the recurring items. Required if start_date exists. */
+                /** @description Denotes the end of the range used to populate the `matching` object in the recurring items. Required if start_date exists. */
                 end_date?: string;
                 include_suggested?: boolean;
             };
@@ -4188,7 +4422,7 @@ interface operations {
             query?: {
                 /** @description Denotes the beginning of the range used to populate the `matching` object in the recurring items. If omitted, the current month will be used as the range.<br> Required if end_date exists. */
                 start_date?: string;
-                /** @description Denotes the end of the the range used to populate the `matching` object in the recurring items. Required if start_date exists. */
+                /** @description Denotes the end of the range used to populate the `matching` object in the recurring items. Required if start_date exists. */
                 end_date?: string;
             };
             header?: never;
@@ -4303,6 +4537,119 @@ interface operations {
             500: components["responses"]["serverError"];
         };
     };
+    getBudgetSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Budget settings for the account */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["budgetSettingsResponseObject"];
+                };
+            };
+            401: components["responses"]["unauthorizedToken"];
+            429: components["responses"]["rateLimited"];
+            500: components["responses"]["serverError"];
+        };
+    };
+    upsertBudget: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                /**
+                 * @example {
+                 *       "start_date": "2025-01-01",
+                 *       "category_id": 315177,
+                 *       "amount": 500,
+                 *       "currency": "usd",
+                 *       "notes": "Monthly groceries"
+                 *     }
+                 */
+                "application/json": components["schemas"]["upsertBudgetRequestObject"];
+            };
+        };
+        responses: {
+            /** @description Budget upserted successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "category_id": 315177,
+                     *       "start_date": "2025-01-01",
+                     *       "amount": 500,
+                     *       "currency": "usd",
+                     *       "to_base": 500,
+                     *       "notes": "Monthly groceries"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["budgetUpsertResponseObject"];
+                };
+            };
+            /** @description Bad Request (invalid period start, invalid category, or validation failure) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["budgetInvalidPeriodErrorObject"] | components["schemas"]["errorResponseObject"];
+                };
+            };
+            401: components["responses"]["unauthorizedToken"];
+            429: components["responses"]["rateLimited"];
+            500: components["responses"]["serverError"];
+        };
+    };
+    deleteBudget: {
+        parameters: {
+            query: {
+                /** @description Category ID of the budget to delete */
+                category_id: number;
+                /** @description Start date of the budget period in ISO 8601 date format (YYYY-MM-DD) */
+                start_date: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Budget deleted (or no budget existed for the given category and period) */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request (invalid period start, invalid category, or validation failure) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["budgetInvalidPeriodErrorObject"] | components["schemas"]["errorResponseObject"];
+                };
+            };
+            401: components["responses"]["unauthorizedToken"];
+            429: components["responses"]["rateLimited"];
+            500: components["responses"]["serverError"];
+        };
+    };
 }
 
 type User = components["schemas"]["userObject"];
@@ -4327,17 +4674,20 @@ type GetAllTransactionsResponse = {
 type UpdateTransactionsResponse = {
     transactions: Transaction[];
 };
-type AlignedSummaryResponse = components["schemas"]["alignedSummaryResponseObject"];
-type NonAlignedSummaryResponse = components["schemas"]["nonAlignedSummaryResponseObject"];
+type AlignedSummaryResponse = components["schemas"]["summaryResponseObject"];
+type NonAlignedSummaryResponse = components["schemas"]["summaryResponseObject"];
 type DeleteCategoryResponse = components["schemas"]["deleteCategoryResponseWithDependencies"];
 type DeleteTagResponse = components["schemas"]["deleteTagResponseWithDependencies"];
+type BudgetSettingsResponse = components["schemas"]["budgetSettingsResponseObject"];
+type BudgetUpsertResponse = components["schemas"]["budgetUpsertResponseObject"];
+type BudgetInvalidPeriodError = components["schemas"]["budgetInvalidPeriodErrorObject"];
 type SummaryTotals = components["schemas"]["summaryTotalsObject"];
 type SummaryTotalsBreakdown = components["schemas"]["summaryTotalsBreakdownObject"];
-type AlignedSummaryCategory = components["schemas"]["alignedSummaryCategoryObject"];
-type NonAlignedSummaryCategory = components["schemas"]["nonAlignedSummaryCategoryObject"];
+type AlignedSummaryCategory = components["schemas"]["summaryCategoryObject"];
+type NonAlignedSummaryCategory = components["schemas"]["summaryCategoryObject"];
 type SummaryRolloverPoolAdjustment = components["schemas"]["summaryRolloverPoolAdjustmentObject"];
-type AlignedCategoryTotals = components["schemas"]["alignedCategoryTotalsObject"];
-type NonAlignedCategoryTotals = components["schemas"]["nonAlignedCategoryTotalsObject"];
+type AlignedCategoryTotals = components["schemas"]["summaryCategoryTotalsObject"];
+type NonAlignedCategoryTotals = components["schemas"]["summaryCategoryTotalsObject"];
 type SummaryCategoryOccurrence = components["schemas"]["summaryCategoryOccurrenceObject"];
 type SummaryRecurringTransaction = components["schemas"]["summaryRecurringTransactionObject"];
 type SummaryRolloverPool = components["schemas"]["summaryRolloverPoolObject"];
@@ -4355,6 +4705,8 @@ type GroupTransactionsBody = operations["groupTransactions"]["requestBody"]["con
 type CreateTagBody = operations["createTag"]["requestBody"]["content"]["application/json"];
 type UpdateTagBody = operations["updateTag"]["requestBody"]["content"]["application/json"];
 type GetBudgetSummaryParams = operations["getBudgetSummary"]["parameters"]["query"];
+type UpsertBudgetBody = operations["upsertBudget"]["requestBody"]["content"]["application/json"];
+type DeleteBudgetParams = operations["deleteBudget"]["parameters"]["query"];
 type GetAllRecurringItemsParams = operations["getAllRecurring"]["parameters"]["query"];
 type DeleteCategoryParams = operations["deleteCategory"]["parameters"]["query"];
 type DeleteTagParams = operations["deleteTag"]["parameters"]["query"];
@@ -4385,6 +4737,9 @@ declare class LunchMoneyClient {
     private client;
     constructor(options: LunchMoneyClientOptions);
     private handleError;
+    private isRecord;
+    private isErrorDetailArray;
+    private normalizeErrorPayload;
     private handleDataResponse;
     private handleVoidResponse;
     get user(): {
@@ -4451,6 +4806,11 @@ declare class LunchMoneyClient {
     get summary(): {
         get: (params: GetBudgetSummaryParams) => Promise<AlignedSummaryResponse | NonAlignedSummaryResponse>;
     };
+    get budgets(): {
+        getSettings: () => Promise<BudgetSettingsResponse>;
+        upsert: (data: UpsertBudgetBody) => Promise<BudgetUpsertResponse>;
+        delete: (params: DeleteBudgetParams) => Promise<void>;
+    };
     /**
      * Access to the raw openapi-fetch client for advanced usage
      */
@@ -4458,4 +4818,4 @@ declare class LunchMoneyClient {
 }
 
 export { LunchMoneyClient, LunchMoneyError, LunchMoneyClient as default };
-export type { AccountType, AlignedCategoryTotals, AlignedSummaryCategory, AlignedSummaryResponse, AttachFileToTransactionBody, Category, ChildCategory, ChildTransaction, CreateCategoryBody, CreateManualAccountBody, CreateTagBody, CreateTransactionsBody, Currency, DeleteCategoryParams, DeleteCategoryResponse, DeleteTagParams, DeleteTagResponse, DeleteTransactionsBody, ErrorDetail, ErrorResponse, GetAllCategoriesParams, GetAllRecurringItemsParams, GetAllTransactionsParams, GetAllTransactionsResponse, GetBudgetSummaryParams, GroupTransactionsBody, InsertTransaction, InsertTransactionsResponse, LunchMoneyClientOptions, ManualAccount, NonAlignedCategoryTotals, NonAlignedSummaryCategory, NonAlignedSummaryResponse, PlaidAccount, RecurringItem, SkippedExistingExternalId, SplitTransaction, SplitTransactionBody, SummaryCategoryOccurrence, SummaryRecurringTransaction, SummaryRolloverPool, SummaryRolloverPoolAdjustment, SummaryTotals, SummaryTotalsBreakdown, Tag, Transaction, TransactionAttachment, TransactionAttachmentUrlResponse, TriggerPlaidAccountFetchParams, UpdateCategoryBody, UpdateManualAccountBody, UpdateTagBody, UpdateTransaction, UpdateTransactionBody, UpdateTransactionsBody, UpdateTransactionsResponse, User, components, operations, paths };
+export type { AccountType, AlignedCategoryTotals, AlignedSummaryCategory, AlignedSummaryResponse, AttachFileToTransactionBody, BudgetInvalidPeriodError, BudgetSettingsResponse, BudgetUpsertResponse, Category, ChildCategory, ChildTransaction, CreateCategoryBody, CreateManualAccountBody, CreateTagBody, CreateTransactionsBody, Currency, DeleteBudgetParams, DeleteCategoryParams, DeleteCategoryResponse, DeleteTagParams, DeleteTagResponse, DeleteTransactionsBody, ErrorDetail, ErrorResponse, GetAllCategoriesParams, GetAllRecurringItemsParams, GetAllTransactionsParams, GetAllTransactionsResponse, GetBudgetSummaryParams, GroupTransactionsBody, InsertTransaction, InsertTransactionsResponse, LunchMoneyClientOptions, ManualAccount, NonAlignedCategoryTotals, NonAlignedSummaryCategory, NonAlignedSummaryResponse, PlaidAccount, RecurringItem, SkippedExistingExternalId, SplitTransaction, SplitTransactionBody, SummaryCategoryOccurrence, SummaryRecurringTransaction, SummaryRolloverPool, SummaryRolloverPoolAdjustment, SummaryTotals, SummaryTotalsBreakdown, Tag, Transaction, TransactionAttachment, TransactionAttachmentUrlResponse, TriggerPlaidAccountFetchParams, UpdateCategoryBody, UpdateManualAccountBody, UpdateTagBody, UpdateTransaction, UpdateTransactionBody, UpdateTransactionsBody, UpdateTransactionsResponse, UpsertBudgetBody, User, components, operations, paths };
