@@ -31,7 +31,10 @@
 		"format": "prettier --write src/**/*.ts",
 		"format:check": "prettier --check src/**/*.ts",
 		"generate-types": "openapi-typescript node_modules/@lunch-money/v2-api-spec/lunch-money-api-v2.yaml -o src/types.generated.ts --default-non-nullable false",
-		"prepare": "npm run generate-types && npm run build"
+		"prepare": "npm run generate-types && npm run build",
+		"release:verify": "npm run lint && npm run typecheck && npm run build",
+		"release:dry-run": "npm run release:verify && npm publish --dry-run --access public",
+		"release:publish": "npm run release:verify && npm publish --access public"
 	},
 	"keywords": [
 		"lunch-money",
