@@ -61,7 +61,7 @@ interface paths {
         put?: never;
         /**
          * Create a new category or category group
-         * @description Creates a new category with the given name.<br> If the `is_group` attribute is set to true, a category group is created. In this case, the `children` attribute may be set to an array of existing category IDs to add to the newly-created category group.
+         * @description Creates a new category with the given name.<br> If the `is_group` attribute is set to true, a category group is created. In this case, the `children` attribute may be set to an array of category IDs to add to the newly created category group.
          */
         post: operations["createCategory"];
         delete?: never;
@@ -85,18 +85,178 @@ interface paths {
         /**
          * Update an existing category or category group
          * @description Modifies the properties of an existing category or category group.<br><br>
-         *     You may submit the response from a `GET /categories/{id}` as the request body; however, only certain properties can be updated using this API. The following properties are accepted in the request body but their values will be ignored: `id`, `is_group`,`archived_at`, `updated_at`, `created_at`, and `order`.<br><br>
+         *     You may submit the response from a `GET /categories/{id}` as the request body; however, only certain properties can be updated using this API. The following properties are accepted in the request body but their values will be ignored: `id`, `is_group`, `updated_at`, `created_at`, and `order`.<br><br>
          *     It is also possible to provide only the properties to be updated in the request body, as long as the request includes at least one of the properties that is not listed above. For example, a request body that contains only a `name` property is valid.<br><br>
-         *     It is not possible to use this API to convert a category to a category group, or a vice versa, so while submitting a request body with the `is_group` property is tolerated, it will result in an error response if the value is changed.<br><br>
-         *     It is possible to modify the children of an existing category group with this API by setting the `children` attribute. If this is set, it will replace the existing children with the newly specified children. If the intention is to add or remove a single category, it is more straightforward to update the child category by specifying the new `group_id` attribute. If the goal is to add multiple new children or remove multiple existing children, it is recommended to first call the `GET /categories/:id` endpoint to get the existing children and then modify the list as desired.<br><br>
+         *     It is not possible to use this API to convert a category to a category group, or vice versa, so while submitting a request body with the `is_group` property is tolerated, it will result in an error response if the value is changed.<br><br>
+         *     It is possible to modify the children of an existing category group with this API by setting the `children` attribute. If this is set, it will replace the existing children with the newly specified children. If the intention is to add or remove a single category, it is more straightforward to update the child category by specifying the new `group_id` attribute. If the goal is to add multiple new children or remove multiple existing children, it is recommended to first call the `GET /categories/{id}` endpoint to get the existing children and then modify the list as desired.<br><br>
          */
         put: operations["updateCategory"];
         post?: never;
         /**
          * Delete a category or category group
-         * @description Attempts to delete the single category or category group specified on the path. By default, this will only work if there are no dependencies, such as existing budgets for the category, categorized transactions, children categories for a category group, categorized recurring items, etc. If there are dependents, this endpoint will return an object that describes the amount and type of existing dependencies.
+         * @description Attempts to delete the single category or category group specified on the path. By default, this will only work if there are no dependencies, such as existing budgets for the category, categorized transactions, child categories for a category group, categorized recurring items, etc. If there are dependents, this endpoint will return an object that describes the number and type of existing dependencies.
          */
         delete: operations["deleteCategory"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cryptocurrencies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get all supported cryptocurrencies
+         * @description Retrieve the list of cryptocurrencies currently supported for manual tracking.<p>
+         *     When creating a new manual crypto balance via `POST /crypto/manual`, the `symbol` you specify must match the `symbol` of one of the entries returned by this endpoint.
+         */
+        get: operations["getAllCryptocurrencies"];
+        put?: never;
+        /**
+         * Add a new supported cryptocurrency
+         * @description Adds a new cryptocurrency to the supported manual-crypto list.<br><br>
+         *     Lunch Money uses [CoinGecko](https://www.coingecko.com/us/coins/ethereum) to convert crypto balances to the user's primary currency. Users add a new supported cryptocurrency by submitting a CoinGecko coin-page URL. The server validates the URL, extracts the id from `/coins/{id}`, checks for an existing supported `coingecko_id`, validates the id against CoinGecko, then confirms the resolved symbol is not already supported before creating the new entry.
+         */
+        post: operations["createCryptocurrency"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crypto/manual": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get all manual crypto balances
+         * @description Retrieve all manually managed crypto balances associated with the user's account.
+         */
+        get: operations["getAllCryptoManual"];
+        put?: never;
+        /**
+         * Create a manual crypto balance
+         * @description Create a manually managed crypto asset.<br><br>
+         *     If `display_name` is `null`, clients may derive one from `institution_name` + `name`.
+         */
+        post: operations["createCryptoManual"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crypto/manual/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a single manual crypto balance
+         * @description Retrieve a single manually managed crypto balance by ID.
+         */
+        get: operations["getCryptoManualById"];
+        /**
+         * Update a manual crypto balance
+         * @description Modify a manually managed crypto balance.<br><br>
+         *     You may submit the response from `GET /crypto/manual/{id}` as the request body. System-defined properties are accepted according to the `x-updatable` metadata in the update schema.
+         */
+        put: operations["updateCryptoManual"];
+        post?: never;
+        /**
+         * Delete a manual crypto balance
+         * @description Delete a single manually managed crypto asset by ID.<p> If this crypto asset has a balance history, and you do not explicitly set the query parameter`keep_history`, a 422 response will be returned requesting you to explicitly set `keep_history` to `true` or `false`.
+         */
+        delete: operations["deleteCryptoManual"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crypto/synced": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get all synced crypto accounts
+         * @description Retrieves all synced crypto accounts associated with the user's account.
+         */
+        get: operations["getAllCryptoSynced"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crypto/synced/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a single synced crypto account
+         * @description Retrieves the synced crypto account and all nested balances for the specified synced crypto account ID.
+         */
+        get: operations["getCryptoSyncedById"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crypto/synced/{id}/{symbol}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a synced crypto balance by symbol
+         * @description Retrieves a single balance from the specified synced crypto account using the crypto symbol.
+         */
+        get: operations["getCryptoSyncedBalanceBySymbol"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crypto/synced/{id}/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Refresh balances for a synced crypto account
+         * @description Trigger a balance refresh for the specified synced crypto account. Returns the refreshed synced crypto account.
+         */
+        post: operations["refreshCryptoSynced"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -227,7 +387,7 @@ interface paths {
         };
         /**
          * Get all transactions
-         * @description Retrieve a list of all transactions associated with a user's account. <br>If called with no parameters, this endpoint will return the most recent transactions up to `limit` number of transactions.
+         * @description Retrieve a list of all transactions associated with a user's account. <br>If called with no parameters, this endpoint will return the most recent transactions, up to the specified `limit`.
          */
         get: operations["getAllTransactions"];
         /**
@@ -459,15 +619,15 @@ interface paths {
         /**
          * Update an existing tag
          * @description Updates an existing tag.<br><br>
-         *     You may submit the response from a `GET /tags/{id}` as the request body, however only certain properties can be updated using this API. The following system set properties are accepted in the request body but their values will be ignored: `id`, `updated_at`, `created_at`, and `archived_at`.<br><br>
-         *     It is also possible to provide only the properties to be updated in the request body, as long as the request includes at least one of the properties that is not listed above. For example a request body that contains only a `name` attribute is valid.
+         *     You may submit the response from a `GET /tags/{id}` as the request body; however, only certain properties can be updated using this API. The following system set properties are accepted in the request body but their values will be ignored: `id`, `updated_at`, and `created_at`.<br><br>
+         *     It is also possible to provide only the properties to be updated in the request body, as long as the request includes at least one of the properties that is not listed above. For example, a request body that contains only a `name` attribute is valid.
          */
         put: operations["updateTag"];
         post?: never;
         /**
          * Delete a tag
          * @description Deletes the tag with the ID specified on the path.<br>
-         *     If transaction or rules exist with the tag a dependents object is returned and the tag is not deleted. This behavior can be overridden by setting the `force` param to `true`.
+         *     If transactions or rules exist with the tag, a dependents object is returned and the tag is not deleted. This behavior can be overridden by setting the `force` parameter to `true`.
          */
         delete: operations["deleteTag"];
         options?: never;
@@ -484,7 +644,7 @@ interface paths {
         };
         /**
          * Get all recurring items
-         * @description Get info about the recurring items for a specified time frame
+         * @description Retrieve recurring items for a specified time frame.
          */
         get: operations["getAllRecurring"];
         put?: never;
@@ -552,13 +712,13 @@ interface paths {
          *     budget period settings). If an invalid `start_date` is provided, the request will fail with an error that indicates what the previous and next valid start dates are.<p>
          *
          *     Use the [budgets/settings](#tag/budgets/GET/budgets/settings) endpoint to view the account's budget settings.<br>
-         *     To view existing budgets details use the [summary](#tag/summary) endpoint.
+         *     To view details for existing budgets, use the [summary](#tag/summary) endpoint.
          */
         put: operations["upsertBudget"];
         post?: never;
         /**
          * Delete budget
-         * @description Removes the budget for the given category and period. If there already is no budget set for that period, the request still succeeds (idempotent).<p> Note that `start_date` **must** be a valid budget period start for the account (based on the account's budget period settings). If an invalid `start_date` is provided, the request will fail with an error that indicates what the previous and next valid start dates are.<p> Use the [budgets/settings](#tag/budgets/GET/budgets/settings) endpoint to view the account's budget settings.<br> To view existing budgets details use the [summary](#tag/summary) endpoint.
+         * @description Removes the budget for the given category and period. If there already is no budget set for that period, the request still succeeds (idempotent).<p> Note that `start_date` **must** be a valid budget period start for the account (based on the account's budget period settings). If an invalid `start_date` is provided, the request will fail with an error that indicates what the previous and next valid start dates are.<p> Use the [budgets/settings](#tag/budgets/GET/budgets/settings) endpoint to view the account's budget settings.<br> To view details for existing budgets, use the [summary](#tag/summary) endpoint.
          */
         delete: operations["deleteBudget"];
         options?: never;
@@ -599,49 +759,49 @@ interface components {
              * @description System defined unique ID for the category
              */
             id: number;
-            /** @description The name of the category. */
+            /** @description Name of the category */
             name: string;
-            /** @description The description of the category or `null` if not set. */
+            /** @description Category description, or `null` if none is set */
             description: string | null;
-            /** @description If `true`, the transactions in this category will be treated as income. (See <a href="https://support.lunchmoney.app/setup/categories/category-properties">Category Properties</a> for more details) */
+            /** @description If `true`, transactions in this category are treated as income. (See [Category Properties](https://support.lunchmoney.app/setup/categories/category-properties) for details) */
             is_income: boolean;
-            /** @description If `true`, the transactions in this category will be excluded from the budget. (See <a href="https://support.lunchmoney.app/setup/categories/category-properties">Category Properties</a> for more details) */
+            /** @description If `true`, transactions in this category are excluded from the budget. (See [Category Properties](https://support.lunchmoney.app/setup/categories/category-properties) for details) */
             exclude_from_budget: boolean;
-            /** @description If `true`, the transactions in this category will be excluded from totals. (See <a href="https://support.lunchmoney.app/setup/categories/category-properties">Category Properties</a> for more details) */
+            /** @description If `true`, transactions in this category are excluded from totals. (See [Category Properties](https://support.lunchmoney.app/setup/categories/category-properties) for details) */
             exclude_from_totals: boolean;
             /**
              * Format: date-time
-             * @description The date and time of when the category was last updated (in the ISO 8601 extended format).
+             * @description Date and time the category was last updated (in the ISO 8601 extended format).
              */
             updated_at: string;
             /**
              * Format: date-time
-             * @description The date and time of when the category was created (in the ISO 8601 extended format).
+             * @description Date and time of when the category was created (ISO 8601 extended format).
              */
             created_at: string;
             /**
              * Format: int64
-             * @description The ID of the category group this category belongs to or `null` if the category doesn't belong to a group, or is itself a category group.
+             * @description ID of the category group this category belongs to, or `null` if it does not belong to a group, or is itself a group.
              */
             group_id: number | null;
-            /** @description If `true`, the category is created as a category group. */
+            /** @description If `true`, this category is created as a category group */
             is_group: boolean;
-            /** @description For category groups, this will populate with details about the categories that belong to this group. The objects in this array are similar to Category Objects but do not include the `is_income`, `exclude_from_budget`, and `exclude_from_totals` properties as these are inherited from the category group. In addition, the `is_group` property will always be `false`, and there will be no `children` attribute. */
+            /** @description For category groups, contains details about the categories in the group. These objects are similar to Category Objects but the `is_group` property will always be `false`, and there will be no `children` attribute. */
             children?: components["schemas"]["childCategoryObject"][];
-            /** @description If true, the category is archived and not displayed in relevant areas of the Lunch Money app. */
+            /** @description If true, the category is archived and hidden in relevant areas of the Lunch Money app. */
             archived: boolean;
             /**
              * Format: date-time
-             * @description The date and time of when the category was last archived (in the ISO 8601 extended format).
+             * @description Date and time the category was last archived ( ISO 8601 extended format).
              */
             archived_at: string | null;
             /**
-             * @description An integer specifying the position in which the category is displayed on the categories page in the Lunch Money GUI. For categories within a category group the order is relative to the other categories within the group.<br>Categories with `order: null` will be displayed in alphabetical order by name, prior to any categories with an order
+             * @description Position of the category on the categories page in the Lunch Money app. For grouped categories, the order is relative to others in the same group.<br> Categories with `order: null` are shown alphabetically before ordered categories
              * @default null
              */
             order: number | null;
             /**
-             * @description If `true`, the category is collapsed in the Lunch Money GUI.
+             * @description If `true`, the category appears collapsed in the Lunch Money app
              * @default false
              */
             collapsed: boolean;
@@ -649,135 +809,138 @@ interface components {
         childCategoryObject: {
             /**
              * Format: int32
-             * @description A system defined unique identifier for the category.
+             * @description System defined unique ID for the category
              */
             id: number;
-            /** @description The name of the category. */
+            /** @description The name of the category */
             name: string;
-            /** @description The description of the category or `null` if not set. */
+            /** @description Category description, or `null` if none is set */
             description: string | null;
-            /** @description If true, the transactions in this category will be treated as income. Inherited from Category Group. */
+            /** @description If true, transactions in this category are treated as income. (Inherited from the Category Group). */
             is_income: boolean;
-            /** @description If true, the transactions in this category will be excluded from the budget. Inherited from Category Group. */
+            /** @description If true, transactions in this category are excluded from the budget. (Inherited from Category Group). */
             exclude_from_budget: boolean;
-            /** @description If true, the transactions in this category will be excluded from totals. Inherited from Category Group. */
+            /** @description If true, transactions in this category are excluded from totals. (Inherited from Category Group). */
             exclude_from_totals: boolean;
             /**
              * Format: date-time
-             * @description The date and time of when the category was last updated (in the ISO 8601 extended format).
+             * @description Date and time the category was last updated (ISO 8601 extended format).
              */
             updated_at: string;
             /**
              * Format: date-time
-             * @description The date and time of when the category was created (in the ISO 8601 extended format).
+             * @description Date and time the category was created (ISO 8601 extended format).
              */
             created_at: string;
             /**
              * Format: int64
-             * @description The ID of the category group this category belongs to or `null` if the category doesn't belong to a group, or is itself a category group.
+             * @description ID of the category group this category belongs to, or `null` if it does not belong to a group, or is itself a group.
              */
             group_id: number | null;
             /**
-             * @description Will always be false for a category that is part of category group.
+             * @description Always false for categories that belong to a category group
              * @enum {boolean}
              */
             is_group: false;
-            /** @description If true, the category is archived and not displayed in relevant areas of the Lunch Money app. */
+            /** @description If true, the category is archived and hidden in relevant areas of the Lunch Money app. */
             archived: boolean;
             /**
              * Format: date-time
-             * @description The date and time of when the category was last archived (in the ISO 8601 extended format).
+             * @description Date and time the category was last archived ( ISO 8601 extended format).
              */
             archived_at: string | null;
-            /** @description An index specifying the position in which the category is displayed on the categories page in the Lunch Money GUI. For categories within a category group the order is relative to the other categories within the group.<br> API. */
+            /** @description Position of the category on the categories page in the Lunch Money app. For grouped categories, the order is relative to the others in the same group. */
             order: number | null;
-            /** @description If `true`, the category is collapsed in the Lunch Money GUI. */
-            collapsed?: boolean | null;
+            /** @description Always `false` for a child category. Child categories cannot be collapsed. */
+            collapsed: boolean;
         };
         createCategoryRequestObject: {
             /**
-             * @description The name of the new category. Must be between 1 and 100 characters.
-             *     Must not match the name of any existing categories or category groups.
+             * @description Name of the new category. Must be between 1 and 100 characters.
+             *     The name must not match the name of any existing categories or category groups.
              */
             name: string;
             /**
-             * @description The description of the category. Must not exceed 200 characters.
+             * @description Description of the category. Maximum length is 200 characters.
              * @default null
              */
             description?: string | null;
             /**
-             * @description If `true`, the transactions in this category will be treated as income. (See <a href="https://support.lunchmoney.app/setup/categories/category-properties">Category Properties</a> for more details)
+             * @description If `true`, transactions in this category are treated as income. (See [Category Properties](https://support.lunchmoney.app/setup/categories/category-properties) for details)
              * @default false
              */
             is_income?: boolean;
             /**
-             * @description If `true`, the transactions in this category will be excluded from the budget. (See <a href="https://support.lunchmoney.app/setup/categories/category-properties">Category Properties</a> for more details)
+             * @description If `true`, transactions in this category are excluded from the budget. (See [Category Properties](https://support.lunchmoney.app/setup/categories/category-properties) for details)
              * @default false
              */
             exclude_from_budget?: boolean;
             /**
-             * @description If `true`, the transactions in this category will be excluded from totals. (See <a href="https://support.lunchmoney.app/setup/categories/category-properties">Category Properties</a> for more details)
+             * @description If `true`, transactions in this category are excluded from totals. (See [Category Properties](https://support.lunchmoney.app/setup/categories/category-properties) for details)
              * @default false
              */
             exclude_from_totals?: boolean;
             /**
-             * @description If `true`, the category is created as a category group.
+             * @description If `true`, this category will be created as a category group.
              * @default false
              */
             is_group?: boolean;
             /**
              * Format: int64
-             * @description If set to the ID of an existing category group, this new category will be assigned to that group. Cannot be set if `is_group` is true.
+             * @description If set to the ID of an existing category group, the new category will be added to that group. Cannot be used if `is_group` is true.
              * @default null
              */
             group_id?: number | null;
             /**
-             * @description If `true`, the category is archived and not displayed in relevant areas of the Lunch Money app.
+             * @description If `true`, the category is archived and in relevant areas of the Lunch Money app.
              * @default false
              */
             archived?: boolean;
-            /** @description The list of existing category objects, or existing category IDs or names of new categories to add to the new category group. This attribute should only be set if `is_group` is also set to true.<br> The categories or IDs specified must already exist and may not be category groups themselves. Categories that already belong to another category group will be moved. If strings are specified, they will be used as the names of new categories that will be added to the new category group. The request will fail if any names are the same as the name of an existing category.<br> It is permissible to provide both full category objects and IDs as well as strings for names in the same request. */
+            /** @description List of categories to include in the new category group. This field should only be set if `is_group` is also set to true.<br> You may provide existing category objects, existing category IDs, or names for new categories to add to the group. Categories or IDs must already exist and cannot be category groups. Categories that already belong to another group will be moved. If strings are provided, they will be used as names for new categories added to the group. The request will fail if any provided name already exists.<br> You may mix category objects, IDs, and new category names in the same request. */
             children?: (number | string | components["schemas"]["categoryObject"])[];
-            /** @description An index specifying the position in which the category is displayed on the categories page in the Lunch Money GUI. For categories within a category group the order is relative to the other categories within the group.<br>While this property can be set via the API it is generally set by the user in the Lunch Money GUI. API. */
+            /** @description Position of the category on the categories page in the Lunch Money app. For grouped categories, the order is relative to other categories in the same group.<br>While this property can be set via the API, it is usually managed by the user in the Lunch Money app. */
             order?: number | null;
-            /** @description If `true`, the category is collapsed in the Lunch Money GUI.<br>While this property can be set via the API it is generally set by the user in the Lunch Money GUI. */
+            /** @description If `true`, the category group appears collapsed in the Lunch Money app. Can only be set to `true` for category groups.<br>While this property can be set via the API, it is usually managed by the user in the Lunch Money app. */
             collapsed?: boolean | null;
         };
         updateCategoryRequestObject: {
-            /** @description If set, the new name of the category. Must be between 1 and 100 characters. */
+            /** @description If set, updates the category name. Must be between 1 and 100 characters. */
             name?: string;
-            /** @description If set, the new description of the category. Must not exceed 200 characters. */
+            /** @description If set, updates the category description. Must not exceed 200 characters. */
             description?: string | null;
-            /** @description If set, will indicate if this category will be treated as income. (See <a href="https://support.lunchmoney.app/setup/categories/category-properties">Category Properties</a> for more details) */
+            /** @description If set, determines whether transactions in this category are treated as income. (See [Category Properties](https://support.lunchmoney.app/setup/categories/category-properties) for details) */
             is_income?: boolean;
-            /** @description If set, will indicate if this category will be excluded from budgets. (See <a href="https://support.lunchmoney.app/setup/categories/category-properties">Category Properties</a> for more details) */
+            /** @description If set, determines whether transactions in this category are excluded from budgets. (See [Category Properties](https://support.lunchmoney.app/setup/categories/category-properties) for details) */
             exclude_from_budget?: boolean;
-            /** @description If set, will indicate if this category will be excluded from totals. (See <a href="https://support.lunchmoney.app/setup/categories/category-properties">Category Properties</a> for more details) */
+            /** @description If set, determines whether transactions in this category are excluded from totals. (See [Category Properties](https://support.lunchmoney.app/setup/categories/category-properties) for details) */
             exclude_from_totals?: boolean;
-            /** @description If set, will indicate if this category is archived. */
+            /** @description If set, determines whether this category is archived. */
             archived?: boolean;
             /**
              * Format: int64
-             * @description If set to the ID of an existing category group, and this category is not itself a category group, this category will be a child of the specified group.
+             * @description If set to the ID of an existing category group, and this category is not itself a category group, this category will be assigned to that group.
              */
             group_id?: number | null;
             /**
-             * @description This attribute may not be set to a value that is different than the current status of the category or category group. In other words, this API may not be used to convert a category to a category group or vice versa.
+             * @description This property is tolerated but cannot be changed. This API cannot be used to convert a category into a category group or vice versa.
              * @default false
              */
             is_group?: boolean | null;
-            /** @description The list of existing category objects, or existing category IDs or names of new categories to add to the new category group. This attribute should only be set if modifying an existing category group.<br> The categories or IDs specified must already exist and not belong to an existing category group. Categories that already belong to another category group will be moved. If strings are specified, they will be used as the names of new categories that will be added to the new category group. The request will fail if any names are the same as the name of an existing category.<br> It is permissible to provide both full category objects and IDs as well as strings for names in the same request. */
+            /** @description List of existing category objects, existing category IDs, or names of new categories to add to the category group. This attribute should only be set when modifying an existing category group.<br> Categories or IDs must already exist and must not already belong to a category group. Categories that already belong to another category group will be moved. If strings are specified, they will be used as names for new categories added to the group. The request will fail if any provided name matches an existing category name.<br> You may mix full category objects, IDs, and new category names in the same request. */
             children?: (number | string | components["schemas"]["categoryObject"])[];
-            /** @description An index specifying the position in which the category is displayed on the categories page in the Lunch Money GUI. For categories within a category group the order is relative to the other categories within the group.<br>While this property can be set via the API it is generally set by the user in the Lunch Money GUI. API. */
+            /** @description Position of the category on the categories page in the Lunch Money app. For categories within a category group, the order is relative to the other categories in the group.<br>While this property can be set via the API, it is generally managed by the user in the Lunch Money app. */
             order?: number | null;
-            /** @description If `true`, the category is collapsed in the Lunch Money GUI.<br>While this property can be set via the API it is generally set by the user in the Lunch Money GUI. */
+            /** @description If `true`, the category is collapsed in the Lunch Money app.<br>While this property can be set via the API it is generally set by the user in the Lunch Money app. */
             collapsed?: boolean | null;
             /**
              * Format: int64
              * @description System defined unique identifier for the category. Ignored if set.
              */
             id?: number;
-            /** @description System set date and time of when the category was last archived (in the ISO 8601 extended format). Ignored if set. */
+            /**
+             * Format: date-time
+             * @description System set date and time of when the category was last archived (in the ISO 8601 extended format). Provide an ISO 8601 extended datetime or `null` to clear it.
+             */
             archived_at?: string | null;
             /**
              * Format: date-time
@@ -786,7 +949,7 @@ interface components {
             updated_at?: string;
             /**
              * Format: date-time
-             * @description System set date and time of when the category was created (in the ISO 8601 extended format). Ignored if set. (in the ISO 8601 extended format). Ignored if set.
+             * @description System set date and time of when the category was created (in the ISO 8601 extended format). Ignored if set.
              */
             created_at?: string;
         };
@@ -807,6 +970,221 @@ interface components {
                 /** @description The number of auto created categories based on Plaid categories */
                 plaid_cats: number;
             };
+        };
+        /** manual crypto object */
+        cryptoManualObject: {
+            /**
+             * Format: int32
+             * @description System defined unique ID for the manual crypto balance
+             */
+            id: number;
+            /** @description User-defined name for the crypto asset */
+            name: string;
+            /** @description Optional display name for the crypto asset. If `null`, clients may derive a display name from `institution_name` + `name`. */
+            display_name: string | null;
+            /** @description Institution or wallet provider display name */
+            institution_name: string | null;
+            /** @description Current balance in numeric format to 18 decimal places */
+            balance: string;
+            /** @description Cryptocurrency symbol */
+            symbol: string;
+            /** @description CoinGecko identifier associated with this balance */
+            coingecko_id: string | null;
+            /** @description Balance converted to the user's primary currency. May be null if no conversion was available. */
+            to_base: number | null;
+            /**
+             * Format: date-time
+             * @description Date/time the manual balance record was last updated in ISO 8601 extended format. This is currently based on the manual crypto record's updated_at timestamp.
+             */
+            balance_as_of: string | null;
+            /**
+             * Format: date-time
+             * @description Date/time the exchange rate used to calculate to_base was last updated in ISO 8601 extended format. Null when no exchange rate was used or no conversion was available.
+             */
+            exchange_rate_as_of: string | null;
+            /** @description Name of the user who created the crypto asset */
+            created_by_name: string | null;
+            /**
+             * Format: date-time
+             * @description Date/time the crypto asset was created in ISO 8601 extended format
+             */
+            created_at: string;
+            /**
+             * Format: date-time
+             * @description Date/time the crypto asset was last updated in ISO 8601 extended format
+             */
+            updated_at: string;
+        };
+        /** synced crypto balance object */
+        cryptoSyncedBalance: {
+            /** @description The name of the crypto asset */
+            name: string;
+            /** @description Current balance in numeric format to 18 decimal places */
+            balance: string;
+            /** @description Symbol of the currency held in the synced account */
+            symbol: string;
+            /** @description CoinGecko identifier associated with this balance */
+            coingecko_id: string | null;
+            /** @description Balance converted to the user's primary currency. May be null if no conversion was available. */
+            to_base: number | null;
+            /**
+             * Format: date-time
+             * @description Date/time the balance was last updated in ISO 8601 extended format.
+             */
+            balance_as_of: string | null;
+            /**
+             * Format: date-time
+             * @description Date/time the exchange rate used to calculate to_base was last updated in ISO 8601 extended format. Null when no exchange rate was used or no conversion was available.
+             */
+            exchange_rate_as_of: string | null;
+            /**
+             * Format: date-time
+             * @description Date/time the crypto asset was last updated in ISO 8601 extended format
+             */
+            updated_at: string;
+        };
+        /** synced crypto account */
+        syncedCryptoAccount: {
+            /**
+             * Format: int32
+             * @description System defined unique ID for the synced crypto connection
+             */
+            id: number;
+            /**
+             * @description Provider used for the synced crypto connection
+             * @enum {string}
+             */
+            provider: "kraken" | "coinbase" | "ethereum";
+            /**
+             * @description Status of the synced crypto account. If not `active`, see the [Knowledge Base](https://support.lunchmoney.app/setup/crypto#why-is-my-synced-crypto-account-showing-not-supported) for details.
+             * @enum {string}
+             */
+            status: "active" | "unsupported" | "relink" | "initializing";
+            /** @description Name of the user who created the crypto connection */
+            created_by_name: string | null;
+            /**
+             * Format: date-time
+             * @description Date/time the synced crypto connection was created in ISO 8601 extended format
+             */
+            created_at: string;
+            /**
+             * Format: date-time
+             * @description Date/time the synced crypto connection was last updated in ISO 8601 extended format
+             */
+            updated_at: string;
+            /**
+             * Format: date-time
+             * @description System defined timestamp in ISO 8601 extended format of the last successful import.
+             */
+            last_import?: string | null;
+            /** @description Optional display name for the synced crypto connection */
+            display_name: string | null;
+            /** @description Balances currently held in the synced crypto connection */
+            balances: components["schemas"]["cryptoSyncedBalance"][];
+        };
+        cryptoManualListResponseObject: {
+            crypto_manual: components["schemas"]["cryptoManualObject"][];
+        };
+        cryptoSyncedListResponseObject: {
+            crypto_synced: components["schemas"]["syncedCryptoAccount"][];
+        };
+        cryptoCurrencyObject: {
+            /**
+             * Format: int32
+             * @description System-defined unique identifier for this cryptocurrency in Lunch Money.
+             */
+            id: number;
+            /** @description System-defined CoinGecko identifier used to fetch the USD-based prices for this cryptocurrency. */
+            coingecko_id: string;
+            /** @description Lowercase currency symbol that must be used as `symbol` when creating a manual crypto balance. */
+            symbol: string;
+            /** @description Human-readable name of the cryptocurrency. */
+            full_name: string;
+        };
+        cryptoCurrencyResponseObject: {
+            /** @description List of cryptocurrencies currently supported for manual tracking. */
+            cryptocurrencies: components["schemas"]["cryptoCurrencyObject"][];
+        };
+        createCryptocurrencyRequestObject: {
+            /**
+             * @description CoinGecko coin-page URL in the form `https://www.coingecko.com/{locale}/coins/{id}`
+             * @example https://www.coingecko.com/en/coins/cardano
+             */
+            coingecko_url: string;
+        };
+        createCryptoManualRequestObject: {
+            /**
+             * @description User-defined name for the manual crypto asset
+             * @example Cold Wallet BTC
+             */
+            name: string;
+            /**
+             * @description Optional display name for the manual crypto asset. If omitted, clients may derive one from `institution_name` + `name`.
+             * @example Cold Storage
+             */
+            display_name?: string;
+            /**
+             * @description Optional institution or wallet provider display name
+             * @example Ledger
+             */
+            institution_name?: string;
+            /**
+             * @description Numeric value of the balance, up to 18 decimal places
+             * @example 0.523400000000000000
+             */
+            balance: number | string;
+            /**
+             * @description Cryptocurrency symbol to track. Must match the `symbol` of one of the supported cryptocurrencies returned by `GET /cryptocurrencies`.
+             * @example btc
+             */
+            symbol: string;
+        };
+        /** @description Update a manual crypto balance. System-defined properties are accepted when resubmitting a `GET /crypto/manual/{id}` response body. */
+        updateCryptoManualRequestObject: {
+            /**
+             * Format: int32
+             * @description System defined unique ID for the manual crypto asset. Ignored if set
+             */
+            id?: number;
+            /** @description If set, the new name of the manual crypto asset */
+            name?: string | null;
+            /** @description If set, the new display name for the manual crypto asset */
+            display_name?: string | null;
+            /** @description If set, the new institution or wallet provider display name */
+            institution_name?: string | null;
+            /**
+             * @description If set, the new balance value up to 18 decimal places
+             * @example 1.050000000000000000
+             */
+            balance?: number | string;
+            /** @description Existing cryptocurrency symbol. Ignored if set. */
+            symbol?: string;
+            /** @description System-defined CoinGecko identifier for this symbol. Ignored if set. */
+            coingecko_id?: string | null;
+            /** @description System defined balance converted to the user's primary currency. Ignored if set */
+            to_base?: number;
+            /**
+             * Format: date-time
+             * @description System defined date/time the manual balance record was last updated in ISO 8601 extended format. Ignored if set
+             */
+            balance_as_of?: string | null;
+            /**
+             * Format: date-time
+             * @description System defined date/time the exchange rate used to calculate to_base was observed in ISO 8601 extended format. Ignored if set
+             */
+            exchange_rate_as_of?: string | null;
+            /** @description System defined name of the user who created the crypto asset. Ignored if set */
+            created_by_name?: string | null;
+            /**
+             * Format: date-time
+             * @description System defined date/time the crypto asset was created in ISO 8601 extended format. Ignored if set
+             */
+            created_at?: string;
+            /**
+             * Format: date-time
+             * @description System defined date/time the crypto asset was last updated in ISO 8601 extended format. Ignored if set
+             */
+            updated_at?: string;
         };
         /**
          * manual account object
@@ -869,7 +1247,7 @@ interface components {
             created_at: string;
             /**
              * Format: date-time
-             * @description Date/time the account was created in ISO 8601 extended format
+             * @description Date/time the account was last updated in ISO 8601 extended format
              */
             updated_at: string;
         };
@@ -939,7 +1317,7 @@ interface components {
             id?: number;
             /** @description If set, the new name of the manual account */
             name?: string;
-            /** @description If set, the name of institution holding the account */
+            /** @description If set, the name of the institution holding the account */
             institution_name?: string | null;
             /** @description If set, the new display name for the manual account.<br> This must be unique for the user. */
             display_name?: string | null;
@@ -954,10 +1332,10 @@ interface components {
             balance?: number | string;
             /** @description If set, the new three-letter lowercase currency code of the manual account balance. */
             currency?: components["schemas"]["currencyEnum"];
-            /** @description A new date for the `updated_at` property.  May be set as a date, ie: YYYY-MM-DD, or date-time string in ISO 8601 extended format. This property is ignored if `balance` is not also set. If `balance` is set and this property is not set the current time is used. */
+            /** @description If set, updates the `balance_as_of` value. May be provided as a date in YYYY-MM-DD format or as a date-time string in ISO 8601 extended format. This property is ignored unless `balance` is also set. If `balance` is set and this property is not set, the current time is used. */
             balance_as_of?: string & (unknown | unknown);
             /**
-             * @description If set, the status of the manual account. If set to `closed`, the `closed_on_date` date will be set to the current date, unless it is also set.
+             * @description If set, updates the status of the manual account. If set to `closed`, `closed_on` will be set to the current date unless it is also set.
              * @enum {string}
              */
             status?: "active" | "closed";
@@ -980,7 +1358,7 @@ interface components {
             created_at?: string;
             /**
              * Format: date-time
-             * @description System defined date/time the account was created in ISO 8601 extended format. Ignored if set.
+             * @description System defined date/time the account was last updated in ISO 8601 extended format. Ignored if set.
              */
             updated_at?: string;
             /** @description System defined name of the user who created the account. Ignored if set */
@@ -1022,7 +1400,7 @@ interface components {
              * @enum {string}
              */
             status: "active" | "inactive" | "closed" | "deactivated" | "not found" | "not supported" | "relink" | "syncing" | "revoked" | "error";
-            /** @description If `false`, transactions imported for this synced account can have their properties (such as amount and account) be modified by the user. This option is managed in the web app. */
+            /** @description If `false`, transactions imported for this synced account can have their properties (such as amount and account) be modified by the user. This option is managed in the Lunch Money app. */
             allow_transaction_modifications: boolean;
             /** @description Optional credit limit of the account. This field is set by Plaid and cannot be altered */
             limit: number | null;
@@ -1096,7 +1474,7 @@ interface components {
                  * @description The date used in conjunction with the `quantity` and `granularity` properties to calculate expected occurrences of recurring transactions.
                  */
                 anchor_date: string;
-                /** @description If set, represents the original transaction payee name that triggered this recurring item's creation. */
+                /** @description If set, specifies the original transaction payee name that triggered this recurring item's creation. */
                 payee: string | null;
                 /** @description The expected amount for a transaction that will match this recurring item. For recurring items that have a flexible amount this is the average of the specified min and max amounts. */
                 amount: string;
@@ -1198,7 +1576,7 @@ interface components {
              * @description The date and time of when the tag was created (in the ISO 8601 extended format).
              */
             created_at: string;
-            /** @description If `true`, the tag will not show up when creating or updating transactions in the Lunch Money app. **Can it be assigned via the API** */
+            /** @description If `true`, the tag will not show up when creating or updating transactions in the Lunch Money app. */
             archived: boolean;
             /**
              * Format: date-time
@@ -1228,19 +1606,19 @@ interface components {
             archived?: boolean;
         };
         updateTagRequestObject: {
-            /** @description If set, the new name of the category. Must be between 1 and 100 characters. */
+            /** @description If set, the new name of the tag. Must be between 1 and 100. characters. */
             name?: string;
-            /** @description If set, the new description of the category. Must not exceed 200 characters. */
+            /** @description If set, the new description of the tag. Must not exceed 200. characters. */
             description?: string | null;
             /** @description The text color of the tag. */
             text_color?: string | null;
             /** @description The background color of the tag. */
             background_color?: string | null;
-            /** @description If set, will indicate if this category is archived. */
+            /** @description If set, determines whether this tag is archived. */
             archived?: boolean;
             /**
              * Format: int32
-             * @description System-defined unique identifier for the category. Ignored if set.
+             * @description System-defined unique identifier for the tag. Ignored if set.
              */
             id?: number;
             /**
@@ -1255,7 +1633,7 @@ interface components {
             created_at?: string;
             /**
              * Format: date-time
-             * @description System-set time the tag was archived. Ignored if set.
+             * @description If set, updates the archived timestamp for the tag. Provide an ISO 8601 extended datetime or `null` to clear it.
              */
             archived_at?: string | null;
         };
@@ -1273,12 +1651,12 @@ interface components {
         transactionObject: {
             /**
              * Format: int64
-             * @description System created unique identifier for transaction
+             * @description System-created unique identifier for the transaction
              */
             id: number;
             /**
              * Format: date
-             * @description Date of transaction in ISO 8601 format
+             * @description Transaction date in ISO 8601 format
              */
             date: string;
             /** @description Amount of the transaction in numeric format to 4 decimal places. Positive values indicate a debit transaction, negative values indicate a credit transaction. */
@@ -1298,7 +1676,7 @@ interface components {
             /**
              * @description Name of payee set by the user, the financial institution, or by
              *     a matched recurring item. This will match the value
-             *     displayed in payee field on the transactions page in the GUI.
+             *     displayed in payee field on the transactions page in the Lunch Money app.
              */
             payee: string;
             /** @description Original payee name from the source (financial institution, CSV, etc.). For Plaid transactions, this is the raw name before normalization. For manual/API transactions, this typically matches `payee`. May be null for older transactions. */
@@ -1310,22 +1688,22 @@ interface components {
             category_id: number | null;
             /**
              * Format: int32
-             * @description The unique identifier of the plaid account associated with this transaction. This will always be null if this transaction is associated with a manual account or if this transaction has no associated account and appears as a "Cash Transaction" in the Lunch Money GUI.
+             * @description The unique identifier of the plaid account associated with this transaction. This will always be null if this transaction is associated with a manual account or if this transaction has no associated account and appears as a "Cash Transaction" in the Lunch Money app.
              */
             plaid_account_id: number | null;
             /**
              * Format: int32
-             * @description The unique identifier of the manual account associated with this transaction. This will always be null if this transaction is associated with a synced account or if this transaction has no associated account and appears as a "Cash Transaction" in the Lunch Money GUI.
+             * @description The unique identifier of the manual account associated with this transaction. This will always be null if this transaction is associated with a synced account or if this transaction has no associated account and appears as a "Cash Transaction" in the Lunch Money app.
              */
             manual_account_id: number | null;
-            /** @description A user-defined external ID for any transaction that was added via csv import, `POST /transactions` API call, or manually added via the Lunch Money GUI. No external ID exists for transactions associated with synced accounts, and they cannot be added. For transactions associated with manual accounts, the external ID must be unique as attempts to add a subsequent transaction with the same external_id and manual_account_id will be flagged as duplicates and fail. */
+            /** @description A user-defined external ID for any transaction that was added via csv import, `POST /transactions` API call, or manually added via the Lunch Money app. No external ID exists for transactions associated with synced accounts, and they cannot be added. For transactions associated with manual accounts, the external ID must be unique as attempts to add a subsequent transaction with the same external_id and manual_account_id will be flagged as duplicates and fail. */
             external_id: string | null;
             /** @description A list of tag_ids for the tags associated with this transaction. If the transaction has no tags this will be an empty list.<br> Tag details can be obtained by passing the value of this attribute as the `ids` query parameter to the [List Tags](../operations/getTags) API */
             tag_ids: number[];
             /**
              * @description Any transaction notes set by the user or by
              *     a matched recurring item. This will match the value
-             *     displayed in notes field on the transactions page in the GUI.
+             *     displayed in notes field on the transactions page in the Lunch Money app.
              */
             notes: string | null;
             /**
@@ -1359,16 +1737,16 @@ interface components {
             is_group_parent: boolean;
             /**
              * Format: int64
-             * @description Is set if this transaction is part of a group. Denotes the ID of the grouped transaction this is now included in. By default the transactions that were grouped are not returned in a call to `GET /transactions` but they can be queried directly by calling the `GET /transactions/group/{id}`, where the id passed is associated with a transaction where the `is_group_parent` attribute is true
+             * @description If set, this transaction is part of a group. Denotes the ID of the grouped transaction that it is included in. By default, the transactions that were grouped are not returned in a call to `GET /transactions` but they can be queried directly by calling the `GET /transactions/group/{id}`, where the id passed is associated with a transaction where the `is_group_parent` attribute is true.
              */
             group_parent_id: number | null;
             /** @description Exists only for transactions which are the parent of a split transaction or for transaction groups. It will not exist in the response unless the `include_children` query parameter is set to `true`.<br> For parents of split transactions, it contains a list of the associated transactions that it was split into. For transaction groups, it contains the transactions that were grouped together. Examine the `is_split_parent` and `is_group_parent` properties to determine which of these it is. */
             children?: components["schemas"]["childTransactionObject"][];
-            /** @description If requested, the transaction's plaid_metadata that came when this transaction was obtained. This will be a json object, but the schema is variable. This is only present when the `include_metadata` query parameter is set to true. */
+            /** @description If requested, the transaction's plaid_metadata that came when this transaction was obtained. This will be a JSON object, but the schema is variable. This is only present when the `include_metadata` query parameter is set to true. */
             plaid_metadata?: Record<string, never> | null;
-            /** @description If requested, the transaction's custom_metadata that was included when the transaction was inserted via the API. This will be a json object, but the schema is variable. This is only present when the `include_metadata` query parameter is set to true. */
+            /** @description If requested, the transaction's custom_metadata that was included when the transaction was inserted via the API. This will be a JSON object, but the schema is variable. This is only present when the `include_metadata` query parameter is set to true. */
             custom_metadata?: Record<string, never> | null;
-            /** @description A list of objects that describe any attachments to the Transactions. This is only present when the `include_files` query parameter is set to true. */
+            /** @description A list of objects that describe any attachments to the transaction. This is only present when the `include_files` query parameter is set to true. */
             files?: components["schemas"]["transactionAttachmentObject"][];
             /**
              * @description Source of the transaction:
@@ -1388,12 +1766,12 @@ interface components {
         childTransactionObject: {
             /**
              * Format: int64
-             * @description System created unique identifier for transaction
+             * @description System-created unique identifier for the transaction
              */
             id: number;
             /**
              * Format: date
-             * @description Date of transaction in ISO 8601 format
+             * @description Transaction date in ISO 8601 format
              */
             date: string;
             /** @description Amount of the transaction in numeric format to 4 decimal places. Positive values indicate a debit transaction, negative values indicate a credit transaction. */
@@ -1413,7 +1791,7 @@ interface components {
             /**
              * @description Name of payee set by the user, the financial institution, or by
              *     a matched recurring item. This will match the value
-             *     displayed in payee field on the transactions page in the GUI.
+             *     displayed in payee field on the transactions page in the Lunch Money app.
              */
             payee: string;
             /** @description Original payee name from the source (financial institution, CSV, etc.). For Plaid transactions, this is the raw name before normalization. For manual/API transactions, this typically matches `payee`. May be null for older transactions. */
@@ -1426,7 +1804,7 @@ interface components {
             /**
              * @description Any transaction notes set by the user or by
              *     a matched recurring item. This will match the value
-             *     displayed in notes field on the transactions page in the GUI.
+             *     displayed in notes field on the transactions page in the Lunch Money app.
              */
             notes: string | null;
             /**
@@ -1446,7 +1824,7 @@ interface components {
              * @description The date and time of when the transaction was last updated (in the ISO 8601 extended format).
              */
             updated_at: string;
-            /** @description If true this transaction has been split into two or more other transactions. By default parent transactions are not returned in call to `GET /transactions` but they can be queried directly by their ID. */
+            /** @description If `true`, this transaction has been split into two or more other transactions. By default, parent transactions are not returned in call to `GET /transactions` but they can be queried directly by their ID. */
             is_split_parent?: boolean;
             /**
              * Format: int64
@@ -1457,17 +1835,17 @@ interface components {
             is_group_parent: boolean;
             /**
              * Format: int64
-             * @description Is set if this transaction is part of a group. Denotes the ID of the grouped transaction this is now included in. By default the transactions that were grouped are not returned in a call to `GET /transactions` but they can be queried directly by calling the `GET /transactions/group/{id}`, where the id passed is associated with a transaction where the `is_group_parent` attribute is true
+             * @description If set, this transaction is part of a group. Denotes the ID of the grouped transaction that it is included in. By default, the transactions that were grouped are not returned in a call to `GET /transactions` but they can be queried directly by calling the `GET /transactions/group/{id}`, where the id passed is associated with a transaction where the `is_group_parent` attribute is true.
              */
             group_parent_id: number | null;
             /**
              * Format: int32
-             * @description The unique identifier of the manual account associated with this transaction. This will always be null if this transaction is associated with a synced account or if this transaction has no associated account and appears as a "Cash Transaction" in the Lunch Money GUI.
+             * @description The unique identifier of the manual account associated with this transaction. This will always be null if this transaction is associated with a synced account or if this transaction has no associated account and appears as a "Cash Transaction" in the Lunch Money app.
              */
             manual_account_id: number | null;
             /**
              * Format: int32
-             * @description The unique identifier of the plaid account associated with this transaction. This will always be null if this transaction is associated with a manual account or if this transaction has no associated account and appears as a "Cash Transaction" in the Lunch Money GUI.
+             * @description The unique identifier of the plaid account associated with this transaction. This will always be null if this transaction is associated with a manual account or if this transaction has no associated account and appears as a "Cash Transaction" in the Lunch Money app.
              */
             plaid_account_id: number | null;
             /** @description A list of tag_ids for the tags associated with this transaction. If the transaction has no tags this will be an empty list.<br> Tag details can be obtained by passing the value of this attribute as the `ids` query parameter to the [List Tags](../operations/getTags) API */
@@ -1486,11 +1864,11 @@ interface components {
              * @enum {string|null}
              */
             source: "api" | "csv" | "manual" | "merge" | "plaid" | "recurring" | "rule" | "split" | "user" | null;
-            /** @description A user-defined external ID for any transaction that was added via csv import, `POST /transactions` API call, or manually added via the Lunch Money GUI. No external ID exists for transactions associated with synced accounts, and they cannot be added. For transactions associated with manual accounts, the external ID must be unique as attempts to add a subsequent transaction with the same external_id and manual_account_id will be flagged as duplicates and fail. */
+            /** @description A user-defined external ID for any transaction that was added via csv import, `POST /transactions` API call, or manually added via the Lunch Money app. No external ID exists for transactions associated with synced accounts, and they cannot be added. For transactions associated with manual accounts, the external ID must be unique as attempts to add a subsequent transaction with the same external_id and manual_account_id will be flagged as duplicates and fail. */
             external_id: string | null;
-            /** @description If requested, the transaction's plaid_metadata that came when this transaction was obtained. This will be a json object, but the schema is variable. This will only be present for transactions associated with a plaid account. */
+            /** @description If requested, the transaction's plaid_metadata that came when this transaction was obtained. This will be a JSON object, but the schema is variable. This will only be present for transactions associated with a plaid account. */
             plaid_metadata?: Record<string, never> | null;
-            /** @description If requested, the transaction's custom_metadata that was included when the transaction was inserted via the API. This will be a json object, but the schema is variable. */
+            /** @description If requested, the transaction's custom_metadata that was included when the transaction was inserted via the API. This will be a JSON object, but the schema is variable. */
             custom_metadata?: Record<string, never> | null;
             /** @description A list of objects that describe any attachments to the transaction */
             files?: components["schemas"]["transactionAttachmentObject"][];
@@ -1498,10 +1876,10 @@ interface components {
         insertTransactionObject: {
             /**
              * Format: date
-             * @description Date of transaction in ISO 8601 format
+             * @description Transaction date in ISO 8601 format
              */
             date: string;
-            /** @description Numeric value of amount without currency symbol. i.e. $4.25 should be denoted as 4.25. May be a string or a number in double format. Positive values indicate a debit transaction, negative values indicate a credit transaction. */
+            /** @description Numeric value of the amount without a currency symbol. For example, $4.25 should be provided as 4.25. May be a string or a number in double format. Positive values indicate a debit transaction, negative values indicate a credit transaction. */
             amount: number | string;
             /** @description Three-letter lowercase currency code of the transaction in ISO 4217 format. Must match one of the [supported currencies](https://alpha.lunchmoney.dev/v2/currencies). If not set defaults to the user account's primary currency. */
             currency?: components["schemas"]["currencyEnum"];
@@ -1511,23 +1889,23 @@ interface components {
             original_name?: string | null;
             /**
              * Format: int32
-             * @description The ID of the category associated with the transactions. If set, the category ID must exist for the user's account and it cannot be a category group.
+             * @description The ID of the category associated with the transaction. If set, the category ID must exist for the user's account and it cannot be a category group.
              */
             category_id?: number | null;
             /**
              * @description Any transaction notes set by the user or by
              *     a matched recurring item. This will match the value
-             *     displayed in notes field on the transactions page in the GUI.
+             *     displayed in notes field on the transactions page in the Lunch Money app.
              */
             notes?: string | null;
             /**
              * Format: int32
-             * @description The Unique identifier for the associated manually managed account. If set, this must match an existing manual account id associated with the user's account. If not set, and `plaid_account_id` is also not set, no account is associated with the transaction and it will appear as a "Cash Transaction" in the Lunch Money GUI. It is an error if this, and `plaid_account_id` is also set on the same transaction.
+             * @description The unique identifier of the associated manual account. If set, this must match an existing manual account id associated with the user's account. If not set, and `plaid_account_id` is also not set, no account is associated with the transaction and it will appear as a "Cash Transaction" in the Lunch Money app. It is an error if this and `plaid_account_id` are both set on the same transaction.
              */
             manual_account_id?: number | null;
             /**
              * Format: int32
-             * @description The Unique identifier for the associated plaid synced account. If set, this must match an existing plaid account id associated with the user's account. If not set, and `manual_account_id` is also not set, no account is associated with the transaction and it will appear as a "Cash Transaction" in the Lunch Money GUI. It is an error if this, and `manual_account_id` is also set on the same transaction. In addition the specified plaid account must have the "Allow Modifications To Transactions" property set (which is enabled by default), or the insert will fail.
+             * @description The unique identifier of the associated Plaid account. If set, this must match an existing plaid account id associated with the user's account. If not set, and `manual_account_id` is also not set, no account is associated with the transaction and it will appear as a "Cash Transaction" in the Lunch Money app. It is an error if this and `manual_account_id` are both set on the same transaction. In addition the specified plaid account must have the "Allow Modifications To Transactions" property set (which is enabled by default), or the insert will fail.
              */
             plaid_account_id?: number | null;
             /**
@@ -1536,7 +1914,7 @@ interface components {
              */
             recurring_id?: number | null;
             /**
-             * @description If set must be either `reviewed` or `unreviewed`. If not set, defaults to `unreviewed`.
+             * @description If set, must be either `reviewed` or `unreviewed`. If not set, defaults to `unreviewed`.
              * @enum {string}
              */
             status?: "reviewed" | "unreviewed";
@@ -1557,10 +1935,10 @@ interface components {
             id?: number;
             /**
              * Format: date
-             * @description Date of transaction in ISO 8601 format
+             * @description Transaction date in ISO 8601 format
              */
             date?: string;
-            /** @description Numeric value of amount without currency symbol. i.e. $4.25 should be denoted as 4.25. May be a string or a number in double format. Positive values indicate a debit transaction, negative values indicate a credit transaction. <br> May not be updated on transactions that belong to a synced account with the "Allow Modifications to Transactions" property disabled. */
+            /** @description Numeric value of the amount without a currency symbol. For example, $4.25 should be provided as 4.25. May be a string or a number in double format. Positive values indicate a debit transaction, negative values indicate a credit transaction. <br> May not be updated on transactions that belong to a synced account with the "Allow Modifications to Transactions" property disabled. */
             amount?: number | string;
             /** @description Three-letter lowercase currency code of the transaction in ISO 4217 format.<br> May not be updated on transactions that belong to a synced account with the "Allow Modifications to Transactions" property disabled. */
             currency?: components["schemas"]["currencyEnum"];
@@ -1582,17 +1960,17 @@ interface components {
             notes?: string | null;
             /**
              * Format: int32
-             * @description The unique identifier of the manual account associated with this transaction. Set this to null to disassociate the transaction with an account. If set `plaid_account_id` may not also be set to a non null value. Moving an existing transaction to to another account will not work if the transaction belongs to a synced account who's "Allow Modifications to Transactions" property is not set.
+             * @description The unique identifier of the manual account associated with this transaction. Set this to null to disassociate the transaction with an account. If set, `plaid_account_id` may not also be set to a non null value. Moving an existing transaction to another account will not work if the transaction belongs to a synced account whose "Allow Modifications to Transactions" property is not set.
              */
             manual_account_id?: number | null;
             /**
              * Format: int32
-             * @description The unique identifier of the plaid account associated with this transaction. If set `manual_account_id` may not also be set to a non null value. Attempting to modify this on a transaction associated with a Plaid account will not work if the account's "Allow Modifications to Transactions" property is not set. Similarly, this cannot be set to an id associated with this type of locked Plaid account.
+             * @description The unique identifier of the Plaid account associated with this transaction. If set, `manual_account_id` may not also be set to a non null value. Attempting to modify this on a transaction associated with a Plaid account will not work if the account's "Allow Modifications to Transactions" property is not set. Similarly, this cannot be set to an id associated with this type of locked Plaid account.
              */
             plaid_account_id?: number | null;
             /** @description A list of tag_ids for the tags associated with this transaction. If set, this property will overwrite any existing tags. Use `additional_tag_ids` to add tags to the existing transaction's tags. Set this to an empty array to remove all tags from a transaction. If set `additional_tag_ids` may not be set. */
             tag_ids?: number[];
-            /** @description A list of tag_ids for the tags associated with this transaction. If set, the tags listed in this property be added to any existing transaction tags. Use `tag_ids` to overwrite or clear transaction tags. If set `tag_ids` may not be set. */
+            /** @description A list of tag_ids for the tags associated with this transaction. If set, the tags listed in this property will be added to any existing transaction tags. Use `tag_ids` to overwrite or clear transaction tags. If set, `tag_ids` may not be set. */
             additional_tag_ids?: number[];
             /** @description A user-defined external ID for the transaction. The update will fail if the transaction does not also have a `manual_account_id` or if there is already an existing transaction with the same `manual_account_id`/`external_id` combination. */
             external_id?: string | null;
@@ -1626,7 +2004,7 @@ interface components {
             updated_at?: string;
             /** @description System defined boolean indicating if this transaction was split. To split or unsplit a transaction use the `/transactions/split` endpoint. Ignored if set. */
             is_split_parent?: boolean;
-            /** @description An array of child transactions that exists when a transaction has been split or if the transaction is a group. Split */
+            /** @description An array of child transactions present when a transaction has been split or when the transaction is a group. Split and grouped transactions may not be modified using this API. Ignored if set. */
             children?: components["schemas"]["childTransactionObject"][];
             /**
              * Format: int64
@@ -1678,7 +2056,7 @@ interface components {
             reason?: "duplicate_external_id" | "duplicate_payee_amount_date";
             /**
              * Format: int64
-             * @description The  of the transaction in the request body's transactions array that was skipped.
+             * @description The index of the transaction in the request body's transactions array that was skipped.
              */
             request_transactions_index?: number;
             /**
@@ -1729,7 +2107,7 @@ interface components {
         budgetObject: {
             /**
              * Format: int64
-             * @description System created unique identifier for the budget entry.
+             * @description System-created unique identifier for the budget entry.
              */
             id: number;
             /**
@@ -1830,7 +2208,7 @@ interface components {
              * @description Start date of the budget period
              */
             start_date?: string;
-            /** @description Budget amount in the stored currency (string for consistency with other amount fields in the API) */
+            /** @description Budget amount in the stored currency (string for consistency with other amount fields in the API). */
             amount?: string;
             /** @description Currency code for the budget */
             currency?: string;
@@ -1860,12 +2238,12 @@ interface components {
              */
             budget_period_anchor_date: string;
             /**
-             * @description The display preference for hiding categories in budget view that have no activity and no budgeted value
+             * @description Display preference for hiding categories in budget view that have no activity and no budgeted value
              * @default false
              */
             budget_hide_no_activity: boolean;
             /**
-             * @description The display preference for using the last day of the month as the period end for monthly periods
+             * @description Display preference for using the last day of the month as the period end for monthly periods
              * @default false
              */
             budget_use_last_day_of_month: boolean;
@@ -1885,19 +2263,19 @@ interface components {
          * @description Budget summary for the requested range
          */
         summaryResponseObject: {
-            /** @description `true` if start_date and end_date are aligned with the user's budget period setting; `false` otherwise.<p> When the response is not aligned, category `totals` will not include values for the `budgeted` and `available` properties, so aligned responses are usually preferred.<p> If unsure how to set an aligned date range, set a range of at least one month and set the  `include_occurrences` parameter to `true`.  Then examine the objects in the `occurrences` array for the first category to find  start and end dates that will produce aligned responses.  Setting `include_past_budget_dates` to `true` will add the three budget periods prior to the range in the `occurrences` array. */
+            /** @description `true` if start_date and end_date are aligned with the user's budget period setting; `false` otherwise.<p> When the response is not aligned, category `totals` will not include values for the `budgeted` and `available` properties, so aligned responses are usually preferred.<p> If unsure how to set an aligned date range, set a range of at least one month and set the `include_occurrences` parameter to `true`. Then examine the objects in the `occurrences` array for the first category to find start and end dates that will produce aligned responses.  Setting `include_past_budget_dates` to `true` will add the three budget periods prior to the range in the `occurrences` array. */
             aligned: boolean;
             categories: components["schemas"]["summaryCategoryObject"][];
             totals?: components["schemas"]["summaryTotalsObject"];
             rollover_pool?: components["schemas"]["summaryRolloverPoolObject"];
         };
-        /** @description Total inflow and outflow for the given date range.  This object is returned when the query parameter `include_totals` is set to `true`. */
+        /** @description Total inflow and outflow for the given date range. This object is returned when the query parameter `include_totals` is set to `true`. */
         summaryTotalsObject: {
             inflow?: components["schemas"]["summaryTotalsBreakdownObject"];
             outflow?: components["schemas"]["summaryTotalsBreakdownObject"];
         };
         summaryTotalsBreakdownObject: {
-            /** @description Total amount, in the user's default currency, of non recurring activity for the given date range */
+            /** @description Total amount, in the user's default currency, of non-recurring activity for the given date range */
             other_activity?: number;
             /** @description Total amount, in the user's default currency, of recurring activity that has occurred for the given date range */
             recurring_activity?: number;
@@ -1905,11 +2283,11 @@ interface components {
             recurring_remaining?: number;
             /** @description Total amount, in the user's default currency, of expected recurring activity for the given date range */
             recurring_expected?: number;
-            /** @description Total amount, in the user's default currency, of non recurring activity coming from un-categorized transactions */
+            /** @description Total amount, in the user's default currency, of non-recurring activity coming from uncategorized transactions */
             uncategorized?: number;
-            /** @description Number of un-categorized transactions for the given date range */
+            /** @description Number of uncategorized transactions for the given date range */
             uncategorized_count?: number;
-            /** @description Total amount, in the user's default currency, of recurring activity coming from un-categorized transactions. */
+            /** @description Total amount, in the user's default currency, of recurring activity coming from uncategorized transactions. */
             uncategorized_recurring?: number;
         };
         /** @description List of each category's budget configuration and activity for the date range. */
@@ -1923,23 +2301,23 @@ interface components {
         };
         /** @description The date and adjusted balance of the rollover pool at the time of the adjustment. */
         summaryRolloverPoolAdjustmentObject: {
-            /** @description true if this rollover pool adjustment is for a budget period that falls within the given date range. */
+            /** @description `true` if this rollover pool adjustment is for a budget period that falls within the given date range. */
             in_range: boolean;
             /**
              * Format: date
              * @description Date the adjustment was made.
              */
             date: string;
-            /** @description Amount of the rollover pool, in the budgets currency, at the time of the adjustment. */
+            /** @description Amount of the rollover pool, in the budget's currency, at the time of the adjustment. */
             amount: string;
             /** @description Currency of the rollover pool at the time of the adjustment. */
             currency: components["schemas"]["currencyEnum"];
             /** @description Amount of the rollover pool, in the user's default currency, at the time of the adjustment. */
             to_base: number;
         };
-        /** @description Total activity for the given category within the given date range which is aligned with budget period setting. */
+        /** @description Total activity for the given category within the given date range when it is aligned with the budget period setting. */
         summaryCategoryTotalsObject: {
-            /** @description Total non recurring activity, in the user's default currency, for the category within the given date range.<br> The total activity for the category is the sum of this and the recurring_activity. */
+            /** @description Total non-recurring activity, in the user's default currency, for the category within the given date range.<br> The total activity for the category is the sum of this and the recurring_activity. */
             other_activity: number;
             /** @description Total recurring activity, in the user's default currency, for the category within the given date range.<br> The total activity for the category is the sum of this and the other_activity. */
             recurring_activity: number;
@@ -1965,7 +2343,7 @@ interface components {
              * @description The end date of the budget period
              */
             end_date: string;
-            /** @description Total non recurring activity, in the user's default currency, for the budget period. The total activity for this category in the period is the sum of this and the recurring_activity. */
+            /** @description Total non-recurring activity, in the user's default currency, for the budget period. The total activity for this category in the period is the sum of this and the recurring_activity. */
             other_activity: number;
             /** @description Total recurring activity, in the user's default currency, for the budget period. The total activity for this category in the budget period is the sum of this and the other_activity. */
             recurring_activity: number;
@@ -1978,7 +2356,7 @@ interface components {
             /** @description Any notes set for the budget period. */
             notes: string | null;
         };
-        /** @description A single transaction associated with a recurring item. I don't think we will expose this in the summary since it's gettable by querying the recurring_id */
+        /** @description A single transaction associated with a recurring item. */
         summaryRecurringTransactionObject: {
             /** Format: date */
             date: string;
@@ -1997,12 +2375,12 @@ interface components {
         };
         /**
          * error response object
-         * @description The object returned will any 4XX error response. Each response is guaranteed to have a `message` and at least one `error` object.
+         * @description The object returned with any 4XX error response. Each response is guaranteed to have a `message` and at least one `error` object.
          */
         errorResponseObject: {
             /** @description High level error type, for example 'Not Found' or 'Request Validation Failure' */
             message: string;
-            /** @description An list of objects that describe the errors encountered while processing the request.<br> If multiple errors were encountered, the list will contain multiple objects.<br> Each `error` object is guaranteed to have an `errMsg`, but it may also contain other error specific properties. */
+            /** @description A list of objects that describe the errors encountered while processing the request.<br> If multiple errors were encountered, the list will contain multiple objects.<br> Each `error` object is guaranteed to have an `errMsg`, but it may also contain other error specific properties. */
             errors: ({
                 /** @description A message to help the developer determine the problem with the request. */
                 errMsg: string;
@@ -2041,7 +2419,7 @@ interface components {
          * currency enum
          * @enum {string}
          */
-        currencyEnum: "aed" | "afn" | "all" | "amd" | "ang" | "aoa" | "ars" | "aud" | "awg" | "azn" | "bam" | "bbd" | "bdt" | "bgn" | "bhd" | "bif" | "bmd" | "bnd" | "bob" | "brl" | "bsd" | "btc" | "btn" | "bwp" | "byn" | "bzd" | "cad" | "cdf" | "chf" | "clp" | "cny" | "cop" | "crc" | "cuc" | "cup" | "cve" | "czk" | "djf" | "dkk" | "dop" | "dzd" | "egp" | "ern" | "etb" | "eur" | "fjd" | "fkp" | "gbp" | "gel" | "ggp" | "ghs" | "gip" | "gmd" | "gnf" | "gtq" | "gyd" | "hkd" | "hnl" | "hrk" | "htg" | "huf" | "idr" | "ils" | "imp" | "inr" | "iqd" | "irr" | "isk" | "jep" | "jmd" | "jod" | "jpy" | "kes" | "kgs" | "khr" | "kmf" | "kpw" | "krw" | "kwd" | "kyd" | "kzt" | "lak" | "lbp" | "lkr" | "lrd" | "lsl" | "ltl" | "lvl" | "lyd" | "mad" | "mdl" | "mga" | "mkd" | "mmk" | "mnt" | "mop" | "mro" | "mur" | "mvr" | "mwk" | "mxn" | "myr" | "mzn" | "nad" | "ngn" | "nio" | "nok" | "npr" | "nzd" | "omr" | "pab" | "pen" | "pgk" | "php" | "pkr" | "pln" | "pyg" | "qar" | "ron" | "rsd" | "rub" | "rwf" | "sar" | "sbd" | "scr" | "sdg" | "sek" | "sgd" | "shp" | "sll" | "sos" | "srd" | "std" | "svc" | "syp" | "szl" | "thb" | "tjs" | "tmt" | "tnd" | "top" | "try" | "ttd" | "twd" | "tzs" | "uah" | "ugx" | "usd" | "uyu" | "uzs" | "vef" | "vnd" | "vuv" | "wst" | "xaf" | "xcd" | "xof" | "xpf" | "yer" | "zar" | "zmw" | "zwl";
+        currencyEnum: "aed" | "afn" | "all" | "amd" | "ang" | "aoa" | "ars" | "aud" | "awg" | "azn" | "bam" | "bbd" | "bdt" | "bgn" | "bhd" | "bif" | "bmd" | "bnd" | "bob" | "brl" | "bsd" | "btc" | "btn" | "bwp" | "byn" | "bzd" | "cad" | "cdf" | "chf" | "clp" | "cny" | "cop" | "crc" | "cuc" | "cup" | "cve" | "czk" | "djf" | "dkk" | "dop" | "dzd" | "egp" | "ern" | "etb" | "eur" | "fjd" | "fkp" | "gbp" | "gel" | "ggp" | "ghs" | "gip" | "gmd" | "gnf" | "gtq" | "gyd" | "hkd" | "hnl" | "hrk" | "htg" | "huf" | "idr" | "ils" | "imp" | "inr" | "iqd" | "irr" | "isk" | "jep" | "jmd" | "jod" | "jpy" | "kes" | "kgs" | "khr" | "kmf" | "kpw" | "krw" | "kwd" | "kyd" | "kzt" | "lak" | "lbp" | "lkr" | "lrd" | "lsl" | "ltl" | "lvl" | "lyd" | "mad" | "mdl" | "mga" | "mkd" | "mmk" | "mnt" | "mop" | "mro" | "mur" | "mvr" | "mwk" | "mxn" | "myr" | "mzn" | "nad" | "ngn" | "nio" | "nok" | "npr" | "nzd" | "omr" | "pab" | "pen" | "pgk" | "php" | "pkr" | "pln" | "pyg" | "qar" | "ron" | "rsd" | "rub" | "rwf" | "sar" | "sbd" | "scr" | "sdg" | "sek" | "sgd" | "shp" | "sll" | "sos" | "srd" | "std" | "svc" | "syp" | "szl" | "thb" | "tjs" | "tmt" | "tnd" | "top" | "try" | "ttd" | "twd" | "tzs" | "uah" | "ugx" | "usd" | "uyu" | "uzs" | "vef" | "vnd" | "vuv" | "wst" | "xaf" | "xag" | "xau" | "xcd" | "xof" | "xpf" | "yer" | "zar" | "zmw" | "zwl";
     };
     responses: {
         /** @description Unauthorized. This error occurs when an invalid API token is passed to the request. */
@@ -2342,7 +2720,7 @@ interface operations {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
-                     *           "errMsg": "There is no category with the id:'543210'`"
+                     *           "errMsg": "There is no category with the id: 543210."
                      *         }
                      *       ]
                      *     }
@@ -2410,7 +2788,7 @@ interface operations {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
-                     *           "errMsg": "There is no category with the id:'543210'`"
+                     *           "errMsg": "There is no category with the id: 543210."
                      *         }
                      *       ]
                      *     }
@@ -2456,7 +2834,7 @@ interface operations {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
-                     *           "errMsg": "There is no category with the id:'543210'`"
+                     *           "errMsg": "There is no category with the id: 543210."
                      *         }
                      *       ]
                      *     }
@@ -2464,13 +2842,757 @@ interface operations {
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
-            /** @description Unprocessable Entity */
+            /** @description Unprocessable Content */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["deleteCategoryResponseWithDependencies"];
+                };
+            };
+            429: components["responses"]["rateLimited"];
+            500: components["responses"]["serverError"];
+        };
+    };
+    getAllCryptocurrencies: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A list of supported cryptocurrencies */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "cryptocurrencies": [
+                     *         {
+                     *           "id": 1,
+                     *           "coingecko_id": "bitcoin",
+                     *           "symbol": "btc",
+                     *           "full_name": "Bitcoin"
+                     *         },
+                     *         {
+                     *           "id": 2,
+                     *           "coingecko_id": "ethereum",
+                     *           "symbol": "eth",
+                     *           "full_name": "Ethereum"
+                     *         },
+                     *         {
+                     *           "id": 3,
+                     *           "coingecko_id": "solana",
+                     *           "symbol": "sol",
+                     *           "full_name": "Solana"
+                     *         },
+                     *         {
+                     *           "id": 4,
+                     *           "coingecko_id": "ripple",
+                     *           "symbol": "xrp",
+                     *           "full_name": "XRP"
+                     *         }
+                     *       ]
+                     *     }
+                     */
+                    "application/json": components["schemas"]["cryptoCurrencyResponseObject"];
+                };
+            };
+            401: components["responses"]["unauthorizedToken"];
+            429: components["responses"]["rateLimited"];
+            500: components["responses"]["serverError"];
+        };
+    };
+    createCryptocurrency: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["createCryptocurrencyRequestObject"];
+            };
+        };
+        responses: {
+            /** @description Supported cryptocurrency created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "id": 5,
+                     *       "coingecko_id": "cardano",
+                     *       "symbol": "ada",
+                     *       "full_name": "Cardano"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["cryptoCurrencyObject"];
+                };
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["errorResponseObject"];
+                };
+            };
+            401: components["responses"]["unauthorizedToken"];
+            /** @description Request validation failure */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["errorResponseObject"];
+                };
+            };
+            429: components["responses"]["rateLimited"];
+            500: components["responses"]["serverError"];
+        };
+    };
+    getAllCryptoManual: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A list of manual crypto balances */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "crypto_manual": [
+                     *         {
+                     *           "id": 22001,
+                     *           "name": "Cold Wallet BTC",
+                     *           "display_name": "Long-term BTC",
+                     *           "institution_name": "Ledger",
+                     *           "balance": "0.852341920145782301",
+                     *           "symbol": "btc",
+                     *           "coingecko_id": "bitcoin",
+                     *           "to_base": 53124.72,
+                     *           "balance_as_of": "2026-02-25T14:22:10.000Z",
+                     *           "exchange_rate_as_of": "2026-02-25T14:10:00.000Z",
+                     *           "created_by_name": "User 1",
+                     *           "created_at": "2025-11-12T20:14:32.000Z",
+                     *           "updated_at": "2026-02-25T14:22:10.000Z"
+                     *         }
+                     *       ]
+                     *     }
+                     */
+                    "application/json": components["schemas"]["cryptoManualListResponseObject"];
+                };
+            };
+            401: components["responses"]["unauthorizedToken"];
+            429: components["responses"]["rateLimited"];
+            500: components["responses"]["serverError"];
+        };
+    };
+    createCryptoManual: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["createCryptoManualRequestObject"];
+            };
+        };
+        responses: {
+            /** @description Manual crypto balance created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "id": 22045,
+                     *       "name": "Coinbase ETH Holdings",
+                     *       "display_name": "Trading ETH",
+                     *       "institution_name": "Coinbase",
+                     *       "balance": "12.004500000000000000",
+                     *       "symbol": "eth",
+                     *       "coingecko_id": "ethereum",
+                     *       "to_base": 28998.44,
+                     *       "balance_as_of": "2026-03-01T09:20:41.000Z",
+                     *       "exchange_rate_as_of": "2026-03-01T09:15:00.000Z",
+                     *       "created_by_name": "User 1",
+                     *       "created_at": "2026-03-01T09:20:41.000Z",
+                     *       "updated_at": "2026-03-01T09:20:41.000Z"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["cryptoManualObject"];
+                };
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["errorResponseObject"];
+                };
+            };
+            401: components["responses"]["unauthorizedToken"];
+            429: components["responses"]["rateLimited"];
+            500: components["responses"]["serverError"];
+        };
+    };
+    getCryptoManualById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description ID of the manual crypto balance to retrieve */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Manual crypto balance object */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "id": 22001,
+                     *       "name": "Cold Wallet BTC",
+                     *       "display_name": "Long-term BTC",
+                     *       "institution_name": "Ledger",
+                     *       "balance": "0.852341920145782301",
+                     *       "symbol": "btc",
+                     *       "coingecko_id": "bitcoin",
+                     *       "to_base": 53124.72,
+                     *       "balance_as_of": "2026-02-25T14:22:10.000Z",
+                     *       "exchange_rate_as_of": "2026-02-25T14:10:00.000Z",
+                     *       "created_by_name": "User 1",
+                     *       "created_at": "2025-11-12T20:14:32.000Z",
+                     *       "updated_at": "2026-02-25T14:22:10.000Z"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["cryptoManualObject"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Invalid Path Parameters",
+                     *       "errors": [
+                     *         {
+                     *           "errMsg": "Invalid value type for path parameter: 'id'. Expected 'number', received 'string'."
+                     *         }
+                     *       ]
+                     *     }
+                     */
+                    "application/json": components["schemas"]["errorResponseObject"];
+                };
+            };
+            401: components["responses"]["unauthorizedToken"];
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Not Found",
+                     *       "errors": [
+                     *         {
+                     *           "errMsg": "There is no manual crypto account with the id: 99999999."
+                     *         }
+                     *       ]
+                     *     }
+                     */
+                    "application/json": components["schemas"]["errorResponseObject"];
+                };
+            };
+            429: components["responses"]["rateLimited"];
+            500: components["responses"]["serverError"];
+        };
+    };
+    updateCryptoManual: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description ID of the manual crypto balance to update */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["updateCryptoManualRequestObject"];
+            };
+        };
+        responses: {
+            /** @description Manual crypto balance updated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "id": 22001,
+                     *       "name": "Cold Wallet BTC",
+                     *       "display_name": "Long-term BTC",
+                     *       "institution_name": "Ledger",
+                     *       "balance": "0.900000000000000000",
+                     *       "symbol": "btc",
+                     *       "coingecko_id": "bitcoin",
+                     *       "to_base": 56011.12,
+                     *       "balance_as_of": "2026-03-01T09:41:18.000Z",
+                     *       "exchange_rate_as_of": "2026-03-01T09:35:00.000Z",
+                     *       "created_by_name": "User 1",
+                     *       "created_at": "2025-11-12T20:14:32.000Z",
+                     *       "updated_at": "2026-03-01T09:41:18.000Z"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["cryptoManualObject"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["errorResponseObject"];
+                };
+            };
+            401: components["responses"]["unauthorizedToken"];
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Not Found",
+                     *       "errors": [
+                     *         {
+                     *           "errMsg": "There is no manual crypto account with the id: 99999999."
+                     *         }
+                     *       ]
+                     *     }
+                     */
+                    "application/json": components["schemas"]["errorResponseObject"];
+                };
+            };
+            429: components["responses"]["rateLimited"];
+            500: components["responses"]["serverError"];
+        };
+    };
+    deleteCryptoManual: {
+        parameters: {
+            query?: {
+                /** @description Explicitly set to `true` to preserve balance history, or `false` to remove associated history during deletion. This must be set if the account has a balance history. */
+                keep_history?: boolean;
+            };
+            header?: never;
+            path: {
+                /** @description ID of the manual crypto balance to delete */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content. The crypto asset has been deleted. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["unauthorizedToken"];
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Not Found",
+                     *       "errors": [
+                     *         {
+                     *           "errMsg": "There is no manual crypto balance with the id: 99999999."
+                     *         }
+                     *       ]
+                     *     }
+                     */
+                    "application/json": components["schemas"]["errorResponseObject"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Explicit confirmation required",
+                     *       "errors": [
+                     *         {
+                     *           "errMsg": "This crypto manual account has existing balance history. To delete this account, you must explicitly set keep_history to true or false.",
+                     *           "crypto_manual_id": 22001,
+                     *           "has_balance_history": true,
+                     *           "required_parameter": "keep_history",
+                     *           "allowed_values": [
+                     *             true,
+                     *             false
+                     *           ]
+                     *         }
+                     *       ]
+                     *     }
+                     */
+                    "application/json": components["schemas"]["errorResponseObject"];
+                };
+            };
+            429: components["responses"]["rateLimited"];
+            500: components["responses"]["serverError"];
+        };
+    };
+    getAllCryptoSynced: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A list of synced crypto accounts */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "crypto_synced": [
+                     *         {
+                     *           "id": 33004,
+                     *           "provider": "coinbase",
+                     *           "status": "active",
+                     *           "created_by_name": "User 1",
+                     *           "created_at": "2025-10-02T11:02:09.000Z",
+                     *           "updated_at": "2026-02-25T14:25:01.000Z",
+                     *           "display_name": "Coinbase Main",
+                     *           "balances": [
+                     *             {
+                     *               "name": "ETH",
+                     *               "balance": "12.004500000000000000",
+                     *               "symbol": "eth",
+                     *               "coingecko_id": "ethereum",
+                     *               "to_base": 28998.44,
+                     *               "balance_as_of": "2026-02-25T14:25:00.000Z",
+                     *               "exchange_rate_as_of": "2026-02-25T14:20:00.000Z",
+                     *               "updated_at": "2026-02-25T14:25:01.000Z"
+                     *             },
+                     *             {
+                     *               "name": "BTC",
+                     *               "balance": "0.100020003000400050",
+                     *               "symbol": "btc",
+                     *               "coingecko_id": "bitcoin",
+                     *               "to_base": 6231.28,
+                     *               "balance_as_of": "2026-02-25T14:25:00.000Z",
+                     *               "exchange_rate_as_of": "2026-02-25T14:20:00.000Z",
+                     *               "updated_at": "2026-02-25T14:25:01.000Z"
+                     *             }
+                     *           ]
+                     *         },
+                     *         {
+                     *           "id": 33005,
+                     *           "provider": "kraken",
+                     *           "status": "relink",
+                     *           "created_by_name": "User 1",
+                     *           "created_at": "2025-08-10T10:00:00.000Z",
+                     *           "updated_at": "2026-02-26T07:22:30.000Z",
+                     *           "display_name": "Kraken Wallet",
+                     *           "balances": [
+                     *             {
+                     *               "name": "XRP",
+                     *               "balance": "2500.000000000000000000",
+                     *               "symbol": "xrp",
+                     *               "coingecko_id": "ripple",
+                     *               "to_base": 1287.5,
+                     *               "balance_as_of": "2026-02-26T07:22:30.000Z",
+                     *               "exchange_rate_as_of": "2026-02-26T07:10:00.000Z",
+                     *               "updated_at": "2026-02-26T07:22:30.000Z"
+                     *             }
+                     *           ]
+                     *         }
+                     *       ]
+                     *     }
+                     */
+                    "application/json": components["schemas"]["cryptoSyncedListResponseObject"];
+                };
+            };
+            401: components["responses"]["unauthorizedToken"];
+            429: components["responses"]["rateLimited"];
+            500: components["responses"]["serverError"];
+        };
+    };
+    getCryptoSyncedById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Synced crypto account ID */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Synced crypto account object */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "id": 33004,
+                     *       "provider": "coinbase",
+                     *       "status": "active",
+                     *       "created_by_name": "User 1",
+                     *       "created_at": "2025-10-02T11:02:09.000Z",
+                     *       "updated_at": "2026-02-25T14:25:01.000Z",
+                     *       "display_name": "Coinbase Main",
+                     *       "balances": [
+                     *         {
+                     *           "name": "ETH",
+                     *           "balance": "12.004500000000000000",
+                     *           "symbol": "eth",
+                     *           "coingecko_id": "ethereum",
+                     *           "to_base": 28998.44,
+                     *           "balance_as_of": "2026-02-25T14:25:00.000Z",
+                     *           "exchange_rate_as_of": "2026-02-25T14:20:00.000Z",
+                     *           "updated_at": "2026-02-25T14:25:01.000Z"
+                     *         },
+                     *         {
+                     *           "name": "BTC",
+                     *           "balance": "0.100020003000400050",
+                     *           "symbol": "btc",
+                     *           "coingecko_id": "bitcoin",
+                     *           "to_base": 6231.28,
+                     *           "balance_as_of": "2026-02-25T14:25:00.000Z",
+                     *           "exchange_rate_as_of": "2026-02-25T14:20:00.000Z",
+                     *           "updated_at": "2026-02-25T14:25:01.000Z"
+                     *         }
+                     *       ]
+                     *     }
+                     */
+                    "application/json": components["schemas"]["syncedCryptoAccount"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Invalid Path Parameters",
+                     *       "errors": [
+                     *         {
+                     *           "errMsg": "Invalid value type for path parameter: 'id'. Expected 'number', received 'string'."
+                     *         }
+                     *       ]
+                     *     }
+                     */
+                    "application/json": components["schemas"]["errorResponseObject"];
+                };
+            };
+            401: components["responses"]["unauthorizedToken"];
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Not Found",
+                     *       "errors": [
+                     *         {
+                     *           "errMsg": "There is no synced crypto account with the id: 99999999."
+                     *         }
+                     *       ]
+                     *     }
+                     */
+                    "application/json": components["schemas"]["errorResponseObject"];
+                };
+            };
+            429: components["responses"]["rateLimited"];
+            500: components["responses"]["serverError"];
+        };
+    };
+    getCryptoSyncedBalanceBySymbol: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Synced crypto account ID */
+                id: number;
+                /** @description Crypto symbol within the synced account */
+                symbol: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Synced crypto balance object */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "name": "ETH",
+                     *       "balance": "12.004500000000000000",
+                     *       "symbol": "eth",
+                     *       "coingecko_id": "ethereum",
+                     *       "to_base": 28998.44,
+                     *       "balance_as_of": "2026-02-25T14:25:00.000Z",
+                     *       "exchange_rate_as_of": "2026-02-25T14:20:00.000Z",
+                     *       "updated_at": "2026-02-25T14:25:01.000Z"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["cryptoSyncedBalance"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["errorResponseObject"];
+                };
+            };
+            401: components["responses"]["unauthorizedToken"];
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["errorResponseObject"];
+                };
+            };
+            429: components["responses"]["rateLimited"];
+            500: components["responses"]["serverError"];
+        };
+    };
+    refreshCryptoSynced: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Synced crypto account ID */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Refreshed synced crypto account */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "id": 33004,
+                     *       "provider": "coinbase",
+                     *       "status": "active",
+                     *       "created_by_name": "User 1",
+                     *       "created_at": "2025-10-02T11:02:09.000Z",
+                     *       "display_name": "Coinbase Main",
+                     *       "balances": [
+                     *         {
+                     *           "name": "ETH",
+                     *           "balance": "12.004500000000000000",
+                     *           "symbol": "eth",
+                     *           "coingecko_id": "ethereum",
+                     *           "to_base": 28998.44,
+                     *           "balance_as_of": "2026-02-25T14:25:00.000Z",
+                     *           "exchange_rate_as_of": "2026-02-25T14:20:00.000Z",
+                     *           "updated_at": "2026-02-25T14:25:01.000Z"
+                     *         },
+                     *         {
+                     *           "name": "BTC",
+                     *           "balance": "0.100020003000400050",
+                     *           "symbol": "btc",
+                     *           "coingecko_id": "bitcoin",
+                     *           "to_base": 6231.28,
+                     *           "balance_as_of": "2026-02-25T14:25:00.000Z",
+                     *           "exchange_rate_as_of": "2026-02-25T14:20:00.000Z",
+                     *           "updated_at": "2026-02-25T14:25:01.000Z"
+                     *         }
+                     *       ]
+                     *     }
+                     */
+                    "application/json": components["schemas"]["syncedCryptoAccount"];
+                };
+            };
+            401: components["responses"]["unauthorizedToken"];
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Not Found",
+                     *       "errors": [
+                     *         {
+                     *           "errMsg": "There is no synced crypto account with the id: 99999999."
+                     *         }
+                     *       ]
+                     *     }
+                     */
+                    "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
             429: components["responses"]["rateLimited"];
@@ -2728,7 +3850,7 @@ interface operations {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
-                     *           "errMsg": "There is no manual account with the id:'543210'`"
+                     *           "errMsg": "There is no manual account with the id: 543210."
                      *         }
                      *       ]
                      *     }
@@ -2776,7 +3898,7 @@ interface operations {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
-                     *           "errMsg": "There is no manual account with the id:'543210'`"
+                     *           "errMsg": "There is no manual account with the id: 543210."
                      *         }
                      *       ]
                      *     }
@@ -3011,9 +4133,9 @@ interface operations {
     triggerPlaidAccountFetch: {
         parameters: {
             query?: {
-                /** @description Denotes the beginning of the time period to fetch transactions for. If omitted, the most recent transactions will be returned. <br> Required if end_date exists. <br> */
+                /** @description Indicates the beginning of the time period to fetch transactions for. If omitted, the most recent transactions will be returned. <br> Required if end_date exists. <br> */
                 start_date?: string;
-                /** @description Denotes the end of the time period you'd like to get transactions for. Required if start_date exists. */
+                /** @description Indicates the end of the time period to fetch transactions for. Required if start_date exists. */
                 end_date?: string;
                 /** @description Specific ID of a plaid account to fetch. If not set the endpoint will trigger a fetch for all eligible accounts. */
                 id?: number;
@@ -3024,7 +4146,7 @@ interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description A 202 ACCEPTED status is returned if Plaid acknowledged the fetch request. This indicates that it is possible to subsequently query the `GET /plaid_accounts` endpoint to determine if the request was successful (`plaid_last_successful_update` is more recent than `last_fetch), or if new transactions were synced (`last_import` is more recent than `last_fetch`).<br> */
+            /** @description A 202 ACCEPTED status is returned if Plaid acknowledged the fetch request. This indicates that it is possible to subsequently query the `GET /plaid_accounts` endpoint to determine if the request was successful (`plaid_last_successful_update` is more recent than `last_fetch`), or if new transactions were synced (`last_import` is more recent than `last_fetch`).<br> */
             202: {
                 headers: {
                     [name: string]: unknown;
@@ -3067,23 +4189,23 @@ interface operations {
     getAllTransactions: {
         parameters: {
             query?: {
-                /** @description Denotes the beginning of the time period to fetch transactions for. If omitted, the most recent transactions will be returned. See `limit`. Required if end_date exists. <br> */
+                /** @description Indicates the beginning of the time period to fetch transactions for. If omitted, the most recent transactions will be returned. See `limit`. Required if end_date exists. <br> */
                 start_date?: string;
-                /** @description Denotes the end of the time period you'd like to get transactions for. Required if start_date exists. */
+                /** @description Indicates the end of the time period to fetch transactions for. Required if start_date exists. */
                 end_date?: string;
                 /** @description Filter transactions to those created after the specified timestamp. Accepts either a date (YYYY-MM-DD) or ISO 8601 datetime string. Date-only values are interpreted as midnight UTC (00:00:00Z). */
                 created_since?: string;
                 /** @description Filter transactions to those updated after the specified timestamp. Accepts either a date (YYYY-MM-DD) or ISO 8601 datetime string. Date-only values are interpreted as midnight UTC (00:00:00Z). */
                 updated_since?: string;
-                /** @description Filter transactions to those associated with specified manual account ID or set this to 0 to omit any transactions from manual accounts. Setting both this and `plaid_account_id` to 0 will return transactions with no account. These are listed as "Cash Transactions" in the Lunch Money GUI.<br> Note that transaction groups are not associated with any account. If you want the response to include transactions from transaction groups, set the `include_group_children` query parameter to `true` when filtering by manual accounts. */
+                /** @description Filter transactions to those associated with specified manual account ID or set this to 0 to omit any transactions from manual accounts. Setting both this and `plaid_account_id` to 0 will return transactions with no account. These are listed as "Cash Transactions" in the Lunch Money app.<br> Note that transaction groups are not associated with any account. If you want the response to include transactions from transaction groups, set the `include_group_children` query parameter to `true` when filtering by manual accounts. */
                 manual_account_id?: number;
-                /** @description Filter transactions to those associated with specified plaid account ID or set this to 0 to omit any transactions from plaid accounts. Setting both this and `manual_account_id` to 0 will return transactions with no account. These are listed as "Cash Transactions" in the Lunch Money GUI.<br> Note that transaction groups are not associated with any account. If you want the response to include transactions from transaction groups, set the `include_group_children` query parameter to `true` when filtering by plaid accounts. */
+                /** @description Filter transactions to those associated with specified plaid account ID or set this to 0 to omit any transactions from plaid accounts. Setting both this and `manual_account_id` to 0 will return transactions with no account. These are listed as "Cash Transactions" in the Lunch Money app.<br> Note that transaction groups are not associated with any account. If you want the response to include transactions from transaction groups, set the `include_group_children` query parameter to `true` when filtering by plaid accounts. */
                 plaid_account_id?: number;
-                /** @description Filter transactions to those associated with specified Recurring  Item ID */
+                /** @description Filter transactions to those associated with the specified recurring item ID. */
                 recurring_id?: number;
-                /** @description Filter transactions to those associated with the specified category ID. Will also match category groups.  Set this to 0 to return only un-categorized transactions */
+                /** @description Filter transactions to those associated with the specified category ID. Will also match category groups. Set this to 0 to return only uncategorized transactions. */
                 category_id?: number;
-                /** @description Filter transactions to those that have a tag with the specified Tag ID */
+                /** @description Filter transactions to those that have the specified tag ID */
                 tag_id?: number;
                 /** @description Filter by group (returns only transaction groups if `true`) */
                 is_group_parent?: boolean;
@@ -3093,15 +4215,15 @@ interface operations {
                 is_pending?: boolean;
                 /** @description By default, pending transactions are excluded from results. Set to `true` to include imported transactions with a pending status in the results. This query param is ignored if the `is_pending` query param is also set. */
                 include_pending?: boolean;
-                /** @description By default, custom and plaid metadata are not included in the response.  Set to true if you'd like the returned transactions objects to include any  metadata associated with the transactions. */
+                /** @description By default, custom and plaid metadata are not included in the response. Set to true if you'd like the returned transaction objects to include any metadata associated with the transactions. */
                 include_metadata?: boolean;
-                /** @description By default, transactions that were split into multiple transactions are not included in the response. Set to true if you'd like the returned transactions objects to include any  transactions that were split into multiple transactions.  Use with caution as this data is normally not exposed after the split transactions are created. */
+                /** @description By default, transactions that were split into multiple transactions are not included in the response. Set to true if you'd like the returned transaction objects to include transactions that were split into multiple transactions. Use with caution, as this data is normally not exposed after the split transactions are created. */
                 include_split_parents?: boolean;
                 /** @description By default, individual transactions that joined into a transaction group are not included in the response. Set to true if you'd like the returned transactions objects to include any transactions that joined into a transaction group. */
                 include_group_children?: boolean;
-                /** @description By default, the `children` property is not included in the response. Set to true if you'd like the children property to be populated with the transactions that  make up a transaction group, or, if the `include_split_parents` query param is also set,  the transactions that were split from a parent transaction. */
+                /** @description By default, the `children` property is not included in the response. Set to true if you'd like the children property to be populated with the transactions that make up a transaction group, or, if the `include_split_parents` query param is also set, the transactions that were split from a parent transaction. */
                 include_children?: boolean;
-                /** @description By default, the `files` property is not included in the response. Set to true if you'd like the responses to include a list of of  objects that describe any files attached to the transactions. */
+                /** @description By default, the `files` property is not included in the response. Set to true if you'd like the responses to include a list of objects that describe any files attached to the transactions. */
                 include_files?: boolean;
                 /** @description Sets the maximum number of transactions to return. If more match the filter criteria, the response will include a `has_more` attribute set to `true`. See [Pagination](https://alpha.lunchmoney.dev/v2/pagination) */
                 limit?: number;
@@ -3218,7 +4340,7 @@ interface operations {
                     /** @description List of transactions to insert. */
                     transactions: components["schemas"]["insertTransactionObject"][];
                     /**
-                     * @description If `true`, any rules associated with the account specified by the `manual_account_id` property for each transaction will be applied.
+                     * @description If explicitly set to `true`, any rules associated with the account specified by the `manual_account_id` property for each transaction will be applied.
                      * @default false
                      */
                     apply_rules?: boolean;
@@ -3411,7 +4533,7 @@ interface operations {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
-                     *           "errMsg": "There is no transaction with the id:'543210'`"
+                     *           "errMsg": "There is no transaction with the id: 543210."
                      *         }
                      *       ]
                      *     }
@@ -3488,7 +4610,7 @@ interface operations {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
-                     *           "errMsg": "There is no transaction with the id:'543210'`"
+                     *           "errMsg": "There is no transaction with the id: 543210."
                      *         }
                      *       ]
                      *     }
@@ -3531,7 +4653,7 @@ interface operations {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
-                     *           "errMsg": "There is no transaction with the id:'543210'`"
+                     *           "errMsg": "There is no transaction with the id: 543210."
                      *         }
                      *       ]
                      *     }
@@ -3570,7 +4692,7 @@ interface operations {
                     /** @description Notes for the grouped transaction. */
                     notes?: string | null;
                     /**
-                     * @description If set must be either `reviewed` or `unreviewed`. If not set, defaults to `reviewed`.
+                     * @description If set, must be either `reviewed` or `unreviewed`. If not set, defaults to `reviewed`.
                      * @enum {string}
                      */
                     status?: "reviewed" | "unreviewed";
@@ -4134,7 +5256,7 @@ interface operations {
             };
         };
         responses: {
-            /** @description Category or Category Group updated successfully */
+            /** @description Tag updated successfully */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -4151,10 +5273,10 @@ interface operations {
                 content: {
                     /**
                      * @example {
-                     *       "message": "Invalid Request Body",
+                     *       "message": "Request Validation Failure",
                      *       "errors": [
                      *         {
-                     *           "errMsg": "A request to update a tag must include at least one of the following properties: name, description, archived"
+                     *           "errMsg": "A request to update a tag must include at least one of the following properties: name, description, archived."
                      *         }
                      *       ]
                      *     }
@@ -4174,7 +5296,7 @@ interface operations {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
-                     *           "errMsg": "There is no tag with the id:'543210'`"
+                     *           "errMsg": "There is no tag with the id: 543210."
                      *         }
                      *       ]
                      *     }
@@ -4220,7 +5342,7 @@ interface operations {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
-                     *           "errMsg": "There is no tag with the id:'543210'`"
+                     *           "errMsg": "There is no tag with the id: 543210."
                      *         }
                      *       ]
                      *     }
@@ -4228,7 +5350,7 @@ interface operations {
                     "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
-            /** @description Unprocessable Entity */
+            /** @description Unprocessable Content */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -4253,9 +5375,9 @@ interface operations {
     getAllRecurring: {
         parameters: {
             query?: {
-                /** @description Denotes the beginning of the range used to populate the `matching` object in the recurring items. If omitted, the current month will be used as the range.<br> Required if end_date exists. */
+                /** @description Indicates the beginning of the range used to populate the `matching` object in the recurring items. If omitted, the current month will be used as the range.<br> Required if end_date exists. */
                 start_date?: string;
-                /** @description Denotes the end of the range used to populate the `matching` object in the recurring items. Required if start_date exists. */
+                /** @description Indicates the end of the range used to populate the `matching` object in the recurring items. Required if start_date exists. */
                 end_date?: string;
                 include_suggested?: boolean;
             };
@@ -4405,7 +5527,7 @@ interface operations {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
-                     *           "errMsg": "There is no tag with the id:'543210'"
+                     *           "errMsg": "There is no recurring item with the id: 543210."
                      *         }
                      *       ]
                      *     }
@@ -4420,9 +5542,9 @@ interface operations {
     getRecurringById: {
         parameters: {
             query?: {
-                /** @description Denotes the beginning of the range used to populate the `matching` object in the recurring items. If omitted, the current month will be used as the range.<br> Required if end_date exists. */
+                /** @description Indicates the beginning of the range used to populate the `matching` object in the recurring items. If omitted, the current month will be used as the range.<br> Required if end_date exists. */
                 start_date?: string;
-                /** @description Denotes the end of the range used to populate the `matching` object in the recurring items. Required if start_date exists. */
+                /** @description Indicates the end of the range used to populate the `matching` object in the recurring items. Required if start_date exists. */
                 end_date?: string;
             };
             header?: never;
@@ -4434,7 +5556,7 @@ interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Tag Object with the requested Tag ID */
+            /** @description Recurring item object with the requested recurring item ID */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -4525,7 +5647,7 @@ interface operations {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
-                     *           "errMsg": "There is no tag with the id:'543210'"
+                     *           "errMsg": "There is no recurring item with the id: 543210."
                      *         }
                      *       ]
                      *     }
@@ -4662,6 +5784,10 @@ type UpdateTransaction = components["schemas"]["updateTransactionObject"];
 type SplitTransaction = components["schemas"]["splitTransactionObject"];
 type ManualAccount = components["schemas"]["manualAccountObject"];
 type PlaidAccount = components["schemas"]["plaidAccountObject"];
+type Cryptocurrency = components["schemas"]["cryptoCurrencyObject"];
+type ManualCryptoAccount = components["schemas"]["cryptoManualObject"];
+type SyncedCryptoAccountBalance = components["schemas"]["cryptoSyncedBalance"];
+type SyncedCryptoAccount = components["schemas"]["syncedCryptoAccount"];
 type Tag = components["schemas"]["tagObject"];
 type RecurringItem = components["schemas"]["recurringObject"];
 type TransactionAttachment = components["schemas"]["transactionAttachmentObject"];
@@ -4712,6 +5838,10 @@ type DeleteCategoryParams = operations["deleteCategory"]["parameters"]["query"];
 type DeleteTagParams = operations["deleteTag"]["parameters"]["query"];
 type CreateManualAccountBody = operations["createManualAccount"]["requestBody"]["content"]["application/json"];
 type UpdateManualAccountBody = operations["updateManualAccount"]["requestBody"]["content"]["application/json"];
+type CreateCryptocurrencyBody = operations["createCryptocurrency"]["requestBody"]["content"]["application/json"];
+type CreateManualCryptoAccountBody = operations["createCryptoManual"]["requestBody"]["content"]["application/json"];
+type UpdateManualCryptoAccountBody = operations["updateCryptoManual"]["requestBody"]["content"]["application/json"];
+type DeleteManualCryptoAccountParams = operations["deleteCryptoManual"]["parameters"]["query"];
 type TriggerPlaidAccountFetchParams = operations["triggerPlaidAccountFetch"]["parameters"]["query"];
 type DeleteTransactionsBody = operations["deleteTransactions"]["requestBody"]["content"]["application/json"];
 type AttachFileToTransactionBody = operations["attachFileToTransaction"]["requestBody"]["content"]["multipart/form-data"];
@@ -4787,6 +5917,25 @@ declare class LunchMoneyClient {
         update: (id: number, data: UpdateManualAccountBody) => Promise<ManualAccount>;
         delete: (id: number) => Promise<void>;
     };
+    get cryptocurrencies(): {
+        getAll: () => Promise<Cryptocurrency[]>;
+        create: (data: CreateCryptocurrencyBody) => Promise<Cryptocurrency>;
+    };
+    get crypto(): {
+        manual: {
+            getAll: () => Promise<ManualCryptoAccount[]>;
+            get: (id: number) => Promise<ManualCryptoAccount>;
+            create: (data: CreateManualCryptoAccountBody) => Promise<ManualCryptoAccount>;
+            update: (id: number, data: UpdateManualCryptoAccountBody) => Promise<ManualCryptoAccount>;
+            delete: (id: number, params?: DeleteManualCryptoAccountParams) => Promise<void>;
+        };
+        synced: {
+            getAll: () => Promise<SyncedCryptoAccount[]>;
+            get: (id: number) => Promise<SyncedCryptoAccount>;
+            getBalance: (id: number, symbol: string) => Promise<SyncedCryptoAccountBalance>;
+            refresh: (id: number) => Promise<SyncedCryptoAccount>;
+        };
+    };
     get plaidAccounts(): {
         getAll: () => Promise<PlaidAccount[]>;
         get: (id: number) => Promise<PlaidAccount>;
@@ -4814,8 +5963,8 @@ declare class LunchMoneyClient {
     /**
      * Access to the raw openapi-fetch client for advanced usage
      */
-    get rawClient(): openapi_fetch.Client<paths, `${string}/${string}`>;
+    get rawClient(): openapi_fetch.Client<paths, MediaType>;
 }
 
 export { LunchMoneyClient, LunchMoneyError, LunchMoneyClient as default };
-export type { AccountType, AlignedCategoryTotals, AlignedSummaryCategory, AlignedSummaryResponse, AttachFileToTransactionBody, BudgetInvalidPeriodError, BudgetSettingsResponse, BudgetUpsertResponse, Category, ChildCategory, ChildTransaction, CreateCategoryBody, CreateManualAccountBody, CreateTagBody, CreateTransactionsBody, Currency, DeleteBudgetParams, DeleteCategoryParams, DeleteCategoryResponse, DeleteTagParams, DeleteTagResponse, DeleteTransactionsBody, ErrorDetail, ErrorResponse, GetAllCategoriesParams, GetAllRecurringItemsParams, GetAllTransactionsParams, GetAllTransactionsResponse, GetBudgetSummaryParams, GroupTransactionsBody, InsertTransaction, InsertTransactionsResponse, LunchMoneyClientOptions, ManualAccount, NonAlignedCategoryTotals, NonAlignedSummaryCategory, NonAlignedSummaryResponse, PlaidAccount, RecurringItem, SkippedExistingExternalId, SplitTransaction, SplitTransactionBody, SummaryCategoryOccurrence, SummaryRecurringTransaction, SummaryRolloverPool, SummaryRolloverPoolAdjustment, SummaryTotals, SummaryTotalsBreakdown, Tag, Transaction, TransactionAttachment, TransactionAttachmentUrlResponse, TriggerPlaidAccountFetchParams, UpdateCategoryBody, UpdateManualAccountBody, UpdateTagBody, UpdateTransaction, UpdateTransactionBody, UpdateTransactionsBody, UpdateTransactionsResponse, UpsertBudgetBody, User, components, operations, paths };
+export type { AccountType, AlignedCategoryTotals, AlignedSummaryCategory, AlignedSummaryResponse, AttachFileToTransactionBody, BudgetInvalidPeriodError, BudgetSettingsResponse, BudgetUpsertResponse, Category, ChildCategory, ChildTransaction, CreateCategoryBody, CreateCryptocurrencyBody, CreateManualAccountBody, CreateManualCryptoAccountBody, CreateTagBody, CreateTransactionsBody, Cryptocurrency, Currency, DeleteBudgetParams, DeleteCategoryParams, DeleteCategoryResponse, DeleteManualCryptoAccountParams, DeleteTagParams, DeleteTagResponse, DeleteTransactionsBody, ErrorDetail, ErrorResponse, GetAllCategoriesParams, GetAllRecurringItemsParams, GetAllTransactionsParams, GetAllTransactionsResponse, GetBudgetSummaryParams, GroupTransactionsBody, InsertTransaction, InsertTransactionsResponse, LunchMoneyClientOptions, ManualAccount, ManualCryptoAccount, NonAlignedCategoryTotals, NonAlignedSummaryCategory, NonAlignedSummaryResponse, PlaidAccount, RecurringItem, SkippedExistingExternalId, SplitTransaction, SplitTransactionBody, SummaryCategoryOccurrence, SummaryRecurringTransaction, SummaryRolloverPool, SummaryRolloverPoolAdjustment, SummaryTotals, SummaryTotalsBreakdown, SyncedCryptoAccount, SyncedCryptoAccountBalance, Tag, Transaction, TransactionAttachment, TransactionAttachmentUrlResponse, TriggerPlaidAccountFetchParams, UpdateCategoryBody, UpdateManualAccountBody, UpdateManualCryptoAccountBody, UpdateTagBody, UpdateTransaction, UpdateTransactionBody, UpdateTransactionsBody, UpdateTransactionsResponse, UpsertBudgetBody, User, components, operations, paths };

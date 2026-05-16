@@ -122,6 +122,8 @@ This library provides convenient methods for:
 - **Categories**: CRUD operations (`categories.getAll()`, `categories.get()`, `categories.create()`, `categories.update()`, `categories.delete()`)
 - **Transactions**: Full transaction management (`transactions.getAll()`, `transactions.create()`, `transactions.split()`, `transactions.group()`)
 - **Manual Accounts**: CRUD operations (`manualAccounts.getAll()`, `manualAccounts.get()`, `manualAccounts.create()`, `manualAccounts.update()`, `manualAccounts.delete()`)
+- **Cryptocurrencies**: Supported cryptocurrency lookup and creation (`cryptocurrencies.getAll()`, `cryptocurrencies.create()`)
+- **Crypto**: Manual and synced crypto account operations (`crypto.manual.getAll()`, `crypto.manual.create()`, `crypto.synced.getAll()`, `crypto.synced.getBalance()`, `crypto.synced.refresh()`)
 - **Plaid Accounts**: Get Plaid-connected accounts (`plaidAccounts.getAll()`, `plaidAccounts.get()`)
 - **Tags**: CRUD operations (`tags.getAll()`, `tags.create()`, `tags.update()`, `tags.delete()`)
 - **Recurring Items**: Get recurring patterns (`recurringItems.getAll()`, `recurringItems.get()`)
@@ -190,6 +192,10 @@ import {
   type Tag,
   type ManualAccount,
   type PlaidAccount,
+  type Cryptocurrency,
+  type ManualCryptoAccount,
+  type SyncedCryptoAccount,
+  type SyncedCryptoAccountBalance,
   type RecurringItem,
   type TransactionAttachment,
 } from 'lunch-money-js-v2';
@@ -213,7 +219,10 @@ import {
   type CreateCategoryBody,
   type UpdateCategoryBody,
   type GetAllTransactionsParams,
-  type CreateTransactionsBody
+  type CreateTransactionsBody,
+  type CreateManualCryptoAccountBody,
+  type UpdateManualCryptoAccountBody,
+  type DeleteManualCryptoAccountParams
 } from 'lunch-money-js-v2';
 ```
 

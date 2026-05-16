@@ -268,6 +268,78 @@ class LunchMoneyClient {
             },
         };
     }
+    get cryptocurrencies() {
+        return {
+            getAll: async () => {
+                const response = await this.client.GET("/cryptocurrencies");
+                const data = this.handleDataResponse(response);
+                return data.cryptocurrencies || [];
+            },
+            create: async (data) => {
+                const response = await this.client.POST("/cryptocurrencies", {
+                    body: data,
+                });
+                return this.handleDataResponse(response);
+            },
+        };
+    }
+    get crypto() {
+        return {
+            manual: {
+                getAll: async () => {
+                    const response = await this.client.GET("/crypto/manual");
+                    const data = this.handleDataResponse(response);
+                    return data.crypto_manual || [];
+                },
+                get: async (id) => {
+                    const response = await this.client.GET("/crypto/manual/{id}", {
+                        params: { path: { id } },
+                    });
+                    return this.handleDataResponse(response);
+                },
+                create: async (data) => {
+                    const response = await this.client.POST("/crypto/manual", {
+                        body: data,
+                    });
+                    return this.handleDataResponse(response);
+                },
+                update: async (id, data) => {
+                    const response = await this.client.PUT("/crypto/manual/{id}", {
+                        params: { path: { id } },
+                        body: data,
+                    });
+                    return this.handleDataResponse(response);
+                },
+                delete: async (id, params) => {
+                    const response = await this.client.DELETE("/crypto/manual/{id}", {
+                        params: { path: { id }, query: params },
+                    });
+                    return this.handleVoidResponse(response);
+                },
+            },
+            synced: {
+                getAll: async () => {
+                    const response = await this.client.GET("/crypto/synced");
+                    const data = this.handleDataResponse(response);
+                    return data.crypto_synced || [];
+                },
+                get: async (id) => {
+                    const response = await this.client.GET("/crypto/synced/{id}", {
+                        params: { path: { id } },
+                    });
+                    return this.handleDataResponse(response);
+                },
+                getBalance: async (id, symbol) => {
+                    const response = await this.client.GET("/crypto/synced/{id}/{symbol}", { params: { path: { id, symbol } } });
+                    return this.handleDataResponse(response);
+                },
+                refresh: async (id) => {
+                    const response = await this.client.POST("/crypto/synced/{id}/refresh", { params: { path: { id } } });
+                    return this.handleDataResponse(response);
+                },
+            },
+        };
+    }
     get plaidAccounts() {
         return {
             getAll: async () => {

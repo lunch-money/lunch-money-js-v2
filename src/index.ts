@@ -7,6 +7,10 @@ import type {
 	Tag,
 	ManualAccount,
 	PlaidAccount,
+	Cryptocurrency,
+	ManualCryptoAccount,
+	SyncedCryptoAccountBalance,
+	SyncedCryptoAccount,
 	RecurringItem,
 	GetAllCategoriesParams,
 	CreateCategoryBody,
@@ -32,6 +36,10 @@ import type {
 	BudgetUpsertResponse,
 	CreateManualAccountBody,
 	UpdateManualAccountBody,
+	CreateCryptocurrencyBody,
+	CreateManualCryptoAccountBody,
+	UpdateManualCryptoAccountBody,
+	DeleteManualCryptoAccountParams,
 	TriggerPlaidAccountFetchParams,
 	InsertTransactionsResponse,
 	UpdateTransactionsResponse,
@@ -379,6 +387,99 @@ export class LunchMoneyClient {
 					params: { path: { id } },
 				});
 				return this.handleVoidResponse(response);
+			},
+		};
+	}
+
+	get cryptocurrencies() {
+		return {
+			getAll: async (): Promise<Cryptocurrency[]> => {
+				const response = await this.client.GET("/cryptocurrencies");
+				const data = this.handleDataResponse(response);
+				return data.cryptocurrencies || [];
+			},
+			create: async (
+				data: CreateCryptocurrencyBody,
+			): Promise<Cryptocurrency> => {
+				const response = await this.client.POST("/cryptocurrencies", {
+					body: data,
+				});
+				return this.handleDataResponse(response);
+			},
+		};
+	}
+
+	get crypto() {
+		return {
+			manual: {
+				getAll: async (): Promise<ManualCryptoAccount[]> => {
+					const response = await this.client.GET("/crypto/manual");
+					const data = this.handleDataResponse(response);
+					return data.crypto_manual || [];
+				},
+				get: async (id: number): Promise<ManualCryptoAccount> => {
+					const response = await this.client.GET("/crypto/manual/{id}", {
+						params: { path: { id } },
+					});
+					return this.handleDataResponse(response);
+				},
+				create: async (
+					data: CreateManualCryptoAccountBody,
+				): Promise<ManualCryptoAccount> => {
+					const response = await this.client.POST("/crypto/manual", {
+						body: data,
+					});
+					return this.handleDataResponse(response);
+				},
+				update: async (
+					id: number,
+					data: UpdateManualCryptoAccountBody,
+				): Promise<ManualCryptoAccount> => {
+					const response = await this.client.PUT("/crypto/manual/{id}", {
+						params: { path: { id } },
+						body: data,
+					});
+					return this.handleDataResponse(response);
+				},
+				delete: async (
+					id: number,
+					params?: DeleteManualCryptoAccountParams,
+				): Promise<void> => {
+					const response = await this.client.DELETE("/crypto/manual/{id}", {
+						params: { path: { id }, query: params },
+					});
+					return this.handleVoidResponse(response);
+				},
+			},
+			synced: {
+				getAll: async (): Promise<SyncedCryptoAccount[]> => {
+					const response = await this.client.GET("/crypto/synced");
+					const data = this.handleDataResponse(response);
+					return data.crypto_synced || [];
+				},
+				get: async (id: number): Promise<SyncedCryptoAccount> => {
+					const response = await this.client.GET("/crypto/synced/{id}", {
+						params: { path: { id } },
+					});
+					return this.handleDataResponse(response);
+				},
+				getBalance: async (
+					id: number,
+					symbol: string,
+				): Promise<SyncedCryptoAccountBalance> => {
+					const response = await this.client.GET(
+						"/crypto/synced/{id}/{symbol}",
+						{ params: { path: { id, symbol } } },
+					);
+					return this.handleDataResponse(response);
+				},
+				refresh: async (id: number): Promise<SyncedCryptoAccount> => {
+					const response = await this.client.POST(
+						"/crypto/synced/{id}/refresh",
+						{ params: { path: { id } } },
+					);
+					return this.handleDataResponse(response);
+				},
 			},
 		};
 	}

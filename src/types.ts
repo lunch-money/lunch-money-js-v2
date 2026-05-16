@@ -14,6 +14,11 @@ export type UpdateTransaction =
 export type SplitTransaction = components["schemas"]["splitTransactionObject"];
 export type ManualAccount = components["schemas"]["manualAccountObject"];
 export type PlaidAccount = components["schemas"]["plaidAccountObject"];
+export type Cryptocurrency = components["schemas"]["cryptoCurrencyObject"];
+export type ManualCryptoAccount = components["schemas"]["cryptoManualObject"];
+export type SyncedCryptoAccountBalance =
+	components["schemas"]["cryptoSyncedBalance"];
+export type SyncedCryptoAccount = components["schemas"]["syncedCryptoAccount"];
 export type Tag = components["schemas"]["tagObject"];
 export type RecurringItem = components["schemas"]["recurringObject"];
 export type TransactionAttachment =
@@ -113,6 +118,14 @@ export type CreateManualAccountBody =
 	operations["createManualAccount"]["requestBody"]["content"]["application/json"];
 export type UpdateManualAccountBody =
 	operations["updateManualAccount"]["requestBody"]["content"]["application/json"];
+export type CreateCryptocurrencyBody =
+	operations["createCryptocurrency"]["requestBody"]["content"]["application/json"];
+export type CreateManualCryptoAccountBody =
+	operations["createCryptoManual"]["requestBody"]["content"]["application/json"];
+export type UpdateManualCryptoAccountBody =
+	operations["updateCryptoManual"]["requestBody"]["content"]["application/json"];
+export type DeleteManualCryptoAccountParams =
+	operations["deleteCryptoManual"]["parameters"]["query"];
 export type TriggerPlaidAccountFetchParams =
 	operations["triggerPlaidAccountFetch"]["parameters"]["query"];
 export type DeleteTransactionsBody =
