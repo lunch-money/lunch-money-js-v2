@@ -129,6 +129,7 @@ This library provides convenient methods for:
 - **Recurring Items**: Get recurring patterns (`recurringItems.getAll()`, `recurringItems.get()`)
 - **Summary**: Get budget summaries (`summary.get()`)
 - **Budgets**: Manage budget settings and period budgets (`budgets.getSettings()`, `budgets.upsert()`, `budgets.delete()`)
+- **Balance History**: Monthly balance history across account types (`balanceHistory.getAll()`, `balanceHistory.account.get()`, `balanceHistory.account.upsert()`, `balanceHistory.account.delete()`, `balanceHistory.account.update()` for deleted-source metadata, `balanceHistory.entry.delete()`)
 
 ## Error Handling
 
@@ -198,6 +199,8 @@ import {
   type SyncedCryptoAccountBalance,
   type RecurringItem,
   type TransactionAttachment,
+  type BalanceHistoryAccount,
+  type BalanceHistoryEntry,
 } from 'lunch-money-js-v2';
 
 // Response types
@@ -222,7 +225,14 @@ import {
   type CreateTransactionsBody,
   type CreateManualCryptoAccountBody,
   type UpdateManualCryptoAccountBody,
-  type DeleteManualCryptoAccountParams
+  type DeleteManualCryptoAccountParams,
+  type BalanceHistoryAccountType,
+  type BalanceHistoryAccountGetInput,
+  type BalanceHistoryAccountUpsertInput,
+  type BalanceHistoryAccountDeleteInput,
+  type BalanceHistoryAccountUpdateInput,
+  type UpsertBalanceHistoryBody,
+  type UpdateBalanceHistoryDetailsBody,
 } from 'lunch-money-js-v2';
 ```
 

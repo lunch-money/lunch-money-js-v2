@@ -438,6 +438,113 @@ class LunchMoneyClient {
             },
         };
     }
+    async balanceHistoryAccountGet(type, accountKey, query) {
+        if (type === "crypto_synced") {
+            if (typeof accountKey === "number") {
+                throw new LunchMoneyError("crypto_synced balance history requires { id, symbol }", 0);
+            }
+            const response = await this.client.GET("/balance_history/crypto_synced/{account_id}/{symbol}", {
+                params: {
+                    path: {
+                        account_id: accountKey.id,
+                        symbol: accountKey.symbol,
+                    },
+                    query,
+                },
+            });
+            const data = this.handleDataResponse(response);
+            return data.balance_history ?? [];
+        }
+        const accountId = typeof accountKey === "number" ? accountKey : accountKey.id;
+        const response = await this.client.GET("/balance_history/{account_type}/{account_id}", {
+            params: {
+                path: { account_type: type, account_id: accountId },
+                query,
+            },
+        });
+        const data = this.handleDataResponse(response);
+        return data.balance_history ?? [];
+    }
+    async balanceHistoryAccountUpsert(type, accountKey, body) {
+        if (type === "crypto_synced") {
+            if (typeof accountKey === "number") {
+                throw new LunchMoneyError("crypto_synced balance history requires { id, symbol }", 0);
+            }
+            const response = await this.client.PUT("/balance_history/crypto_synced/{account_id}/{symbol}", {
+                params: {
+                    path: {
+                        account_id: accountKey.id,
+                        symbol: accountKey.symbol,
+                    },
+                },
+                body,
+            });
+            return this.handleDataResponse(response);
+        }
+        const accountId = typeof accountKey === "number" ? accountKey : accountKey.id;
+        const response = await this.client.PUT("/balance_history/{account_type}/{account_id}", {
+            params: {
+                path: { account_type: type, account_id: accountId },
+            },
+            body,
+        });
+        return this.handleDataResponse(response);
+    }
+    async balanceHistoryAccountDelete(type, accountKey) {
+        if (type === "crypto_synced") {
+            if (typeof accountKey === "number") {
+                throw new LunchMoneyError("crypto_synced balance history requires { id, symbol }", 0);
+            }
+            const response = await this.client.DELETE("/balance_history/crypto_synced/{account_id}/{symbol}", {
+                params: {
+                    path: {
+                        account_id: accountKey.id,
+                        symbol: accountKey.symbol,
+                    },
+                },
+            });
+            return this.handleVoidResponse(response);
+        }
+        const accountId = typeof accountKey === "number" ? accountKey : accountKey.id;
+        const response = await this.client.DELETE("/balance_history/{account_type}/{account_id}", {
+            params: {
+                path: { account_type: type, account_id: accountId },
+            },
+        });
+        return this.handleVoidResponse(response);
+    }
+    async balanceHistoryAccountUpdate(type, id, body) {
+        const response = await this.client.PUT("/balance_history/deleted/{account_id}/details", {
+            params: { path: { account_id: id } },
+            body,
+        });
+        return this.handleDataResponse(response);
+    }
+    get balanceHistory() {
+        return {
+            getAll: async (params) => {
+                const response = await this.client.GET("/balance_history", {
+                    params: { query: params },
+                });
+                const data = this.handleDataResponse(response);
+                return data.balance_history ?? [];
+            },
+            account: {
+                get: this.balanceHistoryAccountGet.bind(this),
+                upsert: this.balanceHistoryAccountUpsert.bind(this),
+                delete: this.balanceHistoryAccountDelete.bind(this),
+                update: this.balanceHistoryAccountUpdate.bind(this),
+            },
+            entry: {
+                delete: async (id) => {
+                    const response = await this.client.DELETE("/balance_history/entries/{id}", {
+                        params: { path: { id } },
+                    });
+                    return this.handleVoidResponse(response);
+                },
+            },
+        };
+    }
     /**
      * Access to the raw openapi-fetch client for advanced usage
      */

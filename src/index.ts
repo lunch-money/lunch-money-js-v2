@@ -47,12 +47,56 @@ import type {
 	AttachFileToTransactionBody,
 	TransactionAttachment,
 	TransactionAttachmentUrlResponse,
+	BalanceHistoryAccount,
+	BalanceHistoryAccountType,
+	BalanceHistoryAccountKey,
+	GetBalanceHistoryParams,
+	GetBalanceHistoryAccountQuery,
+	UpsertBalanceHistoryBody,
+	UpdateBalanceHistoryDetailsBody,
+	UpdateBalanceHistoryDetailsResponse,
 } from "./types";
 import { LunchMoneyError, type ErrorResponse } from "./errors";
 
 export interface LunchMoneyClientOptions extends ClientOptions {
 	apiKey?: string;
 	baseUrl?: string;
+}
+
+export interface BalanceHistoryAccountNamespace {
+	get(
+		type: "crypto_synced",
+		account: { id: number; symbol: string },
+		query?: GetBalanceHistoryAccountQuery,
+	): Promise<BalanceHistoryAccount[]>;
+	get(
+		type: Exclude<BalanceHistoryAccountType, "crypto_synced">,
+		account: number,
+		query?: GetBalanceHistoryAccountQuery,
+	): Promise<BalanceHistoryAccount[]>;
+	upsert(
+		type: "crypto_synced",
+		account: { id: number; symbol: string },
+		body: UpsertBalanceHistoryBody,
+	): Promise<BalanceHistoryAccount>;
+	upsert(
+		type: Exclude<BalanceHistoryAccountType, "crypto_synced">,
+		account: number,
+		body: UpsertBalanceHistoryBody,
+	): Promise<BalanceHistoryAccount>;
+	delete(
+		type: "crypto_synced",
+		account: { id: number; symbol: string },
+	): Promise<void>;
+	delete(
+		type: Exclude<BalanceHistoryAccountType, "crypto_synced">,
+		account: number,
+	): Promise<void>;
+	update(
+		type: "deleted",
+		id: number,
+		body: UpdateBalanceHistoryDetailsBody,
+	): Promise<UpdateBalanceHistoryDetailsResponse>;
 }
 
 /**
@@ -589,6 +633,208 @@ export class LunchMoneyClient {
 					params: { query: params },
 				});
 				return this.handleVoidResponse(response);
+			},
+		};
+	}
+
+	private balanceHistoryAccountGet(
+		type: "crypto_synced",
+		account: { id: number; symbol: string },
+		query?: GetBalanceHistoryAccountQuery,
+	): Promise<BalanceHistoryAccount[]>;
+	private balanceHistoryAccountGet(
+		type: Exclude<BalanceHistoryAccountType, "crypto_synced">,
+		account: number,
+		query?: GetBalanceHistoryAccountQuery,
+	): Promise<BalanceHistoryAccount[]>;
+	private async balanceHistoryAccountGet(
+		type: BalanceHistoryAccountType,
+		accountKey: BalanceHistoryAccountKey,
+		query?: GetBalanceHistoryAccountQuery,
+	): Promise<BalanceHistoryAccount[]> {
+		if (type === "crypto_synced") {
+			if (typeof accountKey === "number") {
+				throw new LunchMoneyError(
+					"crypto_synced balance history requires { id, symbol }",
+					0,
+				);
+			}
+			const response = await this.client.GET(
+				"/balance_history/crypto_synced/{account_id}/{symbol}",
+				{
+					params: {
+						path: {
+							account_id: accountKey.id,
+							symbol: accountKey.symbol,
+						},
+						query,
+					},
+				},
+			);
+			const data = this.handleDataResponse(response);
+			return data.balance_history ?? [];
+		}
+
+		const accountId =
+			typeof accountKey === "number" ? accountKey : accountKey.id;
+		const response = await this.client.GET(
+			"/balance_history/{account_type}/{account_id}",
+			{
+				params: {
+					path: { account_type: type, account_id: accountId },
+					query,
+				},
+			},
+		);
+		const data = this.handleDataResponse(response);
+		return data.balance_history ?? [];
+	}
+
+	private balanceHistoryAccountUpsert(
+		type: "crypto_synced",
+		account: { id: number; symbol: string },
+		body: UpsertBalanceHistoryBody,
+	): Promise<BalanceHistoryAccount>;
+	private balanceHistoryAccountUpsert(
+		type: Exclude<BalanceHistoryAccountType, "crypto_synced">,
+		account: number,
+		body: UpsertBalanceHistoryBody,
+	): Promise<BalanceHistoryAccount>;
+	private async balanceHistoryAccountUpsert(
+		type: BalanceHistoryAccountType,
+		accountKey: BalanceHistoryAccountKey,
+		body: UpsertBalanceHistoryBody,
+	): Promise<BalanceHistoryAccount> {
+		if (type === "crypto_synced") {
+			if (typeof accountKey === "number") {
+				throw new LunchMoneyError(
+					"crypto_synced balance history requires { id, symbol }",
+					0,
+				);
+			}
+			const response = await this.client.PUT(
+				"/balance_history/crypto_synced/{account_id}/{symbol}",
+				{
+					params: {
+						path: {
+							account_id: accountKey.id,
+							symbol: accountKey.symbol,
+						},
+					},
+					body,
+				},
+			);
+			return this.handleDataResponse(response);
+		}
+
+		const accountId =
+			typeof accountKey === "number" ? accountKey : accountKey.id;
+		const response = await this.client.PUT(
+			"/balance_history/{account_type}/{account_id}",
+			{
+				params: {
+					path: { account_type: type, account_id: accountId },
+				},
+				body,
+			},
+		);
+		return this.handleDataResponse(response);
+	}
+
+	private balanceHistoryAccountDelete(
+		type: "crypto_synced",
+		account: { id: number; symbol: string },
+	): Promise<void>;
+	private balanceHistoryAccountDelete(
+		type: Exclude<BalanceHistoryAccountType, "crypto_synced">,
+		account: number,
+	): Promise<void>;
+	private async balanceHistoryAccountDelete(
+		type: BalanceHistoryAccountType,
+		accountKey: BalanceHistoryAccountKey,
+	): Promise<void> {
+		if (type === "crypto_synced") {
+			if (typeof accountKey === "number") {
+				throw new LunchMoneyError(
+					"crypto_synced balance history requires { id, symbol }",
+					0,
+				);
+			}
+			const response = await this.client.DELETE(
+				"/balance_history/crypto_synced/{account_id}/{symbol}",
+				{
+					params: {
+						path: {
+							account_id: accountKey.id,
+							symbol: accountKey.symbol,
+						},
+					},
+				},
+			);
+			return this.handleVoidResponse(response);
+		}
+
+		const accountId =
+			typeof accountKey === "number" ? accountKey : accountKey.id;
+		const response = await this.client.DELETE(
+			"/balance_history/{account_type}/{account_id}",
+			{
+				params: {
+					path: { account_type: type, account_id: accountId },
+				},
+			},
+		);
+		return this.handleVoidResponse(response);
+	}
+
+	private async balanceHistoryAccountUpdate(
+		type: "deleted",
+		id: number,
+		body: UpdateBalanceHistoryDetailsBody,
+	): Promise<UpdateBalanceHistoryDetailsResponse> {
+		const response = await this.client.PUT(
+			"/balance_history/deleted/{account_id}/details",
+			{
+				params: { path: { account_id: id } },
+				body,
+			},
+		);
+		return this.handleDataResponse(response);
+	}
+
+	get balanceHistory(): {
+		getAll: (
+			params?: GetBalanceHistoryParams,
+		) => Promise<BalanceHistoryAccount[]>;
+		account: BalanceHistoryAccountNamespace;
+		entry: { delete: (id: number) => Promise<void> };
+	} {
+		return {
+			getAll: async (
+				params?: GetBalanceHistoryParams,
+			): Promise<BalanceHistoryAccount[]> => {
+				const response = await this.client.GET("/balance_history", {
+					params: { query: params },
+				});
+				const data = this.handleDataResponse(response);
+				return data.balance_history ?? [];
+			},
+			account: {
+				get: this.balanceHistoryAccountGet.bind(this),
+				upsert: this.balanceHistoryAccountUpsert.bind(this),
+				delete: this.balanceHistoryAccountDelete.bind(this),
+				update: this.balanceHistoryAccountUpdate.bind(this),
+			},
+			entry: {
+				delete: async (id: number): Promise<void> => {
+					const response = await this.client.DELETE(
+						"/balance_history/entries/{id}",
+						{
+							params: { path: { id } },
+						},
+					);
+					return this.handleVoidResponse(response);
+				},
 			},
 		};
 	}

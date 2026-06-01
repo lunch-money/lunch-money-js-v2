@@ -135,5 +135,81 @@ export type AttachFileToTransactionBody =
 export type TransactionAttachmentUrlResponse =
 	operations["getTransactionAttachmentUrl"]["responses"]["200"]["content"]["application/json"];
 
+export type BalanceHistoryAccount =
+	components["schemas"]["balanceHistoryAccountObject"];
+export type BalanceHistoryEntry = components["schemas"]["balanceHistoryObject"];
+export type BalanceHistorySourceManual =
+	components["schemas"]["balanceHistorySourceManual"];
+export type BalanceHistorySourcePlaid =
+	components["schemas"]["balanceHistorySourcePlaid"];
+export type BalanceHistorySourceCryptoManual =
+	components["schemas"]["balanceHistorySourceCryptoManual"];
+export type BalanceHistorySourceCryptoSynced =
+	components["schemas"]["balanceHistorySourceCryptoSynced"];
+export type BalanceHistorySourceDeleted =
+	components["schemas"]["balanceHistorySourceDeleted"];
+export type BalanceHistorySource =
+	| BalanceHistorySourceManual
+	| BalanceHistorySourcePlaid
+	| BalanceHistorySourceCryptoManual
+	| BalanceHistorySourceCryptoSynced
+	| BalanceHistorySourceDeleted;
+
+export type GetBalanceHistoryParams =
+	operations["getBalanceHistory"]["parameters"]["query"];
+export type GetBalanceHistoryAccountQuery =
+	operations["getBalanceHistoryForAccount"]["parameters"]["query"];
+export type UpsertBalanceHistoryBody =
+	operations["upsertBalanceHistoryForAccount"]["requestBody"]["content"]["application/json"];
+export type UpdateBalanceHistoryDetailsBody =
+	operations["updateBalanceHistoryDetails"]["requestBody"]["content"]["application/json"];
+export type UpdateBalanceHistoryDetailsResponse =
+	operations["updateBalanceHistoryDetails"]["responses"]["200"]["content"]["application/json"];
+
+export type BalanceHistoryAccountType =
+	| "manual"
+	| "plaid"
+	| "crypto_manual"
+	| "crypto_synced"
+	| "deleted";
+export type BalanceHistoryAccountKey = number | { id: number; symbol: string };
+
+export type BalanceHistoryAccountGetInput =
+	| {
+			type: "crypto_synced";
+			account: { id: number; symbol: string };
+			query?: GetBalanceHistoryAccountQuery;
+	  }
+	| {
+			type: Exclude<BalanceHistoryAccountType, "crypto_synced">;
+			account: number;
+			query?: GetBalanceHistoryAccountQuery;
+	  };
+
+export type BalanceHistoryAccountUpsertInput =
+	| {
+			type: "crypto_synced";
+			account: { id: number; symbol: string };
+			body: UpsertBalanceHistoryBody;
+	  }
+	| {
+			type: Exclude<BalanceHistoryAccountType, "crypto_synced">;
+			account: number;
+			body: UpsertBalanceHistoryBody;
+	  };
+
+export type BalanceHistoryAccountDeleteInput =
+	| { type: "crypto_synced"; account: { id: number; symbol: string } }
+	| {
+			type: Exclude<BalanceHistoryAccountType, "crypto_synced">;
+			account: number;
+	  };
+
+export type BalanceHistoryAccountUpdateInput = {
+	type: "deleted";
+	id: number;
+	body: UpdateBalanceHistoryDetailsBody;
+};
+
 // Re-export the raw OpenAPI types for advanced usage
 export type { paths, operations, components } from "./types.generated";
