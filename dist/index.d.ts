@@ -301,14 +301,14 @@ interface paths {
         get: operations["getBalanceHistoryForAccount"];
         /**
          * Upsert balance history for an account
-         * @description Upsert one or more historical balance entries for a single manual, Plaid, manual crypto, or deleted acount. Crypto synced accounts require an additional `symbol` path parameter.<br><br>
-         *     The `account_type` path parameter identifies the the type of account and the `account_id` path parameter identifies the specific id for that account type.<br><br>
+         * @description Upsert one or more historical balance entries for a single manual, Plaid, manual crypto, or deleted account. Crypto synced accounts require an additional `symbol` path parameter.<br><br>
+         *     The `account_type` path parameter identifies the type of account and the `account_id` path parameter identifies the specific id for that account type.<br><br>
          *     Submit one or more entries in the `balances` array. Each entry must specify a `date` and `balance` value.<br><br>
-         *     Balance history is monthly. Each entry's `date` must be the first day of a month and must not be in the future.<br><br>
+         *     Balance history is monthly. Each entry's `date` must be the first day of a month and must be in a past month.<br><br>
          *     `currency` may be provided for any balance entry. If omitted, it defaults to the account currency for manual/Plaid accounts, or the user's primary currency for crypto/deleted accounts.<br><br>
-         *     `symbol` is optional for `crypto_manual` accounts, tolerated for `deleted` accounts, and invalid for `manual` or `plaid` accounts.<br><br>
-         *     `crypto_balance` may be provided for `crypto_manual` and `deleted` accounts, and is invalid for `manual` or `plaid` accounts.<br><br>
-         *     Use `PUT /v2/balance_history/deleted/{account_id}/details` to update deleted-source metadata.
+         *     `symbol` may only be set when `account_type` is `crypto_manual` or `crypto_synced`. It is optional for `crypto_manual` accounts and tolerated for `deleted` accounts.<br><br>
+         *     `crypto_balance` may be provided for `crypto_manual`, `crypto_synced`, and `deleted` accounts, and is invalid for `manual` or `plaid` accounts.<br><br>
+         *     The response contains only the balance entries that were submitted in this request.
          */
         put: operations["upsertBalanceHistoryForAccount"];
         post?: never;
@@ -341,10 +341,11 @@ interface paths {
          * @description Upsert one or more historical balance entries for a single synced crypto symbol stream.<br><br>
          *     The path identifies both the synced crypto account and the symbol being updated.<br><br>
          *     Submit one or more entries in the `balances` array. Each entry must specify a `date` and `balance` value.<br><br>
-         *     Balance history is monthly. Each entry's `date` must be the first day of a month and must not be in the future.<br><br>
-         *     The request body must not include `symbol`; the symbol is supplied by the path.<br><br>
+         *     Balance history is monthly. Each entry's `date` must be the first day of a month and must be in a past month.<br><br>
+         *     The request body may include an optional `symbol` on each balance entry. If provided, it must match the `symbol` path parameter. Omit `symbol` to use the path value.<br><br>
          *     `currency` may be provided for any balance entry. If omitted, it defaults to the user's primary currency for synced crypto balances.<br><br>
-         *     `crypto_balance` may be provided for synced crypto balances.
+         *     `crypto_balance` may be provided for synced crypto balances.<br><br>
+         *     The response contains only the balance entries that were submitted in this request.
          */
         put: operations["upsertBalanceHistoryForCryptoSynced"];
         post?: never;
@@ -1155,8 +1156,10 @@ interface components {
         };
         /** synced crypto balance object */
         cryptoSyncedBalance: {
-            /** @description The name of the crypto asset */
+            /** @description The asset name for this balance, typically the uppercased currency symbol (e.g. ETH). */
             name: string;
+            /** @description Optional display name for the synced crypto asset as set by the user. If `null`, clients may derive a display name from syncedCryptoAccount's `provider` + `name`. */
+            display_name: string | null;
             /** @description Current balance in numeric format to 18 decimal places */
             balance: string;
             /** @description Symbol of the currency held in the synced account */
@@ -1461,8 +1464,11 @@ interface components {
             display_name?: string | null;
             /** @description If set, the new type of the manual account */
             type?: components["schemas"]["accountTypeEnum"];
-            /** @description If set, an optional account subtype. Examples include<br> - retirement - checking - savings - prepaid credit card */
-            subtype?: string;
+            /**
+             * @description If set, an optional account subtype. Set to `null` to clear it. Examples include<br> - retirement - checking - savings - prepaid credit card
+             * @example prepaid credit card
+             */
+            subtype?: string | null;
             /**
              * @description Numeric value of the current balance, up to four decimal places, of the manual account as a number or string. Do not include any special characters aside from a decimal point.
              * @example 195.50
@@ -1664,7 +1670,7 @@ interface components {
         balanceHistoryAccountObject: {
             /** @description Identifies the account this balance entry belongs to. The shape varies by `source.type`. Use `source.type` to determine which account id field is present. */
             source: components["schemas"]["balanceHistorySourceManual"] | components["schemas"]["balanceHistorySourcePlaid"] | components["schemas"]["balanceHistorySourceCryptoManual"] | components["schemas"]["balanceHistorySourceCryptoSynced"] | components["schemas"]["balanceHistorySourceDeleted"];
-            /** @description One or more monthly balance history entries for the source account. */
+            /** @description Monthly balance history entries for the source account. On GET responses, this includes all entries in the requested range. On PUT upsert responses, this includes only the entries modified by that request. */
             balances: components["schemas"]["balanceHistoryObject"][];
         };
         /**
@@ -1682,7 +1688,7 @@ interface components {
              * @description Date of this historical balance entry in YYYY-MM-DD format. This is always the first day of a month.
              */
             date: string;
-            /** @description Historical balance stored for this entry. For manual and Plaid accounts this is in the account currency. For crypto accounts this is in the user's primary currency. */
+            /** @description Historical balance stored for this entry, as a numeric string with up to four decimal places. Trailing zeros and decimal places are not guaranteed in responses. For manual and Plaid accounts this is in the account currency. For crypto accounts this is in the user's primary currency. */
             balance: string;
             /** @description Currency of the stored `balance`. For crypto entries this is the user's primary currency. */
             currency: components["schemas"]["currencyEnum"];
@@ -1705,7 +1711,7 @@ interface components {
             id?: number;
             /**
              * Format: date
-             * @description Month to update, in YYYY-MM-DD format. This must be the first day of a month and must not be in the future.
+             * @description Month to update, in YYYY-MM-DD format. This must be the first day of a month and must be in a past month.
              */
             date: string;
             /** @description Numeric value of the historical balance, up to four decimal places, as a number or string. For manual and Plaid accounts this is typically in the account currency. For crypto and deleted accounts this is typically in the user's primary currency. Do not include any special characters aside from a decimal point. */
@@ -2008,7 +2014,7 @@ interface components {
              * @description The unique identifier of the manual account associated with this transaction. This will always be null if this transaction is associated with a synced account or if this transaction has no associated account and appears as a "Cash Transaction" in the Lunch Money app.
              */
             manual_account_id: number | null;
-            /** @description A user-defined external ID for any transaction that was added via csv import, `POST /transactions` API call, or manually added via the Lunch Money app. No external ID exists for transactions associated with synced accounts, and they cannot be added. For transactions associated with manual accounts, the external ID must be unique as attempts to add a subsequent transaction with the same external_id and manual_account_id will be flagged as duplicates and fail. */
+            /** @description A user-defined external ID associated with the transaction. For transactions belonging to manual accounts, the external ID must be unique for each transaction associated with the account. */
             external_id: string | null;
             /** @description A list of tag_ids for the tags associated with this transaction. If the transaction has no tags this will be an empty list.<br> Tag details can be obtained by passing the value of this attribute as the `ids` query parameter to the [List Tags](../operations/getTags) API */
             tag_ids: number[];
@@ -2176,7 +2182,7 @@ interface components {
              * @enum {string|null}
              */
             source: "api" | "csv" | "manual" | "merge" | "plaid" | "recurring" | "rule" | "split" | "user" | null;
-            /** @description A user-defined external ID for any transaction that was added via csv import, `POST /transactions` API call, or manually added via the Lunch Money app. No external ID exists for transactions associated with synced accounts, and they cannot be added. For transactions associated with manual accounts, the external ID must be unique as attempts to add a subsequent transaction with the same external_id and manual_account_id will be flagged as duplicates and fail. */
+            /** @description A user-defined external ID associated with the transaction. For transactions belonging to manual accounts, the external ID must be unique for each transaction associated with the account. */
             external_id: string | null;
             /** @description If requested, the transaction's plaid_metadata that came when this transaction was obtained. This will be a JSON object, but the schema is variable. This will only be present for transactions associated with a plaid account. */
             plaid_metadata?: Record<string, never> | null;
@@ -2691,7 +2697,7 @@ interface components {
         errorResponseObject: {
             /** @description High level error type, for example 'Not Found' or 'Request Validation Failure' */
             message: string;
-            /** @description A list of objects that describe the errors encountered while processing the request.<br> If multiple errors were encountered, the list will contain multiple objects.<br> Each `error` object is guaranteed to have an `errMsg`, but it may also contain other error specific properties. */
+            /** @description A list of objects that describe the errors encountered while processing the request.<br> If multiple errors were encountered, the list will contain multiple objects.<br> Each `error` object is guaranteed to have an `errMsg`, but it may also contain other error-specific properties such as `code` (for example `VALIDATION_ERROR`), or other properties that are useful to map the error to the relevant part of the request. */
             errors: ({
                 /** @description A message to help the developer determine the problem with the request. */
                 errMsg: string;
@@ -4016,7 +4022,7 @@ interface operations {
             };
         };
         responses: {
-            /** @description All balance history entries were upserted successfully */
+            /** @description Returns the modified balance entries only. Other historical entries for the account are omitted from `balances`. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -4185,7 +4191,7 @@ interface operations {
             };
         };
         responses: {
-            /** @description All balance history entries were upserted successfully */
+            /** @description Returns the modified balance entries only. Other historical entries for the symbol stream are omitted from `balances`. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -4250,7 +4256,7 @@ interface operations {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
-                     *           "errMsg": "There is no synced crypto balance history stream for symbol 'doge' on account id: 33004."
+                     *           "errMsg": "There is no balance history for symbol 'doge' on this account."
                      *         }
                      *       ]
                      *     }
@@ -4280,6 +4286,25 @@ interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Request Validation Failure",
+                     *       "errors": [
+                     *         {
+                     *           "errMsg": "Invalid value type for path parameter: 'id'. Expected 'number', received 'string'."
+                     *         }
+                     *       ]
+                     *     }
+                     */
+                    "application/json": components["schemas"]["errorResponseObject"];
+                };
             };
             401: components["responses"]["unauthorizedToken"];
             /** @description Not Found */
@@ -4351,7 +4376,7 @@ interface operations {
                      *       "message": "Invalid Request Body",
                      *       "errors": [
                      *         {
-                     *           "errMsg": "Request body must include at least one of: name, institution_name, display_name, account_type, subtype, mask."
+                     *           "errMsg": "At least one property must be provided: name, institution_name, display_name, account_type, subtype, mask."
                      *         }
                      *       ]
                      *     }
@@ -4371,7 +4396,7 @@ interface operations {
                      *       "message": "Not Found",
                      *       "errors": [
                      *         {
-                     *           "errMsg": "There is no deleted balance history source with the id: 99999999."
+                     *           "errMsg": "Deleted balance history source 99999999 was not found."
                      *         }
                      *       ]
                      *     }
