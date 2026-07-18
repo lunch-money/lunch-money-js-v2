@@ -137,7 +137,11 @@ export type TransactionAttachmentUrlResponse =
 
 export type BalanceHistoryAccount =
 	components["schemas"]["balanceHistoryAccountObject"];
-export type BalanceHistoryEntry = components["schemas"]["balanceHistoryObject"];
+export type BalanceHistoryEntry = components["schemas"]["balanceHistoryEntry"];
+export type HistoricalBalanceHistoryEntry =
+	components["schemas"]["historicalBalanceHistoryEntry"];
+export type CurrentBalanceHistoryEntry =
+	components["schemas"]["currentBalanceHistoryEntry"];
 export type BalanceHistorySourceManual =
 	components["schemas"]["balanceHistorySourceManual"];
 export type BalanceHistorySourcePlaid =

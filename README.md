@@ -129,7 +129,7 @@ This library provides convenient methods for:
 - **Recurring Items**: Get recurring patterns (`recurringItems.getAll()`, `recurringItems.get()`)
 - **Summary**: Get budget summaries (`summary.get()`)
 - **Budgets**: Manage budget settings and period budgets (`budgets.getSettings()`, `budgets.upsert()`, `budgets.delete()`)
-- **Balance History**: Monthly balance history across account types (`balanceHistory.getAll()`, `balanceHistory.account.get()`, `balanceHistory.account.upsert()`, `balanceHistory.account.delete()`, `balanceHistory.account.update()` for deleted-source metadata, `balanceHistory.entry.delete()`)
+- **Balance History**: Monthly balance history across account types (`balanceHistory.getAll()`, `balanceHistory.account.get()`, `balanceHistory.account.upsert()`, `balanceHistory.account.delete()`, `balanceHistory.account.update()` for deleted-source metadata, `balanceHistory.entry.delete()`). Date ranges and upserts use `YYYY-MM` month values; responses distinguish stored `historical` entries from ephemeral `current` entries.
 
 ## Error Handling
 
@@ -201,6 +201,8 @@ import {
   type TransactionAttachment,
   type BalanceHistoryAccount,
   type BalanceHistoryEntry,
+  type HistoricalBalanceHistoryEntry,
+  type CurrentBalanceHistoryEntry,
 } from 'lunch-money-js-v2';
 
 // Response types

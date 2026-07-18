@@ -271,10 +271,17 @@ interface paths {
         };
         /**
          * Get balance history
-         * @description Retrieve historical balance entries.<br><br>
-         *     Balance history is monthly. When `start_date` and `end_date` are both provided, they must be first-of-month dates. `start_date` must not be in the future, while `end_date` may be in the future. If one of `start_date` or `end_date` is provided, the other is required. If neither is provided, all available balance history is returned.<br><br>
-         *     The response groups entries by source account. Each item in `balance_history` contains a `source` object plus a `balances` array containing one balance entry per month in the requested range, or all stored entries when no range is provided.<br><br>
-         *     Historical entries for accounts that have been deleted may still be returned. These entries use `source.type: deleted` and include `deleted_account_id`, archived display fields, and account metadata on the `source` object.
+         * @description Retrieve monthly balance history for all account sources.<br><br>
+         *     Balance history is monthly. Each entry represents the account balance at or around the end of the specified month. System-generated entries are generally captured near the boundary between months.<br><br>
+         *     Query with optional `start_month` and `end_month` in YYYY-MM format. The range is inclusive. If either parameter is provided, both are required. `start_month` must not be in the future. `end_month` may not be earlier than `start_month` and must not be in the future. Values must be valid calendar months in exact YYYY-MM format. A full date such as `2026-06-01` is invalid. If neither is provided, all available balance history is returned, including an ephemeral `current` entry for the current month when applicable.<br><br>
+         *     The response groups entries by source account. Each item in `balance_history` contains a `source` object plus a `balances` array. Within a requested range (or across all history when no range is provided), the array includes only months that have data — months with no data are omitted. A `current` entry is also included when the requested range includes the current month.<br><br>
+         *     Each balance entry has a `type`:<br>
+         *     - `historical`: stored snapshot of a past month for an active or deleted account. Includes an `id` that can be used with balance history entry endpoints<br>
+         *     - `current`: snapshot based on the account's current balances. It is ephemeral and may change between requests. To inspect the underlying account, use the type-specific source id for the `source.type` values:<br>
+         *     &nbsp;&nbsp;&nbsp;&nbsp;- `manual`: `source.manual_account_id` with [GET /manual_accounts/{id}](#tag/manual-accounts/GET/manual_accounts/{id})<br>
+         *     &nbsp;&nbsp;&nbsp;&nbsp;- `plaid`: `source.plaid_account_id` with [GET /plaid_accounts/{id}](#tag/plaid-accounts/GET/plaid_accounts/{id})<br>
+         *     &nbsp;&nbsp;&nbsp;&nbsp;- `crypto_manual`: `source.crypto_manual_id` with [GET /crypto/manual/{id}](#tag/crypto-manual/GET/crypto/manual/{id})<br>
+         *     &nbsp;&nbsp;&nbsp;&nbsp;- `crypto_synced`: `source.crypto_synced_id` and `source.symbol` with [GET /crypto/synced/{id}/{symbol}](#tag/crypto-synced/GET/crypto/synced/{id}/{symbol})
          */
         get: operations["getBalanceHistory"];
         put?: never;
@@ -294,27 +301,26 @@ interface paths {
         };
         /**
          * Get balance history for an account
-         * @description Retrieve historical balance entries for one manual, Plaid, manual crypto, or deleted account.  Crypto synced accounts require an additional `symbol` path parameter.<br><br>
-         *     The `account_type` path parameter identifies the type of account and the `account_id` path parameter identifies the specific id for that account type.<br><br>
-         *     When `start_date` and `end_date` are both provided, they must be first-of-month dates. `start_date` must not be in the future, while `end_date` may be in the future. If one of `start_date` or `end_date` is provided, the other is required. If neither is provided, all available history for the source is returned.
+         * @description Retrieve monthly balance history for one manual, Plaid, manual crypto, or deleted account. For synced crypto symbol streams, use [GET /balance_history/crypto_synced/{account_id}/{symbol}](#tag/balance-history/GET/balance_history/crypto_synced/{account_id}/{symbol}).<br><br>
+         *     The `account_type` path parameter identifies the account family (`manual`, `plaid`, `crypto_manual`, or `deleted`) and `account_id` identifies the account within that family.<br><br>
+         *     `start_month`, `end_month`, and current-month entries behave as described in [GET /balance_history](#tag/balance-history/GET/balance_history).
          */
         get: operations["getBalanceHistoryForAccount"];
         /**
          * Upsert balance history for an account
-         * @description Upsert one or more historical balance entries for a single manual, Plaid, manual crypto, or deleted account. Crypto synced accounts require an additional `symbol` path parameter.<br><br>
-         *     The `account_type` path parameter identifies the type of account and the `account_id` path parameter identifies the specific id for that account type.<br><br>
-         *     Submit one or more entries in the `balances` array. Each entry must specify a `date` and `balance` value.<br><br>
-         *     Balance history is monthly. Each entry's `date` must be the first day of a month and must be in a past month.<br><br>
+         * @description Upsert one or more historical balance entries for a single manual, Plaid, manual crypto, or deleted account. For synced crypto symbol streams, use [PUT /balance_history/crypto_synced/{account_id}/{symbol}](#tag/balance-history/PUT/balance_history/crypto_synced/{account_id}/{symbol}).<br><br>
+         *     The `account_type` path parameter identifies the account family (`manual`, `plaid`, `crypto_manual`, or `deleted`) and `account_id` identifies the account within that family.<br><br>
+         *     Submit one or more entries in the `balances` array. Each entry must specify a `month` (YYYY-MM) and `balance` value. `month` must be a past calendar month. The current month cannot be written through this endpoint.<br><br>
          *     `currency` may be provided for any balance entry. If omitted, it defaults to the account currency for manual/Plaid accounts, or the user's primary currency for crypto/deleted accounts.<br><br>
-         *     `symbol` may only be set when `account_type` is `crypto_manual` or `crypto_synced`. It is optional for `crypto_manual` accounts and tolerated for `deleted` accounts.<br><br>
-         *     `crypto_balance` may be provided for `crypto_manual`, `crypto_synced`, and `deleted` accounts, and is invalid for `manual` or `plaid` accounts.<br><br>
-         *     The response contains only the balance entries that were submitted in this request.
+         *     `symbol` may be set for `crypto_manual` (optional) and `deleted` (tolerated) accounts. Do not provide it for `manual` or `plaid` accounts.<br><br>
+         *     `crypto_balance` may be provided for `crypto_manual` and `deleted` accounts. It is invalid for `manual` or `plaid` accounts.<br><br>
+         *     The response contains only the `type: historical` balance entries that were submitted in this request.
          */
         put: operations["upsertBalanceHistoryForAccount"];
         post?: never;
         /**
          * Delete all balance history for an account
-         * @description Delete all historical balance entries for a single manual, Plaid, manual crypto, or deleted account. Crypto synced accounts require an additional `symbol` path parameter.
+         * @description Delete all historical balance entries for a single manual, Plaid, manual crypto, or deleted account. For synced crypto symbol streams, use [DELETE /balance_history/crypto_synced/{account_id}/{symbol}](#tag/balance-history/DELETE/balance_history/crypto_synced/{account_id}/{symbol}).
          */
         delete: operations["deleteBalanceHistoryForAccount"];
         options?: never;
@@ -331,21 +337,20 @@ interface paths {
         };
         /**
          * Get balance history for a synced crypto symbol
-         * @description Retrieve historical balance entries for a single synced crypto symbol stream.<br><br>
-         *     Use the `crypto_synced` account id together with a `symbol` path parameter to select one balance stream within that synced crypto account.<br><br>
-         *     When `start_date` and `end_date` are both provided, they must be first-of-month dates. `start_date` must not be in the future, while `end_date` may be in the future. If one of `start_date` or `end_date` is provided, the other is required. If neither is provided, all available history for the symbol stream is returned.
+         * @description Retrieve monthly balance history for a single synced crypto symbol stream.<br><br>
+         *     The path selects one balance stream with a synced crypto account id and `symbol`.<br><br>
+         *     `start_month`, `end_month`, and current-month entries behave as described in [GET /balance_history](#tag/balance-history/GET/balance_history).
          */
         get: operations["getBalanceHistoryForCryptoSynced"];
         /**
          * Upsert balance history for a synced crypto symbol
          * @description Upsert one or more historical balance entries for a single synced crypto symbol stream.<br><br>
          *     The path identifies both the synced crypto account and the symbol being updated.<br><br>
-         *     Submit one or more entries in the `balances` array. Each entry must specify a `date` and `balance` value.<br><br>
-         *     Balance history is monthly. Each entry's `date` must be the first day of a month and must be in a past month.<br><br>
+         *     Submit one or more entries in the `balances` array. Each entry must specify a `month` (YYYY-MM) and `balance` value. `month` must be a past calendar month. The current month cannot be written through this endpoint.<br><br>
          *     The request body may include an optional `symbol` on each balance entry. If provided, it must match the `symbol` path parameter. Omit `symbol` to use the path value.<br><br>
          *     `currency` may be provided for any balance entry. If omitted, it defaults to the user's primary currency for synced crypto balances.<br><br>
          *     `crypto_balance` may be provided for synced crypto balances.<br><br>
-         *     The response contains only the balance entries that were submitted in this request.
+         *     The response contains only the `type: historical` balance entries that were submitted in this request.
          */
         put: operations["upsertBalanceHistoryForCryptoSynced"];
         post?: never;
@@ -372,7 +377,7 @@ interface paths {
         post?: never;
         /**
          * Delete a balance history entry
-         * @description Delete a single monthly balance history entry by its id.
+         * @description Delete a single stored (`type: historical`) monthly balance history entry by its id. Ephemeral `current` entries cannot be deleted this way.
          */
         delete: operations["deleteBalanceHistoryEntry"];
         options?: never;
@@ -391,7 +396,7 @@ interface paths {
         /**
          * Update details for a deleted account
          * @description Update archived metadata for a deleted balance history source.<br><br>
-         *     Pass the `deleted` source id returned on `source.deleted_account_id`. This endpoint updates the stored deleted-source metadata used for all historical entries associated with that deleted source.
+         *     Pass the `deleted_account_id` from a `source.type: deleted` entry. The update applies to all historical entries associated with that deleted source.
          */
         put: operations["updateBalanceHistoryDetails"];
         post?: never;
@@ -822,8 +827,10 @@ interface paths {
             cookie?: never;
         };
         /**
-         * Get budget settings
-         * @description Returns the budget-related settings for the user's account.
+         * Get budget period settings
+         * @description Returns budget period and display settings for the budget
+         *     associated with this API token.<p> These control how budget **periods** are calculated
+         *     (granularity, anchor date, rollover, and related options).
          */
         get: operations["getBudgetSettings"];
         put?: never;
@@ -850,14 +857,14 @@ interface paths {
          *     Note that `start_date` **must** be a valid budget period start for the account (based on the account's
          *     budget period settings). If an invalid `start_date` is provided, the request will fail with an error that indicates what the previous and next valid start dates are.<p>
          *
-         *     Use the [budgets/settings](#tag/budgets/GET/budgets/settings) endpoint to view the account's budget settings.<br>
+         *     Use the [/budgets/settings](#tag/budgets/GET/budgets/settings) endpoint to view the budget period settings for the account.<br>
          *     To view details for existing budgets, use the [summary](#tag/summary) endpoint.
          */
         put: operations["upsertBudget"];
         post?: never;
         /**
          * Delete budget
-         * @description Removes the budget for the given category and period. If there already is no budget set for that period, the request still succeeds (idempotent).<p> Note that `start_date` **must** be a valid budget period start for the account (based on the account's budget period settings). If an invalid `start_date` is provided, the request will fail with an error that indicates what the previous and next valid start dates are.<p> Use the [budgets/settings](#tag/budgets/GET/budgets/settings) endpoint to view the account's budget settings.<br> To view details for existing budgets, use the [summary](#tag/summary) endpoint.
+         * @description Removes the budget for the given category and period. If there already is no budget set for that period, the request still succeeds (idempotent).<p> Note that `start_date` **must** be a valid budget period start for the account (based on the account's budget period settings). If an invalid `start_date` is provided, the request will fail with an error that indicates what the previous and next valid start dates are.<p> Use the [/budgets/settings](#tag/budgets/GET/budgets/settings) endpoint to view the account's budget settings.<br> To view details for existing budgets, use the [summary](#tag/summary) endpoint.
          */
         delete: operations["deleteBudget"];
         options?: never;
@@ -881,12 +888,12 @@ interface components {
             id: number;
             /**
              * Format: int64
-             * @description Unique ID for the linked budgeting account
+             * @description Unique ID for the current budgeting account
              */
             account_id: number;
-            /** @description Name of the linked budgeting account */
+            /** @description Name of the current budgeting account */
             budget_name: string;
-            /** @description Primary currency set in the user's settings */
+            /** @description Primary currency for the current budgeting account */
             primary_currency: components["schemas"]["currencyEnum"];
             /** @description Label assigned by the user to the API key being used. Returns null if no label is set */
             api_key_label: string | null;
@@ -1583,7 +1590,7 @@ interface components {
         /** @description Source information for a manual account balance history entry. */
         balanceHistorySourceManual: {
             /**
-             * @description Identifies this entry as belonging to a manually-managed account. (enum property replaced by openapi-typescript)
+             * @description Identifies this entry as belonging to a manual account. (enum property replaced by openapi-typescript)
              * @enum {string}
              */
             type: "manual";
@@ -1606,10 +1613,10 @@ interface components {
              */
             plaid_account_id: number;
         };
-        /** @description Source information for a manually-tracked cryptocurrency balance history entry. */
+        /** @description Source information for a manual cryptocurrency balance history entry. */
         balanceHistorySourceCryptoManual: {
             /**
-             * @description Identifies this entry as belonging to a manually-tracked crypto account. (enum property replaced by openapi-typescript)
+             * @description Identifies this entry as belonging to a manual crypto account. (enum property replaced by openapi-typescript)
              * @enum {string}
              */
             type: "crypto_manual";
@@ -1636,7 +1643,7 @@ interface components {
             /** @description Crypto symbol (e.g. `eth`, `btc`) identifying the specific currency within the synced account. */
             symbol: string;
         };
-        /** @description Source information for a balance history entry whose account has since been deleted. Historical balances are preserved when a user chooses to keep history on account deletion. This object contains details that can be used to display the deleted account in the UI. The `deleted_account_id` can be passed to `PUT /v2/balance_history/deleted/{account_id}/details` to update the archived source metadata. */
+        /** @description Source information for balance history whose account has since been deleted. Historical balances are preserved when a user chooses to keep history on account deletion. This object contains details that can be used to display the deleted account in the UI. The `deleted_account_id` can be passed to [PUT /balance_history/deleted/{account_id}/details](#tag/balance-history/PUT/balance_history/deleted/{account_id}/details) to update the archived source metadata. */
         balanceHistorySourceDeleted: {
             /**
              * @description Identifies this entry as belonging to an account that has since been deleted. (enum property replaced by openapi-typescript)
@@ -1656,53 +1663,92 @@ interface components {
             display_name: string | null;
             /** @description Archived `type` of the deleted account source */
             account_type: string | null;
-            /** @description Archived `subtype`` of the deleted account source */
+            /** @description Archived `subtype` of the deleted account source */
             subtype: string | null;
-            /** @description Archived account `mask` for a deleted plaid account source */
+            /** @description Archived account `mask` for a deleted Plaid account source */
             mask: string | null;
             /** @description Archived `symbol` for a deleted crypto account source */
             symbol: string | null;
         };
         /**
          * balance history for an account object
-         * @description Historical balance entries grouped under a single account source.
+         * @description Monthly balance entries grouped under a single account source.
          */
         balanceHistoryAccountObject: {
-            /** @description Identifies the account this balance entry belongs to. The shape varies by `source.type`. Use `source.type` to determine which account id field is present. */
+            /** @description Identifies the account these balance entries belong to. The shape varies by `source.type`. Each source type exposes a type-specific account id field (`manual_account_id`, `plaid_account_id`, `crypto_manual_id`, `crypto_synced_id`, or `deleted_account_id`). */
             source: components["schemas"]["balanceHistorySourceManual"] | components["schemas"]["balanceHistorySourcePlaid"] | components["schemas"]["balanceHistorySourceCryptoManual"] | components["schemas"]["balanceHistorySourceCryptoSynced"] | components["schemas"]["balanceHistorySourceDeleted"];
-            /** @description Monthly balance history entries for the source account. On GET responses, this includes all entries in the requested range. On PUT upsert responses, this includes only the entries modified by that request. */
-            balances: components["schemas"]["balanceHistoryObject"][];
+            /** @description Monthly balance entries for this account source. A `historical` entry is a stored snapshot of a past month and includes an `id`. A `current` entry is an ephemeral snapshot based on the account's current balances and has no balance-entry `id`. On PUT upsert responses, this array includes only the `type: historical` entries modified by that request. */
+            balances: components["schemas"]["balanceHistoryEntry"][];
         };
         /**
-         * balance history entry object
-         * @description A historical balance entry for a single account on a single date.
+         * historical balance history entry
+         * @description A stored monthly balance for a past month. The `id` may be used with balance history entry endpoints. The balance represents the account balance at or around the end of `month`.
          */
-        balanceHistoryObject: {
+        historicalBalanceHistoryEntry: {
+            /**
+             * @description Identifies this entry as a stored snapshot of a past month. (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            type: "historical";
             /**
              * Format: int32
-             * @description Unique identifier of this historical balance entry.
+             * @description Unique identifier for this historical balance entry.
              */
             id: number;
             /**
-             * Format: date
-             * @description Date of this historical balance entry in YYYY-MM-DD format. This is always the first day of a month.
+             * @description Calendar month for this entry in YYYY-MM format.
+             * @example 2026-06
              */
-            date: string;
-            /** @description Historical balance stored for this entry, as a numeric string with up to four decimal places. Trailing zeros and decimal places are not guaranteed in responses. For manual and Plaid accounts this is in the account currency. For crypto accounts this is in the user's primary currency. */
+            month: string;
+            /** @description Historical balance for this entry, as a numeric string with up to four decimal places. Trailing zeros and decimal places are not guaranteed in responses. For manual and Plaid accounts this is in the account currency. For crypto accounts this is in the user's primary currency. */
             balance: string;
-            /** @description Currency of the stored `balance`. For crypto entries this is the user's primary currency. */
+            /** @description Currency of `balance`. For crypto entries this is the user's primary currency. */
             currency: components["schemas"]["currencyEnum"];
             /**
              * Format: double
              * @description Historical balance converted to the user's primary currency. When the entry currency is the user's primary currency, this is the numeric value of `balance`.
              */
             to_base: number;
-            /** @description Crypto quantity stored for this balance entry, when available. This may be present for crypto or deleted-account entries and is `null` otherwise. */
+            /** @description Crypto quantity for this balance entry, when available. This may be present for crypto or deleted-account entries and is `null` otherwise. */
             crypto_balance: string | null;
         };
+        /**
+         * current balance history entry
+         * @description An ephemeral snapshot based on the account's current balances. It may change between requests.
+         */
+        currentBalanceHistoryEntry: {
+            /**
+             * @description Identifies this entry as an ephemeral current-month snapshot. (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            type: "current";
+            /**
+             * @description Calendar month for this entry in YYYY-MM format. For current entries this is the current month.
+             * @example 2026-07
+             */
+            month: string;
+            /** @description Calculated balance for the current month, as a numeric string with up to four decimal places. Trailing zeros and decimal places are not guaranteed in responses. For manual and Plaid accounts this is in the account currency. For crypto accounts this is in the user's primary currency. */
+            balance: string;
+            /** @description Currency of the calculated `balance`. For crypto entries this is the user's primary currency. */
+            currency: components["schemas"]["currencyEnum"];
+            /**
+             * Format: double
+             * @description Calculated balance converted to the user's primary currency. When the entry currency is the user's primary currency, this is the numeric value of `balance`.
+             */
+            to_base: number;
+            /** @description Crypto quantity for this calculated entry, when available. This may be present for crypto entries and is `null` otherwise. */
+            crypto_balance: string | null;
+        };
+        /**
+         * balance history entry
+         * @description A monthly balance history entry. Discriminated by `type`. `historical` entries are stored snapshots of past months with an `id`. `current` entries are ephemeral snapshots with no balance-entry `id`.
+         */
+        balanceHistoryEntry: components["schemas"]["historicalBalanceHistoryEntry"] | components["schemas"]["currentBalanceHistoryEntry"];
+        /** @description List response for balance history GET endpoints. Entries are grouped by account source under `balance_history`. */
         balanceHistoryListResponseObject: {
             balance_history: components["schemas"]["balanceHistoryAccountObject"][];
         };
+        /** @description A single monthly balance entry to upsert. Request bodies use this shape. Responses return `type: historical` entries instead. */
         balanceHistoryUpdateItemObject: {
             /**
              * Format: int32
@@ -1710,13 +1756,13 @@ interface components {
              */
             id?: number;
             /**
-             * Format: date
-             * @description Month to update, in YYYY-MM-DD format. This must be the first day of a month and must be in a past month.
+             * @description Calendar month to upsert, in YYYY-MM format. Must be a past month. The current month cannot be written through PUT endpoints.
+             * @example 2026-06
              */
-            date: string;
-            /** @description Numeric value of the historical balance, up to four decimal places, as a number or string. For manual and Plaid accounts this is typically in the account currency. For crypto and deleted accounts this is typically in the user's primary currency. Do not include any special characters aside from a decimal point. */
+            month: string;
+            /** @description Numeric value of the historical balance, up to four decimal places, as a number or string. For manual and Plaid accounts this is in the account currency. For crypto and deleted accounts this is in the user's primary currency. Do not include any special characters aside from a decimal point. */
             balance: number | string;
-            /** @description Optional for crypto balances, but if set it must match the account's symbol. Tolerated for deleted-account balances. Do not provide this for manual or Plaid balances. If provided when using the synced crypto path-based endpoint, this must match the symbol in the path. */
+            /** @description Optional for crypto balances. If set, it must match the account's symbol. Tolerated for deleted-account balances. Do not provide this for manual or Plaid balances. On the synced crypto path endpoint, if provided it must match the `symbol` path parameter. */
             symbol?: string | null;
             /** @description Optional crypto quantity for crypto_manual, crypto_synced, and deleted balances. Do not provide this for manual or Plaid balances. */
             crypto_balance?: string | null;
@@ -1724,34 +1770,41 @@ interface components {
             currency?: components["schemas"]["currencyEnum"];
             /**
              * Format: double
-             * @description System-defined historical balance converted to the user's primary currency. Ignored if set. Use `balance` to update the stored historical balance.
+             * @description System-defined historical balance converted to the user's primary currency. Ignored if set. Use `balance` to update the historical balance.
              */
             to_base?: number;
         };
         upsertBalanceHistoryRequestObject: {
-            /** @description One or more monthly balance history entries to upsert */
+            /** @description One or more monthly balance history entries to upsert. Each entry uses `month` (YYYY-MM) and `balance`. Do not include response-only fields such as `type`. PUT responses return only the `type: historical` entries modified by the request. */
             balances: components["schemas"]["balanceHistoryUpdateItemObject"][];
         };
         updateBalanceHistoryDetailsRequestObject: {
-            /** @description New archived account name for the deleted account source. */
+            /** @description New archived account name for the deleted account source */
             name?: string | null;
-            /** @description New archived institution name for the deleted account source. */
+            /** @description New archived institution name for the deleted account source */
             institution_name?: string | null;
-            /** @description New display name for the deleted account source. */
+            /** @description New display name for the deleted account source */
             display_name?: string | null;
-            /** @description New archived account type for the deleted account source. */
+            /** @description New archived account type for the deleted account source */
             account_type?: string | null;
-            /** @description New archived subtype for the deleted account source. */
+            /** @description New archived subtype for the deleted account source */
             subtype?: string | null;
-            /** @description New archived account mask for the deleted account source. */
+            /** @description New archived account mask for the deleted account source */
             mask?: string | null;
         };
+        /** @description Updated archived metadata for a deleted balance history source */
         updateBalanceHistoryDetailsResponseObject: {
+            /** @description Archived account name for the deleted account source */
             name: string | null;
+            /** @description Archived institution name for the deleted account source */
             institution_name: string | null;
+            /** @description Archived display name for the deleted account source */
             display_name: string | null;
+            /** @description Archived account type for the deleted account source */
             account_type: string | null;
+            /** @description Archived subtype for the deleted account source */
             subtype: string | null;
+            /** @description Archived account mask for the deleted account source */
             mask: string | null;
         };
         /** recurring item object */
@@ -2199,7 +2252,7 @@ interface components {
             date: string;
             /** @description Numeric value of the amount without a currency symbol. For example, $4.25 should be provided as 4.25. May be a string or a number in double format. Positive values indicate a debit transaction, negative values indicate a credit transaction. */
             amount: number | string;
-            /** @description Three-letter lowercase currency code of the transaction in ISO 4217 format. Must match one of the [supported currencies](https://lm-v2-api-next-a7fabcab8e9a.herokuapp.com/v2/currencies). If not set defaults to the user account's primary currency. */
+            /** @description Three-letter lowercase currency code of the transaction in ISO 4217 format. Must match one of the [supported currencies](https://lunchmoney.dev/v2/currencies). If not set defaults to the user account's primary currency. */
             currency?: components["schemas"]["currencyEnum"];
             /** @description Name of payee for the transaction */
             payee?: string;
@@ -2538,7 +2591,10 @@ interface components {
             /** @description Notes for the budget period */
             notes?: string | null;
         };
-        /** @description Budget period and display settings */
+        /**
+         * budget settings object
+         * @description Budget period and display settings for the current budgeting account.
+         */
         budgetSettingsResponseObject: {
             /**
              * @description Budget period granularity
@@ -2546,7 +2602,7 @@ interface components {
              */
             budget_period_granularity: "day" | "week" | "month" | "year" | "twice a month";
             /**
-             * Format: double
+             * Format: int32
              * @description The number of `granularity` units that make up a single budgeting period.
              */
             budget_period_quantity: number;
@@ -3919,10 +3975,10 @@ interface operations {
     getBalanceHistory: {
         parameters: {
             query?: {
-                /** @description Optional start date for the requested history range in YYYY-MM-DD format. If set, `end_date` is also required. This must be the first day of a month and must not be in the future. */
-                start_date?: string;
-                /** @description Optional end date for the requested history range in YYYY-MM-DD format. If set, `start_date` is also required. This must be the first day of a month. For a single month, set this to the same first-of-month date as `start_date`. */
-                end_date?: string;
+                /** @description Optional start of the requested history range as a calendar month in YYYY-MM format (for example `2026-06`). If set, `end_month` is also required. The range is inclusive. `start_month` must not be in the future. A full date such as `2026-06-01` is invalid. */
+                start_month?: string;
+                /** @description Optional end of the requested history range as a calendar month in YYYY-MM format (for example `2026-06`). If set, `start_month` is also required. The range is inclusive. `end_month` may not be earlier than `start_month` and must not be in the future. A full date such as `2026-06-01` is invalid. For a single month, set this to the same value as `start_month`. */
+                end_month?: string;
             };
             header?: never;
             path?: never;
@@ -3930,7 +3986,7 @@ interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Historical balance entries for the requested date range */
+            /** @description Monthly balance history for the requested month range */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3956,14 +4012,14 @@ interface operations {
     getBalanceHistoryForAccount: {
         parameters: {
             query?: {
-                /** @description Optional start date for the requested history range in YYYY-MM-DD format. If set, `end_date` is also required. This must be the first day of a month and must not be in the future. */
-                start_date?: string;
-                /** @description Optional end date for the requested history range in YYYY-MM-DD format. If set, `start_date` is also required. This must be the first day of a month. */
-                end_date?: string;
+                /** @description Optional. Same format and constraints as `start_month` on [GET /balance_history](#tag/balance-history/GET/balance_history). */
+                start_month?: string;
+                /** @description Optional. Same format and constraints as `end_month` on [GET /balance_history](#tag/balance-history/GET/balance_history). */
+                end_month?: string;
             };
             header?: never;
             path: {
-                /** @description Source family to retrieve. Use `manual`, `plaid`, `crypto_manual`, or `deleted`. */
+                /** @description Account family to retrieve. Use `manual`, `plaid`, `crypto_manual`, or `deleted`. */
                 account_type: "manual" | "plaid" | "crypto_manual" | "deleted";
                 /** @description Account or deleted-source identifier within the selected `account_type`. */
                 account_id: number;
@@ -3972,7 +4028,7 @@ interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Historical balance entries for the requested source */
+            /** @description Monthly balance history for the requested source */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -4009,7 +4065,7 @@ interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Source family to update. Use `manual`, `plaid`, `crypto_manual`, or `deleted`. */
+                /** @description Account family to update. Use `manual`, `plaid`, `crypto_manual`, or `deleted`. */
                 account_type: "manual" | "plaid" | "crypto_manual" | "deleted";
                 /** @description Account or deleted-source identifier within the selected `account_type`. */
                 account_id: number;
@@ -4022,7 +4078,7 @@ interface operations {
             };
         };
         responses: {
-            /** @description Returns the modified balance entries only. Other historical entries for the account are omitted from `balances`. */
+            /** @description Returns only the `type: historical` entries modified by this request. Other historical entries for the account are omitted from `balances`. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -4031,7 +4087,7 @@ interface operations {
                     "application/json": components["schemas"]["balanceHistoryAccountObject"];
                 };
             };
-            /** @description Bad Request. The entire request is rejected if any row in `balances` fails validation; no rows are updated. */
+            /** @description Bad Request. If any entry in `balances` fails validation, the entire request is rejected and no entries are updated. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4069,7 +4125,7 @@ interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Source family to delete. Use `manual`, `plaid`, `crypto_manual`, or `deleted`. */
+                /** @description Account family to delete. Use `manual`, `plaid`, `crypto_manual`, or `deleted`. */
                 account_type: "manual" | "plaid" | "crypto_manual" | "deleted";
                 /** @description Account or deleted-source identifier within the selected `account_type`. */
                 account_id: number;
@@ -4102,10 +4158,10 @@ interface operations {
     getBalanceHistoryForCryptoSynced: {
         parameters: {
             query?: {
-                /** @description Optional start date for the requested history range in YYYY-MM-DD format. If set, `end_date` is also required. This must be the first day of a month and must not be in the future. */
-                start_date?: string;
-                /** @description Optional end date for the requested history range in YYYY-MM-DD format. If set, `start_date` is also required. This must be the first day of a month. */
-                end_date?: string;
+                /** @description Optional. Same format and constraints as `start_month` on [GET /balance_history](#tag/balance-history/GET/balance_history). */
+                start_month?: string;
+                /** @description Optional. Same format and constraints as `end_month` on [GET /balance_history](#tag/balance-history/GET/balance_history). */
+                end_month?: string;
             };
             header?: never;
             path: {
@@ -4118,7 +4174,7 @@ interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Historical balance entries for the synced crypto symbol stream */
+            /** @description Monthly balance history for the synced crypto symbol stream */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -4135,8 +4191,9 @@ interface operations {
                      *           },
                      *           "balances": [
                      *             {
+                     *               "type": "historical",
                      *               "id": 401,
-                     *               "date": "2026-02-01",
+                     *               "month": "2026-02",
                      *               "balance": "6231.2800",
                      *               "currency": "usd",
                      *               "to_base": 6231.28,
@@ -4191,7 +4248,7 @@ interface operations {
             };
         };
         responses: {
-            /** @description Returns the modified balance entries only. Other historical entries for the symbol stream are omitted from `balances`. */
+            /** @description Returns only the `type: historical` entries modified by this request. Other historical entries for the symbol stream are omitted from `balances`. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -4200,7 +4257,7 @@ interface operations {
                     "application/json": components["schemas"]["balanceHistoryAccountObject"];
                 };
             };
-            /** @description Bad Request. The entire request is rejected if any row in `balances` fails validation; no rows are updated. */
+            /** @description Bad Request. If any entry in `balances` fails validation, the entire request is rejected and no entries are updated. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4273,7 +4330,7 @@ interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Balance history row identifier to delete. */
+                /** @description Historical balance entry identifier to delete. */
                 id: number;
             };
             cookie?: never;
@@ -4295,7 +4352,7 @@ interface operations {
                 content: {
                     /**
                      * @example {
-                     *       "message": "Request Validation Failure",
+                     *       "message": "Invalid Path Parameters",
                      *       "errors": [
                      *         {
                      *           "errMsg": "Invalid value type for path parameter: 'id'. Expected 'number', received 'string'."
@@ -5034,9 +5091,9 @@ interface operations {
                 include_children?: boolean;
                 /** @description By default, the `files` property is not included in the response. Set to true if you'd like the responses to include a list of objects that describe any files attached to the transactions. */
                 include_files?: boolean;
-                /** @description Sets the maximum number of transactions to return. If more match the filter criteria, the response will include a `has_more` attribute set to `true`. See [Pagination](https://lm-v2-api-next-a7fabcab8e9a.herokuapp.com/v2/pagination) */
+                /** @description Sets the maximum number of transactions to return. If more match the filter criteria, the response will include a `has_more` attribute set to `true`. See [Pagination](https://lunchmoney.dev/v2/pagination) */
                 limit?: number;
-                /** @description Sets the offset for the records returned. This is typically set automatically in the header. See [Pagination](https://lm-v2-api-next-a7fabcab8e9a.herokuapp.com/v2/pagination) */
+                /** @description Sets the offset for the records returned. This is typically set automatically in the header. See [Pagination](https://lunchmoney.dev/v2/pagination) */
                 offset?: number;
             };
             header?: never;
@@ -5045,7 +5102,7 @@ interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Returns an array of transactions. <br><br>The `has_more` property is set to `true` if more transactions are available. See [Pagination](https://lm-v2-api-next-a7fabcab8e9a.herokuapp.com/v2/pagination) */
+            /** @description Returns an array of transactions. <br><br>The `has_more` property is set to `true` if more transactions are available. See [Pagination](https://lunchmoney.dev/v2/pagination) */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -6477,7 +6534,7 @@ interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Budget settings for the account */
+            /** @description Budget period settings for the current budget */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -6656,7 +6713,9 @@ type DeleteTransactionsBody = operations["deleteTransactions"]["requestBody"]["c
 type AttachFileToTransactionBody = operations["attachFileToTransaction"]["requestBody"]["content"]["multipart/form-data"];
 type TransactionAttachmentUrlResponse = operations["getTransactionAttachmentUrl"]["responses"]["200"]["content"]["application/json"];
 type BalanceHistoryAccount = components["schemas"]["balanceHistoryAccountObject"];
-type BalanceHistoryEntry = components["schemas"]["balanceHistoryObject"];
+type BalanceHistoryEntry = components["schemas"]["balanceHistoryEntry"];
+type HistoricalBalanceHistoryEntry = components["schemas"]["historicalBalanceHistoryEntry"];
+type CurrentBalanceHistoryEntry = components["schemas"]["currentBalanceHistoryEntry"];
 type BalanceHistorySourceManual = components["schemas"]["balanceHistorySourceManual"];
 type BalanceHistorySourcePlaid = components["schemas"]["balanceHistorySourcePlaid"];
 type BalanceHistorySourceCryptoManual = components["schemas"]["balanceHistorySourceCryptoManual"];
@@ -6862,4 +6921,4 @@ declare class LunchMoneyClient {
 }
 
 export { LunchMoneyClient, LunchMoneyError, LunchMoneyClient as default };
-export type { AccountType, AlignedCategoryTotals, AlignedSummaryCategory, AlignedSummaryResponse, AttachFileToTransactionBody, BalanceHistoryAccount, BalanceHistoryAccountDeleteInput, BalanceHistoryAccountGetInput, BalanceHistoryAccountKey, BalanceHistoryAccountNamespace, BalanceHistoryAccountType, BalanceHistoryAccountUpdateInput, BalanceHistoryAccountUpsertInput, BalanceHistoryEntry, BalanceHistorySource, BalanceHistorySourceCryptoManual, BalanceHistorySourceCryptoSynced, BalanceHistorySourceDeleted, BalanceHistorySourceManual, BalanceHistorySourcePlaid, BudgetInvalidPeriodError, BudgetSettingsResponse, BudgetUpsertResponse, Category, ChildCategory, ChildTransaction, CreateCategoryBody, CreateCryptocurrencyBody, CreateManualAccountBody, CreateManualCryptoAccountBody, CreateTagBody, CreateTransactionsBody, Cryptocurrency, Currency, DeleteBudgetParams, DeleteCategoryParams, DeleteCategoryResponse, DeleteManualCryptoAccountParams, DeleteTagParams, DeleteTagResponse, DeleteTransactionsBody, ErrorDetail, ErrorResponse, GetAllCategoriesParams, GetAllRecurringItemsParams, GetAllTransactionsParams, GetAllTransactionsResponse, GetBalanceHistoryAccountQuery, GetBalanceHistoryParams, GetBudgetSummaryParams, GroupTransactionsBody, InsertTransaction, InsertTransactionsResponse, LunchMoneyClientOptions, ManualAccount, ManualCryptoAccount, NonAlignedCategoryTotals, NonAlignedSummaryCategory, NonAlignedSummaryResponse, PlaidAccount, RecurringItem, SkippedExistingExternalId, SplitTransaction, SplitTransactionBody, SummaryCategoryOccurrence, SummaryRecurringTransaction, SummaryRolloverPool, SummaryRolloverPoolAdjustment, SummaryTotals, SummaryTotalsBreakdown, SyncedCryptoAccount, SyncedCryptoAccountBalance, Tag, Transaction, TransactionAttachment, TransactionAttachmentUrlResponse, TriggerPlaidAccountFetchParams, UpdateBalanceHistoryDetailsBody, UpdateBalanceHistoryDetailsResponse, UpdateCategoryBody, UpdateManualAccountBody, UpdateManualCryptoAccountBody, UpdateTagBody, UpdateTransaction, UpdateTransactionBody, UpdateTransactionsBody, UpdateTransactionsResponse, UpsertBalanceHistoryBody, UpsertBudgetBody, User, components, operations, paths };
+export type { AccountType, AlignedCategoryTotals, AlignedSummaryCategory, AlignedSummaryResponse, AttachFileToTransactionBody, BalanceHistoryAccount, BalanceHistoryAccountDeleteInput, BalanceHistoryAccountGetInput, BalanceHistoryAccountKey, BalanceHistoryAccountNamespace, BalanceHistoryAccountType, BalanceHistoryAccountUpdateInput, BalanceHistoryAccountUpsertInput, BalanceHistoryEntry, BalanceHistorySource, BalanceHistorySourceCryptoManual, BalanceHistorySourceCryptoSynced, BalanceHistorySourceDeleted, BalanceHistorySourceManual, BalanceHistorySourcePlaid, BudgetInvalidPeriodError, BudgetSettingsResponse, BudgetUpsertResponse, Category, ChildCategory, ChildTransaction, CreateCategoryBody, CreateCryptocurrencyBody, CreateManualAccountBody, CreateManualCryptoAccountBody, CreateTagBody, CreateTransactionsBody, Cryptocurrency, Currency, CurrentBalanceHistoryEntry, DeleteBudgetParams, DeleteCategoryParams, DeleteCategoryResponse, DeleteManualCryptoAccountParams, DeleteTagParams, DeleteTagResponse, DeleteTransactionsBody, ErrorDetail, ErrorResponse, GetAllCategoriesParams, GetAllRecurringItemsParams, GetAllTransactionsParams, GetAllTransactionsResponse, GetBalanceHistoryAccountQuery, GetBalanceHistoryParams, GetBudgetSummaryParams, GroupTransactionsBody, HistoricalBalanceHistoryEntry, InsertTransaction, InsertTransactionsResponse, LunchMoneyClientOptions, ManualAccount, ManualCryptoAccount, NonAlignedCategoryTotals, NonAlignedSummaryCategory, NonAlignedSummaryResponse, PlaidAccount, RecurringItem, SkippedExistingExternalId, SplitTransaction, SplitTransactionBody, SummaryCategoryOccurrence, SummaryRecurringTransaction, SummaryRolloverPool, SummaryRolloverPoolAdjustment, SummaryTotals, SummaryTotalsBreakdown, SyncedCryptoAccount, SyncedCryptoAccountBalance, Tag, Transaction, TransactionAttachment, TransactionAttachmentUrlResponse, TriggerPlaidAccountFetchParams, UpdateBalanceHistoryDetailsBody, UpdateBalanceHistoryDetailsResponse, UpdateCategoryBody, UpdateManualAccountBody, UpdateManualCryptoAccountBody, UpdateTagBody, UpdateTransaction, UpdateTransactionBody, UpdateTransactionsBody, UpdateTransactionsResponse, UpsertBalanceHistoryBody, UpsertBudgetBody, User, components, operations, paths };
