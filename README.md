@@ -118,7 +118,7 @@ The `LunchMoneyClient` constructor accepts the following options:
 
 This library provides convenient methods for:
 
-- **User**: Get current user details (`user.getMe()`) and read/update settings (`user.getAccountSettings()` / `user.updateAccountSettings()` for budgeting-account settings shared by collaborators, `user.getUserAccountSettings()` / `user.updateUserAccountSettings()` for the current user within the active account, `user.getSettings()` / `user.updateSettings()` for the current user across all accounts). Updates are partial: send only the properties to change; the complete settings object is returned.
+- **User**: Current user and settings (`user.getMe()`, `user.getAccountSettings()` / `user.updateAccountSettings()` for the budgeting account, `user.getUserAccountSettings()` / `user.updateUserAccountSettings()` for the current user in the account, `user.getUserSettings()` / `user.updateUserSettings()` for the current user across accounts). Updates are partial and require at least one property.
 - **Categories**: CRUD operations (`categories.getAll()`, `categories.get()`, `categories.create()`, `categories.update()`, `categories.delete()`)
 - **Transactions**: Full transaction management (`transactions.getAll()`, `transactions.create()`, `transactions.split()`, `transactions.group()`)
 - **Manual Accounts**: CRUD operations (`manualAccounts.getAll()`, `manualAccounts.get()`, `manualAccounts.create()`, `manualAccounts.update()`, `manualAccounts.delete()`)

@@ -7329,7 +7329,8 @@ declare class LunchMoneyClient {
         getAccountSettings: () => Promise<AccountSettings>;
         /**
          * Update settings for the current budgeting account. Only the provided
-         * properties are updated; returns the complete updated settings.
+         * properties are updated (at least one is required); returns the
+         * complete updated settings.
          */
         updateAccountSettings: (data: UpdateAccountSettingsBody) => Promise<AccountSettings>;
         /**
@@ -7339,20 +7340,23 @@ declare class LunchMoneyClient {
         getUserAccountSettings: () => Promise<UserAccountSettings>;
         /**
          * Update settings specific to the current user within the current
-         * budgeting account. Only the provided properties are updated; returns
-         * the complete updated settings.
+         * budgeting account. Only the provided properties are updated (at least
+         * one is required); returns the complete updated settings.
          */
         updateUserAccountSettings: (data: UpdateUserAccountSettingsBody) => Promise<UserAccountSettings>;
         /**
          * Get display and formatting settings for the current user across all
          * budgeting accounts
          */
-        getSettings: () => Promise<UserSettings>;
+        getUserSettings: () => Promise<UserSettings>;
         /**
-         * Update display and formatting settings for the current user. Only the
-         * provided properties are updated; returns the complete updated settings.
+         * Update display and formatting settings for the current user across all
+         * budgeting accounts. Only the provided properties are updated (at least
+         * one is required); returns the complete updated settings.
+         * `show_debits_as_negative` only affects how the Lunch Money apps
+         * display amounts; API amounts always return debits as positive.
          */
-        updateSettings: (data: UpdateUserSettingsBody) => Promise<UserSettings>;
+        updateUserSettings: (data: UpdateUserSettingsBody) => Promise<UserSettings>;
     };
     get categories(): {
         /**

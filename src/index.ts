@@ -240,7 +240,8 @@ export class LunchMoneyClient {
 			},
 			/**
 			 * Update settings for the current budgeting account. Only the provided
-			 * properties are updated; returns the complete updated settings.
+			 * properties are updated (at least one is required); returns the
+			 * complete updated settings.
 			 */
 			updateAccountSettings: async (
 				data: UpdateAccountSettingsBody,
@@ -260,8 +261,8 @@ export class LunchMoneyClient {
 			},
 			/**
 			 * Update settings specific to the current user within the current
-			 * budgeting account. Only the provided properties are updated; returns
-			 * the complete updated settings.
+			 * budgeting account. Only the provided properties are updated (at least
+			 * one is required); returns the complete updated settings.
 			 */
 			updateUserAccountSettings: async (
 				data: UpdateUserAccountSettingsBody,
@@ -275,15 +276,18 @@ export class LunchMoneyClient {
 			 * Get display and formatting settings for the current user across all
 			 * budgeting accounts
 			 */
-			getSettings: async (): Promise<UserSettings> => {
+			getUserSettings: async (): Promise<UserSettings> => {
 				const response = await this.client.GET("/me/user/settings");
 				return this.handleDataResponse(response);
 			},
 			/**
-			 * Update display and formatting settings for the current user. Only the
-			 * provided properties are updated; returns the complete updated settings.
+			 * Update display and formatting settings for the current user across all
+			 * budgeting accounts. Only the provided properties are updated (at least
+			 * one is required); returns the complete updated settings.
+			 * `show_debits_as_negative` only affects how the Lunch Money apps
+			 * display amounts; API amounts always return debits as positive.
 			 */
-			updateSettings: async (
+			updateUserSettings: async (
 				data: UpdateUserSettingsBody,
 			): Promise<UserSettings> => {
 				const response = await this.client.PUT("/me/user/settings", {
