@@ -103,6 +103,8 @@ export type CreateTransactionsBody =
 	operations["createNewTransactions"]["requestBody"]["content"]["application/json"];
 export type UpdateTransactionBody =
 	operations["updateTransaction"]["requestBody"]["content"]["application/json"];
+export type UpdateTransactionParams =
+	operations["updateTransaction"]["parameters"]["query"];
 export type UpdateTransactionsBody =
 	operations["updateTransactions"]["requestBody"]["content"]["application/json"];
 export type SplitTransactionBody =
@@ -128,6 +130,10 @@ export type CreateManualAccountBody =
 	operations["createManualAccount"]["requestBody"]["content"]["application/json"];
 export type UpdateManualAccountBody =
 	operations["updateManualAccount"]["requestBody"]["content"]["application/json"];
+export type DeleteManualAccountParams =
+	operations["deleteManualAccount"]["parameters"]["query"];
+export type GetRecurringItemParams =
+	operations["getRecurringById"]["parameters"]["query"];
 export type CreateCryptocurrencyBody =
 	operations["createCryptocurrency"]["requestBody"]["content"]["application/json"];
 export type CreateManualCryptoAccountBody =
@@ -140,8 +146,23 @@ export type TriggerPlaidAccountFetchParams =
 	operations["triggerPlaidAccountFetch"]["parameters"]["query"];
 export type DeleteTransactionsBody =
 	operations["deleteTransactions"]["requestBody"]["content"]["application/json"];
-export type AttachFileToTransactionBody =
-	operations["attachFileToTransaction"]["requestBody"]["content"]["multipart/form-data"];
+/** Blob/File interface shared by browsers and supported Node versions. */
+export type TransactionAttachmentFile = Pick<
+	Blob,
+	"size" | "type" | "arrayBuffer" | "text"
+> & {
+	readonly name?: string;
+	slice(
+		start?: number,
+		end?: number,
+		contentType?: string,
+	): TransactionAttachmentFile;
+	stream(): unknown;
+};
+export type AttachFileToTransactionBody = Omit<
+	operations["attachFileToTransaction"]["requestBody"]["content"]["multipart/form-data"],
+	"file"
+> & { file: TransactionAttachmentFile; filename?: string };
 export type TransactionAttachmentUrlResponse =
 	operations["getTransactionAttachmentUrl"]["responses"]["200"]["content"]["application/json"];
 export type UpdateAccountSettingsBody =

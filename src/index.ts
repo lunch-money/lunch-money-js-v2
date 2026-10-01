@@ -1,4 +1,4 @@
-import createClient, { ClientOptions } from "openapi-fetch";
+import createClient, { type Client, type ClientOptions } from "openapi-fetch";
 import type { paths } from "./types.generated";
 import type {
 	User,
@@ -25,6 +25,7 @@ import type {
 	GetAllTransactionsResponse,
 	CreateTransactionsBody,
 	UpdateTransactionBody,
+	UpdateTransactionParams,
 	UpdateTransactionsBody,
 	SplitTransactionBody,
 	GroupTransactionsBody,
@@ -42,6 +43,8 @@ import type {
 	BudgetUpsertResponse,
 	CreateManualAccountBody,
 	UpdateManualAccountBody,
+	DeleteManualAccountParams,
+	GetRecurringItemParams,
 	CreateCryptocurrencyBody,
 	CreateManualCryptoAccountBody,
 	UpdateManualCryptoAccountBody,
@@ -109,7 +112,7 @@ export interface BalanceHistoryAccountNamespace {
  * Lunch Money API v2 client
  */
 export class LunchMoneyClient {
-	private client: ReturnType<typeof createClient<paths>>;
+	private client: Client<paths>;
 
 	constructor(options: LunchMoneyClientOptions) {
 		const {
@@ -197,9 +200,9 @@ export class LunchMoneyClient {
 	private handleDataResponse<T>(response: {
 		data?: T;
 		error?: unknown;
-		response: { status: number };
+		response: { status: number; ok: boolean };
 	}): T {
-		if (response.error) {
+		if (!response.response.ok) {
 			this.handleError(response);
 		}
 		if (response.data === undefined) {
@@ -213,9 +216,9 @@ export class LunchMoneyClient {
 
 	private handleVoidResponse(response: {
 		error?: unknown;
-		response: { status: number };
+		response: { status: number; ok: boolean };
 	}): void {
-		if (response.error) {
+		if (!response.response.ok) {
 			this.handleError(response);
 		}
 		// No data expected, just return void
@@ -379,9 +382,10 @@ export class LunchMoneyClient {
 			update: async (
 				id: number,
 				data: UpdateTransactionBody,
+				params?: UpdateTransactionParams,
 			): Promise<Transaction> => {
 				const response = await this.client.PUT("/transactions/{id}", {
-					params: { path: { id } },
+					params: { path: { id }, query: params },
 					body: data,
 				});
 				return this.handleDataResponse(response);
@@ -436,11 +440,27 @@ export class LunchMoneyClient {
 				transactionId: number,
 				data: AttachFileToTransactionBody,
 			): Promise<TransactionAttachment> => {
+				const form = new FormData();
+				// Node's Blob/File typings can lag the DOM library. FormData
+				// accepts these binaries without requiring newer Blob methods.
+				const file = data.file as Blob;
+				if (data.filename !== undefined) {
+					form.append("file", file, data.filename);
+				} else if ("name" in data.file && typeof data.file.name === "string") {
+					form.append("file", file, data.file.name);
+				} else {
+					form.append("file", file, "attachment");
+				}
+				if (data.notes !== undefined) form.append("notes", data.notes);
 				const response = await this.client.POST(
 					"/transactions/{transaction_id}/attachments",
 					{
 						params: { path: { transaction_id: transactionId } },
-						body: data,
+						// The generated schema represents binary data as a string;
+						// the serializer supplies the actual multipart file bytes.
+						body: { file: "", notes: data.notes },
+						bodySerializer: () => form,
+						headers: { "Content-Type": null },
 					},
 				);
 				return this.handleDataResponse(response);
@@ -497,9 +517,12 @@ export class LunchMoneyClient {
 				});
 				return this.handleDataResponse(response);
 			},
-			delete: async (id: number): Promise<void> => {
+			delete: async (
+				id: number,
+				params?: DeleteManualAccountParams,
+			): Promise<void> => {
 				const response = await this.client.DELETE("/manual_accounts/{id}", {
-					params: { path: { id } },
+					params: { path: { id }, query: params },
 				});
 				return this.handleVoidResponse(response);
 			},
@@ -667,9 +690,12 @@ export class LunchMoneyClient {
 				const data = this.handleDataResponse(response);
 				return data.recurring_items || [];
 			},
-			get: async (id: number): Promise<RecurringItem> => {
+			get: async (
+				id: number,
+				params?: GetRecurringItemParams,
+			): Promise<RecurringItem> => {
 				const response = await this.client.GET("/recurring_items/{id}", {
-					params: { path: { id } },
+					params: { path: { id }, query: params },
 				});
 				return this.handleDataResponse(response);
 			},
@@ -913,7 +939,7 @@ export class LunchMoneyClient {
 	/**
 	 * Access to the raw openapi-fetch client for advanced usage
 	 */
-	get rawClient() {
+	get rawClient(): Client<paths> {
 		return this.client;
 	}
 }

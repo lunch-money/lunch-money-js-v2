@@ -10,7 +10,7 @@ export default [
 		input: "src/index.ts",
 		output: [
 			{
-				file: "dist/index.js",
+				file: "dist/index.cjs",
 				format: "cjs",
 				exports: "named",
 				interop: "auto",
@@ -31,15 +31,17 @@ export default [
 			typescript({
 				tsconfig: "./tsconfig.json",
 				declaration: false,
+				declarationMap: false,
+				sourceMap: false,
 			}),
 		],
 	},
 	{
 		input: "src/index.ts",
-		output: {
-			file: "dist/index.d.ts",
-			format: "es",
-		},
+		output: [
+			{ file: "dist/index.d.ts", format: "es" },
+			{ file: "dist/index.d.cts", format: "es" },
+		],
 		external,
 		plugins: [dts()],
 	},

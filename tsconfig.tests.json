@@ -1,0 +1,15 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"rootDir": ".",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"lib": ["ES2020", "DOM", "DOM.Iterable"],
+		"types": ["node"],
+		"noEmit": true,
+		"declaration": false,
+		"declarationMap": false,
+		"skipLibCheck": false
+	},
+	"include": ["tests/**/*.ts"]
+}

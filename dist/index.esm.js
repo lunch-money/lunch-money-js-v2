@@ -65,7 +65,7 @@ class LunchMoneyClient {
         };
     }
     handleDataResponse(response) {
-        if (response.error) {
+        if (!response.response.ok) {
             this.handleError(response);
         }
         if (response.data === undefined) {
@@ -74,7 +74,7 @@ class LunchMoneyClient {
         return response.data;
     }
     handleVoidResponse(response) {
-        if (response.error) {
+        if (!response.response.ok) {
             this.handleError(response);
         }
         // No data expected, just return void
@@ -216,9 +216,9 @@ class LunchMoneyClient {
                 });
                 return this.handleDataResponse(response);
             },
-            update: async (id, data) => {
+            update: async (id, data, params) => {
                 const response = await this.client.PUT("/transactions/{id}", {
-                    params: { path: { id } },
+                    params: { path: { id }, query: params },
                     body: data,
                 });
                 return this.handleDataResponse(response);
@@ -265,9 +265,28 @@ class LunchMoneyClient {
                 return this.handleVoidResponse(response);
             },
             attachFile: async (transactionId, data) => {
+                const form = new FormData();
+                // Node's Blob/File typings can lag the DOM library. FormData
+                // accepts these binaries without requiring newer Blob methods.
+                const file = data.file;
+                if (data.filename !== undefined) {
+                    form.append("file", file, data.filename);
+                }
+                else if ("name" in data.file && typeof data.file.name === "string") {
+                    form.append("file", file, data.file.name);
+                }
+                else {
+                    form.append("file", file, "attachment");
+                }
+                if (data.notes !== undefined)
+                    form.append("notes", data.notes);
                 const response = await this.client.POST("/transactions/{transaction_id}/attachments", {
                     params: { path: { transaction_id: transactionId } },
-                    body: data,
+                    // The generated schema represents binary data as a string;
+                    // the serializer supplies the actual multipart file bytes.
+                    body: { file: "", notes: data.notes },
+                    bodySerializer: () => form,
+                    headers: { "Content-Type": null },
                 });
                 return this.handleDataResponse(response);
             },
@@ -311,9 +330,9 @@ class LunchMoneyClient {
                 });
                 return this.handleDataResponse(response);
             },
-            delete: async (id) => {
+            delete: async (id, params) => {
                 const response = await this.client.DELETE("/manual_accounts/{id}", {
-                    params: { path: { id } },
+                    params: { path: { id }, query: params },
                 });
                 return this.handleVoidResponse(response);
             },
@@ -453,9 +472,9 @@ class LunchMoneyClient {
                 const data = this.handleDataResponse(response);
                 return data.recurring_items || [];
             },
-            get: async (id) => {
+            get: async (id, params) => {
                 const response = await this.client.GET("/recurring_items/{id}", {
-                    params: { path: { id } },
+                    params: { path: { id }, query: params },
                 });
                 return this.handleDataResponse(response);
             },
