@@ -1,6 +1,6 @@
 # Lunch Money JS v2
 
-[![npm version](https://img.shields.io/npm/v/lunch-money-js-v2.svg)](https://www.npmjs.com/package/lunch-money-js-v2)
+[![npm version](https://img.shields.io/npm/v/@lunch-money/lunch-money-js-v2.svg)](https://www.npmjs.com/package/@lunch-money/lunch-money-js-v2)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 
 A TypeScript client library for the Lunch Money API v2, built with openapi-ts and openapi-fetch.
@@ -32,7 +32,7 @@ yarn add @lunch-money/lunch-money-js-v2
 ## Usage
 
 ```typescript
-import { LunchMoneyClient, LunchMoneyError, type ErrorResponse, type ErrorDetail, type User, type Category, type Transaction } from 'lunch-money-js-v2';
+import { LunchMoneyClient, LunchMoneyError, type ErrorResponse, type ErrorDetail, type User, type Category, type Transaction } from '@lunch-money/lunch-money-js-v2';
 
 // Initialize the client
 const client = new LunchMoneyClient({
@@ -77,6 +77,32 @@ const updatedCategory: Category = await client.categories.update(123, {
   name: 'Updated Groceries'
 });
 
+// Upload binary file data (File is also supported in browsers)
+await client.transactions.attachFile(123, {
+  file: new Blob([
+    Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII='), c => c.charCodeAt(0))
+  ], { type: 'image/png' }),
+  filename: 'receipt.png',
+  notes: 'Purchase receipt'
+});
+
+// Update without changing the associated account balance
+await client.transactions.update(123, { payee: 'Updated payee' }, {
+  update_balance: false
+});
+
+// Get recurring matches for a date range
+await client.recurringItems.get(123, {
+  start_date: '2025-01-01',
+  end_date: '2025-01-31'
+});
+
+// Delete an account and its associated items and history (irreversible)
+await client.manualAccounts.delete(123, {
+  delete_items: true,
+  delete_balance_history: true
+});
+
 // Delete a category
 await client.categories.delete(123);
 
@@ -105,6 +131,8 @@ const rawResponse = await client.rawClient.GET('/me');
 console.log(rawResponse.data, rawResponse.error, rawResponse.response);
 ```
 
+Attachment inputs accept browser and Node `Blob` or `File` objects; string paths are not supported. Supported file formats are JPEG, PNG, PDF, HEIC, and HEIF. If `filename` is omitted, a File’s name is preserved and other Blobs use `attachment`.
+
 ## Configuration
 
 The `LunchMoneyClient` constructor accepts the following options:
@@ -118,15 +146,18 @@ The `LunchMoneyClient` constructor accepts the following options:
 
 This library provides convenient methods for:
 
-- **User**: Get current user details (`user.getMe()`)
+- **User**: Current user and settings (`user.getMe()`, `user.getAccountSettings()` / `user.updateAccountSettings()` for the budgeting account, `user.getUserAccountSettings()` / `user.updateUserAccountSettings()` for the current user in the account, `user.getUserSettings()` / `user.updateUserSettings()` for the current user across accounts). Updates are partial and require at least one property.
 - **Categories**: CRUD operations (`categories.getAll()`, `categories.get()`, `categories.create()`, `categories.update()`, `categories.delete()`)
 - **Transactions**: Full transaction management (`transactions.getAll()`, `transactions.create()`, `transactions.split()`, `transactions.group()`)
 - **Manual Accounts**: CRUD operations (`manualAccounts.getAll()`, `manualAccounts.get()`, `manualAccounts.create()`, `manualAccounts.update()`, `manualAccounts.delete()`)
+- **Cryptocurrencies**: Supported cryptocurrency lookup and creation (`cryptocurrencies.getAll()`, `cryptocurrencies.create()`)
+- **Crypto**: Manual and synced crypto account operations (`crypto.manual.getAll()`, `crypto.manual.create()`, `crypto.synced.getAll()`, `crypto.synced.getBalance()`, `crypto.synced.refresh()`)
 - **Plaid Accounts**: Get Plaid-connected accounts (`plaidAccounts.getAll()`, `plaidAccounts.get()`)
 - **Tags**: CRUD operations (`tags.getAll()`, `tags.create()`, `tags.update()`, `tags.delete()`)
 - **Recurring Items**: Get recurring patterns (`recurringItems.getAll()`, `recurringItems.get()`)
 - **Summary**: Get budget summaries (`summary.get()`)
 - **Budgets**: Manage budget settings and period budgets (`budgets.getSettings()`, `budgets.upsert()`, `budgets.delete()`)
+- **Balance History**: Monthly balance history across account types (`balanceHistory.getAll()`, `balanceHistory.account.get()`, `balanceHistory.account.upsert()`, `balanceHistory.account.delete()`, `balanceHistory.account.update()` for deleted-source metadata, `balanceHistory.entry.delete()`). Date ranges and upserts use `YYYY-MM` month values; responses distinguish stored `historical` entries from ephemeral `current` entries.
 
 ## Error Handling
 
@@ -142,7 +173,7 @@ All methods throw `LunchMoneyError` on API failure. The error object provides de
 The client normalizes API error payloads so `error.errors` remains useful even when an endpoint returns a top-level `errMsg` instead of an `errors[]` array. The original payload is always available in `error.data`.
 
 ```typescript
-import { LunchMoneyError } from 'lunch-money-js-v2';
+import { LunchMoneyError } from '@lunch-money/lunch-money-js-v2';
 
 try {
   await client.transactions.create({
@@ -175,7 +206,7 @@ All API responses and request parameters are fully typed using TypeScript types 
 - **Generated Types**: All types are automatically generated from the OpenAPI spec using `openapi-typescript`
 - **Clean Type Exports**: Import clean types like `User`, `Category`, `Transaction` directly from the package
 - **Request/Response Types**: All parameters and response types are inferred from the OpenAPI specification
-- **Runtime Validation**: Uses `openapi-fetch` for runtime type checking and validation
+- **Typed HTTP Requests**: Uses `openapi-fetch` for request serialization and response parsing; responses are not validated at runtime
 
 ## Available Types
 
@@ -190,9 +221,20 @@ import {
   type Tag,
   type ManualAccount,
   type PlaidAccount,
+  type Cryptocurrency,
+  type ManualCryptoAccount,
+  type SyncedCryptoAccount,
+  type SyncedCryptoAccountBalance,
   type RecurringItem,
   type TransactionAttachment,
-} from 'lunch-money-js-v2';
+  type BalanceHistoryAccount,
+  type BalanceHistoryEntry,
+  type HistoricalBalanceHistoryEntry,
+  type CurrentBalanceHistoryEntry,
+  type AccountSettings,
+  type UserAccountSettings,
+  type UserSettings,
+} from '@lunch-money/lunch-money-js-v2';
 
 // Response types
 import {
@@ -200,27 +242,50 @@ import {
   type ErrorResponse,
   type AlignedSummaryResponse,
   type NonAlignedSummaryResponse,
-} from 'lunch-money-js-v2';
+} from '@lunch-money/lunch-money-js-v2';
 
 // Enums
 import {
   type Currency,
   type AccountType,
-} from 'lunch-money-js-v2';
+  type Locale,
+  type WeekStartsOn,
+  type MonthYearFormat,
+  type MonthDayYearFormat,
+  type MonthDayFormat,
+} from '@lunch-money/lunch-money-js-v2';
 
 // API operation types (for request/response typing)
 import {
+  type AttachFileToTransactionBody,
+  type TransactionAttachmentFile,
+  type UpdateTransactionParams,
+  type DeleteManualAccountParams,
+  type GetRecurringItemParams,
   type CreateCategoryBody,
   type UpdateCategoryBody,
   type GetAllTransactionsParams,
-  type CreateTransactionsBody
-} from 'lunch-money-js-v2';
+  type CreateTransactionsBody,
+  type CreateManualCryptoAccountBody,
+  type UpdateManualCryptoAccountBody,
+  type DeleteManualCryptoAccountParams,
+  type BalanceHistoryAccountType,
+  type BalanceHistoryAccountGetInput,
+  type BalanceHistoryAccountUpsertInput,
+  type BalanceHistoryAccountDeleteInput,
+  type BalanceHistoryAccountUpdateInput,
+  type UpsertBalanceHistoryBody,
+  type UpdateBalanceHistoryDetailsBody,
+  type UpdateAccountSettingsBody,
+  type UpdateUserAccountSettingsBody,
+  type UpdateUserSettingsBody,
+} from '@lunch-money/lunch-money-js-v2';
 ```
 
 For advanced usage, you can also import the raw OpenAPI types:
 
 ```typescript
-import { type paths, type operations, type components } from 'lunch-money-js-v2';
+import { type paths, type operations, type components } from '@lunch-money/lunch-money-js-v2';
 ```
 
 ## Requirements

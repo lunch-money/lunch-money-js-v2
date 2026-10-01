@@ -12,7 +12,7 @@ export default [
 			parserOptions: {
 				ecmaVersion: 2020,
 				sourceType: "module",
-				project: "./tsconfig.json",
+				project: ["./tsconfig.json", "./tsconfig.tests.json"],
 			},
 		},
 		plugins: {
@@ -34,5 +34,9 @@ export default [
 	{
 		files: ["**/*.js"],
 		...js.configs.recommended,
+	},
+	{
+		files: ["src/types.generated.ts"],
+		rules: { "prettier/prettier": "off" },
 	},
 ];

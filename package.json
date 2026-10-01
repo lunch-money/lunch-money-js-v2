@@ -1,16 +1,21 @@
 {
 	"name": "@lunch-money/lunch-money-js-v2",
-	"version": "2.9.0",
+	"version": "2.11.1",
 	"type": "module",
 	"description": "TypeScript client library for Lunch Money API v2",
-	"main": "dist/index.js",
+	"main": "dist/index.cjs",
 	"module": "dist/index.esm.js",
 	"types": "dist/index.d.ts",
 	"exports": {
 		".": {
-			"types": "./dist/index.d.ts",
-			"import": "./dist/index.esm.js",
-			"require": "./dist/index.js"
+			"import": {
+				"types": "./dist/index.d.ts",
+				"default": "./dist/index.esm.js"
+			},
+			"require": {
+				"types": "./dist/index.d.cts",
+				"default": "./dist/index.cjs"
+			}
 		}
 	},
 	"sideEffects": false,
@@ -26,15 +31,17 @@
 		"build": "rollup -c",
 		"dev": "rollup -c -w",
 		"typecheck": "tsc --noEmit",
-		"lint": "eslint src --ext .ts",
-		"lint:fix": "eslint src --ext .ts --fix",
-		"format": "prettier --write src/**/*.ts",
-		"format:check": "prettier --check src/**/*.ts",
+		"lint": "eslint src tests --ext .ts",
+		"lint:fix": "eslint src tests --ext .ts --fix",
+		"format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
+		"format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\"",
 		"generate-types": "openapi-typescript node_modules/@lunch-money/v2-api-spec/lunch-money-api-v2.yaml -o src/types.generated.ts --default-non-nullable false",
-		"prepare": "npm run generate-types && npm run build",
-		"release:verify": "npm run lint && npm run typecheck && npm run build",
-		"release:dry-run": "npm run release:verify && npm publish --dry-run --access public",
-		"release:publish": "npm run release:verify && npm publish --access public"
+		"prepare": "pnpm run generate-types && pnpm run build",
+		"release:verify": "pnpm run lint && pnpm run typecheck && pnpm run build && pnpm test",
+		"release:dry-run": "pnpm run release:verify && pnpm publish --dry-run --access public --no-git-checks",
+		"release:publish": "pnpm run release:verify && pnpm publish --access public --no-git-checks",
+		"test": "pnpm run test:typecheck && node --import tsx --test tests/*.test.ts",
+		"test:typecheck": "tsc -p tsconfig.tests.json"
 	},
 	"keywords": [
 		"lunch-money",
@@ -57,10 +64,12 @@
 		"openapi-fetch": "^0.15.0"
 	},
 	"devDependencies": {
-		"@lunch-money/v2-api-spec": "2.9.0",
+		"@eslint/js": "^9.39.0",
+		"@lunch-money/v2-api-spec": "2.11.1",
 		"@rollup/plugin-commonjs": "^28.0.6",
 		"@rollup/plugin-node-resolve": "^16.0.1",
 		"@rollup/plugin-typescript": "^12.1.4",
+		"@types/node": "^18.19.130",
 		"@typescript-eslint/eslint-plugin": "^8.0.0",
 		"@typescript-eslint/parser": "^8.0.0",
 		"eslint": "^9.0.0",
@@ -71,6 +80,7 @@
 		"rollup": "^4.52.2",
 		"rollup-plugin-dts": "^6.2.3",
 		"tslib": "^2.8.1",
+		"tsx": "^4.23.15",
 		"typescript": "^5.9.2"
 	}
 }

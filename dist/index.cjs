@@ -73,7 +73,7 @@ class LunchMoneyClient {
         };
     }
     handleDataResponse(response) {
-        if (response.error) {
+        if (!response.response.ok) {
             this.handleError(response);
         }
         if (response.data === undefined) {
@@ -82,7 +82,7 @@ class LunchMoneyClient {
         return response.data;
     }
     handleVoidResponse(response) {
-        if (response.error) {
+        if (!response.response.ok) {
             this.handleError(response);
         }
         // No data expected, just return void
@@ -94,6 +94,65 @@ class LunchMoneyClient {
              */
             getMe: async () => {
                 const response = await this.client.GET("/me");
+                return this.handleDataResponse(response);
+            },
+            /**
+             * Get settings for the current budgeting account, shared by all users
+             * of the account
+             */
+            getAccountSettings: async () => {
+                const response = await this.client.GET("/me/account/settings");
+                return this.handleDataResponse(response);
+            },
+            /**
+             * Update settings for the current budgeting account. Only the provided
+             * properties are updated (at least one is required); returns the
+             * complete updated settings.
+             */
+            updateAccountSettings: async (data) => {
+                const response = await this.client.PUT("/me/account/settings", {
+                    body: data,
+                });
+                return this.handleDataResponse(response);
+            },
+            /**
+             * Get settings specific to the current user within the current
+             * budgeting account
+             */
+            getUserAccountSettings: async () => {
+                const response = await this.client.GET("/me/user/account/settings");
+                return this.handleDataResponse(response);
+            },
+            /**
+             * Update settings specific to the current user within the current
+             * budgeting account. Only the provided properties are updated (at least
+             * one is required); returns the complete updated settings.
+             */
+            updateUserAccountSettings: async (data) => {
+                const response = await this.client.PUT("/me/user/account/settings", {
+                    body: data,
+                });
+                return this.handleDataResponse(response);
+            },
+            /**
+             * Get display and formatting settings for the current user across all
+             * budgeting accounts
+             */
+            getUserSettings: async () => {
+                const response = await this.client.GET("/me/user/settings");
+                return this.handleDataResponse(response);
+            },
+            /**
+             * Update display and formatting settings for the current user across all
+             * budgeting accounts. Only the provided properties are updated (at least
+             * one is required); returns the complete updated settings.
+             * `show_debits_as_negative` only affects how the Lunch Money apps
+             * display amounts; API amounts always return debits as positive.
+             */
+            updateUserSettings: async (data) => {
+                const response = await this.client.PUT("/me/user/settings", {
+                    body: data,
+                });
                 return this.handleDataResponse(response);
             },
         };
@@ -165,9 +224,9 @@ class LunchMoneyClient {
                 });
                 return this.handleDataResponse(response);
             },
-            update: async (id, data) => {
+            update: async (id, data, params) => {
                 const response = await this.client.PUT("/transactions/{id}", {
-                    params: { path: { id } },
+                    params: { path: { id }, query: params },
                     body: data,
                 });
                 return this.handleDataResponse(response);
@@ -214,9 +273,28 @@ class LunchMoneyClient {
                 return this.handleVoidResponse(response);
             },
             attachFile: async (transactionId, data) => {
+                const form = new FormData();
+                // Node's Blob/File typings can lag the DOM library. FormData
+                // accepts these binaries without requiring newer Blob methods.
+                const file = data.file;
+                if (data.filename !== undefined) {
+                    form.append("file", file, data.filename);
+                }
+                else if ("name" in data.file && typeof data.file.name === "string") {
+                    form.append("file", file, data.file.name);
+                }
+                else {
+                    form.append("file", file, "attachment");
+                }
+                if (data.notes !== undefined)
+                    form.append("notes", data.notes);
                 const response = await this.client.POST("/transactions/{transaction_id}/attachments", {
                     params: { path: { transaction_id: transactionId } },
-                    body: data,
+                    // The generated schema represents binary data as a string;
+                    // the serializer supplies the actual multipart file bytes.
+                    body: { file: "", notes: data.notes },
+                    bodySerializer: () => form,
+                    headers: { "Content-Type": null },
                 });
                 return this.handleDataResponse(response);
             },
@@ -260,11 +338,83 @@ class LunchMoneyClient {
                 });
                 return this.handleDataResponse(response);
             },
-            delete: async (id) => {
+            delete: async (id, params) => {
                 const response = await this.client.DELETE("/manual_accounts/{id}", {
-                    params: { path: { id } },
+                    params: { path: { id }, query: params },
                 });
                 return this.handleVoidResponse(response);
+            },
+        };
+    }
+    get cryptocurrencies() {
+        return {
+            getAll: async () => {
+                const response = await this.client.GET("/cryptocurrencies");
+                const data = this.handleDataResponse(response);
+                return data.cryptocurrencies || [];
+            },
+            create: async (data) => {
+                const response = await this.client.POST("/cryptocurrencies", {
+                    body: data,
+                });
+                return this.handleDataResponse(response);
+            },
+        };
+    }
+    get crypto() {
+        return {
+            manual: {
+                getAll: async () => {
+                    const response = await this.client.GET("/crypto/manual");
+                    const data = this.handleDataResponse(response);
+                    return data.crypto_manual || [];
+                },
+                get: async (id) => {
+                    const response = await this.client.GET("/crypto/manual/{id}", {
+                        params: { path: { id } },
+                    });
+                    return this.handleDataResponse(response);
+                },
+                create: async (data) => {
+                    const response = await this.client.POST("/crypto/manual", {
+                        body: data,
+                    });
+                    return this.handleDataResponse(response);
+                },
+                update: async (id, data) => {
+                    const response = await this.client.PUT("/crypto/manual/{id}", {
+                        params: { path: { id } },
+                        body: data,
+                    });
+                    return this.handleDataResponse(response);
+                },
+                delete: async (id, params) => {
+                    const response = await this.client.DELETE("/crypto/manual/{id}", {
+                        params: { path: { id }, query: params },
+                    });
+                    return this.handleVoidResponse(response);
+                },
+            },
+            synced: {
+                getAll: async () => {
+                    const response = await this.client.GET("/crypto/synced");
+                    const data = this.handleDataResponse(response);
+                    return data.crypto_synced || [];
+                },
+                get: async (id) => {
+                    const response = await this.client.GET("/crypto/synced/{id}", {
+                        params: { path: { id } },
+                    });
+                    return this.handleDataResponse(response);
+                },
+                getBalance: async (id, symbol) => {
+                    const response = await this.client.GET("/crypto/synced/{id}/{symbol}", { params: { path: { id, symbol } } });
+                    return this.handleDataResponse(response);
+                },
+                refresh: async (id) => {
+                    const response = await this.client.POST("/crypto/synced/{id}/refresh", { params: { path: { id } } });
+                    return this.handleDataResponse(response);
+                },
             },
         };
     }
@@ -330,9 +480,9 @@ class LunchMoneyClient {
                 const data = this.handleDataResponse(response);
                 return data.recurring_items || [];
             },
-            get: async (id) => {
+            get: async (id, params) => {
                 const response = await this.client.GET("/recurring_items/{id}", {
-                    params: { path: { id } },
+                    params: { path: { id }, query: params },
                 });
                 return this.handleDataResponse(response);
             },
@@ -363,6 +513,113 @@ class LunchMoneyClient {
                     params: { query: params },
                 });
                 return this.handleVoidResponse(response);
+            },
+        };
+    }
+    async balanceHistoryAccountGet(type, accountKey, query) {
+        if (type === "crypto_synced") {
+            if (typeof accountKey === "number") {
+                throw new LunchMoneyError("crypto_synced balance history requires { id, symbol }", 0);
+            }
+            const response = await this.client.GET("/balance_history/crypto_synced/{account_id}/{symbol}", {
+                params: {
+                    path: {
+                        account_id: accountKey.id,
+                        symbol: accountKey.symbol,
+                    },
+                    query,
+                },
+            });
+            const data = this.handleDataResponse(response);
+            return data.balance_history ?? [];
+        }
+        const accountId = typeof accountKey === "number" ? accountKey : accountKey.id;
+        const response = await this.client.GET("/balance_history/{account_type}/{account_id}", {
+            params: {
+                path: { account_type: type, account_id: accountId },
+                query,
+            },
+        });
+        const data = this.handleDataResponse(response);
+        return data.balance_history ?? [];
+    }
+    async balanceHistoryAccountUpsert(type, accountKey, body) {
+        if (type === "crypto_synced") {
+            if (typeof accountKey === "number") {
+                throw new LunchMoneyError("crypto_synced balance history requires { id, symbol }", 0);
+            }
+            const response = await this.client.PUT("/balance_history/crypto_synced/{account_id}/{symbol}", {
+                params: {
+                    path: {
+                        account_id: accountKey.id,
+                        symbol: accountKey.symbol,
+                    },
+                },
+                body,
+            });
+            return this.handleDataResponse(response);
+        }
+        const accountId = typeof accountKey === "number" ? accountKey : accountKey.id;
+        const response = await this.client.PUT("/balance_history/{account_type}/{account_id}", {
+            params: {
+                path: { account_type: type, account_id: accountId },
+            },
+            body,
+        });
+        return this.handleDataResponse(response);
+    }
+    async balanceHistoryAccountDelete(type, accountKey) {
+        if (type === "crypto_synced") {
+            if (typeof accountKey === "number") {
+                throw new LunchMoneyError("crypto_synced balance history requires { id, symbol }", 0);
+            }
+            const response = await this.client.DELETE("/balance_history/crypto_synced/{account_id}/{symbol}", {
+                params: {
+                    path: {
+                        account_id: accountKey.id,
+                        symbol: accountKey.symbol,
+                    },
+                },
+            });
+            return this.handleVoidResponse(response);
+        }
+        const accountId = typeof accountKey === "number" ? accountKey : accountKey.id;
+        const response = await this.client.DELETE("/balance_history/{account_type}/{account_id}", {
+            params: {
+                path: { account_type: type, account_id: accountId },
+            },
+        });
+        return this.handleVoidResponse(response);
+    }
+    async balanceHistoryAccountUpdate(type, id, body) {
+        const response = await this.client.PUT("/balance_history/deleted/{account_id}/details", {
+            params: { path: { account_id: id } },
+            body,
+        });
+        return this.handleDataResponse(response);
+    }
+    get balanceHistory() {
+        return {
+            getAll: async (params) => {
+                const response = await this.client.GET("/balance_history", {
+                    params: { query: params },
+                });
+                const data = this.handleDataResponse(response);
+                return data.balance_history ?? [];
+            },
+            account: {
+                get: this.balanceHistoryAccountGet.bind(this),
+                upsert: this.balanceHistoryAccountUpsert.bind(this),
+                delete: this.balanceHistoryAccountDelete.bind(this),
+                update: this.balanceHistoryAccountUpdate.bind(this),
+            },
+            entry: {
+                delete: async (id) => {
+                    const response = await this.client.DELETE("/balance_history/entries/{id}", {
+                        params: { path: { id } },
+                    });
+                    return this.handleVoidResponse(response);
+                },
             },
         };
     }
