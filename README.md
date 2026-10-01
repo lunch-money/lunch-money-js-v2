@@ -118,7 +118,7 @@ The `LunchMoneyClient` constructor accepts the following options:
 
 This library provides convenient methods for:
 
-- **User**: Get current user details (`user.getMe()`)
+- **User**: Current user and settings (`user.getMe()`, `user.getAccountSettings()` / `user.updateAccountSettings()` for the budgeting account, `user.getUserAccountSettings()` / `user.updateUserAccountSettings()` for the current user in the account, `user.getUserSettings()` / `user.updateUserSettings()` for the current user across accounts). Updates are partial and require at least one property.
 - **Categories**: CRUD operations (`categories.getAll()`, `categories.get()`, `categories.create()`, `categories.update()`, `categories.delete()`)
 - **Transactions**: Full transaction management (`transactions.getAll()`, `transactions.create()`, `transactions.split()`, `transactions.group()`)
 - **Manual Accounts**: CRUD operations (`manualAccounts.getAll()`, `manualAccounts.get()`, `manualAccounts.create()`, `manualAccounts.update()`, `manualAccounts.delete()`)
@@ -203,6 +203,9 @@ import {
   type BalanceHistoryEntry,
   type HistoricalBalanceHistoryEntry,
   type CurrentBalanceHistoryEntry,
+  type AccountSettings,
+  type UserAccountSettings,
+  type UserSettings,
 } from 'lunch-money-js-v2';
 
 // Response types
@@ -217,6 +220,11 @@ import {
 import {
   type Currency,
   type AccountType,
+  type Locale,
+  type WeekStartsOn,
+  type MonthYearFormat,
+  type MonthDayYearFormat,
+  type MonthDayFormat,
 } from 'lunch-money-js-v2';
 
 // API operation types (for request/response typing)
@@ -235,6 +243,9 @@ import {
   type BalanceHistoryAccountUpdateInput,
   type UpsertBalanceHistoryBody,
   type UpdateBalanceHistoryDetailsBody,
+  type UpdateAccountSettingsBody,
+  type UpdateUserAccountSettingsBody,
+  type UpdateUserSettingsBody,
 } from 'lunch-money-js-v2';
 ```
 

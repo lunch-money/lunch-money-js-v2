@@ -25,6 +25,10 @@ export type TransactionAttachment =
 	components["schemas"]["transactionAttachmentObject"];
 export type SkippedExistingExternalId =
 	components["schemas"]["skippedExistingExternalIdObject"];
+export type AccountSettings = components["schemas"]["accountSettingsObject"];
+export type UserAccountSettings =
+	components["schemas"]["userAccountSettingsObject"];
+export type UserSettings = components["schemas"]["userSettingsObject"];
 
 // Response types
 export type InsertTransactionsResponse =
@@ -79,6 +83,12 @@ export type ErrorDetail = ErrorResponse["errors"][number];
 // Enums
 export type Currency = components["schemas"]["currencyEnum"];
 export type AccountType = components["schemas"]["accountTypeEnum"];
+export type Locale = components["schemas"]["localeEnum"];
+export type WeekStartsOn = components["schemas"]["weekStartsOnEnum"];
+export type MonthYearFormat = components["schemas"]["monthYearFormatEnum"];
+export type MonthDayYearFormat =
+	components["schemas"]["monthDayYearFormatEnum"];
+export type MonthDayFormat = components["schemas"]["monthDayFormatEnum"];
 
 // API operation parameter and body types
 export type GetAllCategoriesParams =
@@ -134,6 +144,12 @@ export type AttachFileToTransactionBody =
 	operations["attachFileToTransaction"]["requestBody"]["content"]["multipart/form-data"];
 export type TransactionAttachmentUrlResponse =
 	operations["getTransactionAttachmentUrl"]["responses"]["200"]["content"]["application/json"];
+export type UpdateAccountSettingsBody =
+	operations["updateAccountSettings"]["requestBody"]["content"]["application/json"];
+export type UpdateUserAccountSettingsBody =
+	operations["updateUserAccountSettings"]["requestBody"]["content"]["application/json"];
+export type UpdateUserSettingsBody =
+	operations["updateUserSettings"]["requestBody"]["content"]["application/json"];
 
 export type BalanceHistoryAccount =
 	components["schemas"]["balanceHistoryAccountObject"];
