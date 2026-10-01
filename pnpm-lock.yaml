@@ -13,8 +13,8 @@ importers:
         version: 0.15.0
     devDependencies:
       '@lunch-money/v2-api-spec':
-        specifier: 2.11.0-preview.17
-        version: 2.11.0-preview.17
+        specifier: 2.11.1
+        version: 2.11.1
       '@rollup/plugin-commonjs':
         specifier: ^28.0.6
         version: 28.0.9(rollup@4.52.5)
@@ -125,8 +125,8 @@ packages:
   '@jridgewell/sourcemap-codec@1.5.5':
     resolution: {integrity: sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og==}
 
-  '@lunch-money/v2-api-spec@2.11.0-preview.17':
-    resolution: {integrity: sha512-KZnZpJaBNzrksCW+BRGBMkVGSRIWXEK1gwvoeNyxaB6ST2gCmV3SiFwx0n7Mea1uMyt7ufowJNxmSc6VOvc/1Q==}
+  '@lunch-money/v2-api-spec@2.11.1':
+    resolution: {integrity: sha512-2vuAsAR8joi5gPvml9wOjguei7Ih0HDT2IWeGGlAw/kkNwippxWp9H5bSB2YyLOqg0sTLZu+8kgrU04W4nWpNA==}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -985,7 +985,7 @@ snapshots:
 
   '@jridgewell/sourcemap-codec@1.5.5': {}
 
-  '@lunch-money/v2-api-spec@2.11.0-preview.17': {}
+  '@lunch-money/v2-api-spec@2.11.1': {}
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:

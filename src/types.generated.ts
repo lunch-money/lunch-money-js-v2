@@ -13,10 +13,105 @@ export interface paths {
         };
         /**
          * Get current user
-         * @description Get details about the user associated with the supplied authorization token.
+         * @description Get details about the user associated with the supplied authorization
+         *     token.<p> Use [/me/user/settings](#tag/me/GET/me/user/settings) for
+         *     user-wide preferences,
+         *     [/me/account/settings](#tag/me/GET/me/account/settings) for account-wide
+         *     preferences, and
+         *     [/me/user/account/settings](#tag/me/GET/me/user/account/settings) for
+         *     preferences specific to the current user and budgeting account.
+         *     Properties such as `primary_currency` and `budget_name` remain on this
+         *     response for backwards compatibility.
          */
         get: operations["getMe"];
         put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/account/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get account settings
+         * @description Returns settings for the current budgeting account. These settings apply regardless of which user is accessing the account.
+         */
+        get: operations["getAccountSettings"];
+        /**
+         * Update account settings
+         * @description Updates account-level settings for the budgeting account
+         *     associated with the authorized API token. Submit the full response from
+         *     `GET /me/account/settings` with one or more properties changed, or
+         *     provide only the properties to update. The request body must include at
+         *     least one property.
+         */
+        put: operations["updateAccountSettings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/user/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get user settings
+         * @description Returns display and formatting preferences for the authorized user. These settings apply across every budgeting account the user owns or collaborates on.
+         */
+        get: operations["getUserSettings"];
+        /**
+         * Update user settings
+         * @description Updates user-level display and formatting preferences for the user
+         *     associated with the authorized API token. Submit the full response from
+         *     `GET /me/user/settings` with one or more properties changed, or provide
+         *     only the properties to update. The request body must include at least
+         *     one property.<p> Updating
+         *     `show_debits_as_negative` affects display in the Lunch Money app only.
+         *     Amount fields in API responses always use positive values for debits and
+         *     negative values for credits.
+         */
+        put: operations["updateUserSettings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/user/account/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get user account settings
+         * @description Returns settings specific to the authorized user within the current budgeting account. These settings do not affect other users or the authorized user's settings in other budgeting accounts.
+         */
+        get: operations["getUserAccountSettings"];
+        /**
+         * Update user account settings
+         * @description Updates settings specific to the authorized user within the current
+         *     budgeting account. Submit the full response from
+         *     `GET /me/user/account/settings` with one or more properties changed, or
+         *     provide only the properties to update. The request body must include at
+         *     least one property.
+         */
+        put: operations["updateUserAccountSettings"];
         post?: never;
         delete?: never;
         options?: never;
@@ -828,7 +923,9 @@ export interface paths {
          * Get budget period settings
          * @description Returns budget period and display settings for the budget
          *     associated with this API token.<p> These control how budget **periods** are calculated
-         *     (granularity, anchor date, rollover, and related options).
+         *     (granularity, anchor date, rollover, and related options). For general
+         *     budget preferences such as currency and locale, see
+         *     [/me/account/settings](#tag/me/GET/me/account/settings).
          */
         get: operations["getBudgetSettings"];
         put?: never;
@@ -890,9 +987,9 @@ export interface components {
              * @description Unique ID for the current budgeting account
              */
             account_id: number;
-            /** @description Name of the current budgeting account */
+            /** @description Name of the current budgeting account.<p> Also available as `display_name` on [/me/account/settings](#tag/me/GET/me/account/settings), which is the preferred endpoint for reading and updating account settings. */
             budget_name: string;
-            /** @description Primary currency for the current budgeting account */
+            /** @description Primary currency for the current budgeting account.<p> Also available on [/me/account/settings](#tag/me/GET/me/account/settings), which is the preferred endpoint for reading and updating account settings. */
             primary_currency: components["schemas"]["currencyEnum"];
             /** @description Label assigned by the user to the API key being used. Returns null if no label is set */
             api_key_label: string | null;
@@ -1266,15 +1363,15 @@ export interface components {
              */
             name: string;
             /**
-             * @description Optional display name for the manual crypto asset. If omitted, clients may derive one from `institution_name` + `name`.
+             * @description Display name for the manual crypto asset. If omitted or `null`, clients may derive one from `institution_name` + `name`.
              * @example Cold Storage
              */
-            display_name?: string;
+            display_name?: string | null;
             /**
-             * @description Optional institution or wallet provider display name
+             * @description Institution or wallet provider display name. If omitted or `null`, no institution name is set.
              * @example Ledger
              */
-            institution_name?: string;
+            institution_name?: string | null;
             /**
              * @description Numeric value of the balance, up to 18 decimal places
              * @example 0.523400000000000000
@@ -1405,22 +1502,22 @@ export interface components {
              */
             name: string;
             /**
-             * @description Name of institution holding the manual account
+             * @description Name of the institution holding the manual account. If omitted or `null`, no institution name is set.
              * @example Bank of the West
              */
-            institution_name?: string;
+            institution_name?: string | null;
             /**
-             * @description Display name of the manual account as set by user or derived from the `institution_name` and `name` if not explicitly set.<br> This must be unique for the budgeting account.
+             * @description Display name of the manual account. If omitted or `null`, it is derived from `institution_name` and `name`. An explicitly set display name must be unique for the budgeting account.
              * @example Savings
              */
-            display_name?: string;
+            display_name?: string | null;
             /** @description The type of manual account */
             type: components["schemas"]["accountTypeEnum"];
             /**
-             * @description An optional manual account subtype. Examples include<br> - retirement - checking - savings - prepaid credit card
+             * @description Manual account subtype. If omitted or `null`, no subtype is set. Examples include retirement, checking, savings, and prepaid credit card.
              * @example prepaid credit card
              */
-            subtype?: string;
+            subtype?: string | null;
             /**
              * @description Numeric value of the current balance, up to four decimal places, of the account as a number or string. Do not include any special characters aside from a decimal point.
              * @example 195.50
@@ -2407,13 +2504,13 @@ export interface components {
             date?: string;
             /**
              * Format: int32
-             * @description Unique identifier for associated category_id. Category must already exist for the account. Will inherit category from the parent if not defined.
+             * @description Category ID for the child transaction. The category must already exist for the account. If omitted, the child inherits the parent category. If `null`, the child has no category.
              */
-            category_id?: number;
+            category_id?: number | null;
             /** @description The IDs of any tags to apply to this split child transaction. Each ID must match an existing tag. */
             tag_ids?: number[];
-            /** @description Will inherit notes from parent if not defined. */
-            notes?: string;
+            /** @description Notes for the child transaction. If omitted, the child inherits the parent notes. If `null` or an empty string, the child has no notes. */
+            notes?: string | null;
         };
         /** @description The object returned when a new transaction has an external_id that already exists */
         skippedExistingExternalIdObject: {
@@ -2630,6 +2727,188 @@ export interface components {
              * @default false
              */
             budget_rollover_left_to_budget: boolean;
+        };
+        /**
+         * week starts on enum
+         * @description The day on which a calendar week begins.
+         * @enum {string}
+         */
+        weekStartsOnEnum: "sunday" | "monday";
+        /**
+         * month and year format enum
+         * @description Format string for displaying month and year values in the Lunch Money app.
+         * @enum {string}
+         */
+        monthYearFormatEnum: "MMMM YYYY" | "MMM YYYY" | "YYYY MMM" | "MM YYYY" | "MM-YYYY" | "MM.YYYY" | "MM/YYYY" | "M YYYY" | "M-YYYY" | "M.YYYY" | "M/YYYY" | "YYYY M" | "YYYY-M" | "YYYY.M" | "YYYY/M" | "YYYY MM" | "YYYY-MM" | "YYYY.MM" | "YYYY/MM";
+        /**
+         * month, day and year format enum
+         * @description Format string for displaying full dates in the Lunch Money app.
+         * @enum {string}
+         */
+        monthDayYearFormatEnum: "MMM D, YYYY" | "D MMM YYYY" | "YYYY MM DD" | "YYYY-MM-DD" | "YYYY.MM.DD" | "YYYY/MM/DD" | "YYYY M DD" | "YYYY-M-DD" | "YYYY.M.DD" | "YYYY/M/DD" | "YYYY MM D" | "YYYY-MM-D" | "YYYY.MM.D" | "YYYY/MM/D" | "YYYY M D" | "YYYY-M-D" | "YYYY.M.D" | "YYYY/M/D" | "DD MM YYYY" | "DD-MM-YYYY" | "DD.MM.YYYY" | "DD/MM/YYYY" | "DD M YYYY" | "DD-M-YYYY" | "DD.M.YYYY" | "DD/M/YYYY" | "D MM YYYY" | "D-MM-YYYY" | "D.MM.YYYY" | "D/MM/YYYY" | "D M YYYY" | "D-M-YYYY" | "D.M.YYYY" | "D/M/YYYY" | "M D YYYY" | "M-D-YYYY" | "M.D.YYYY" | "M/D/YYYY" | "MM D YYYY" | "MM-D-YYYY" | "MM.D.YYYY" | "MM/D/YYYY" | "MM DD YYYY" | "MM-DD-YYYY" | "MM.DD.YYYY" | "MM/DD/YYYY" | "M DD YYYY" | "M-DD-YYYY" | "M.DD.YYYY" | "M/DD/YYYY";
+        /**
+         * month and day format enum
+         * @description Format string for displaying month and day values without a year.
+         * @enum {string}
+         */
+        monthDayFormatEnum: "MMM D" | "MMM DD" | "D MMM" | "DD MMM" | "MM D" | "MM-D" | "MM.D" | "MM/D" | "MM DD" | "MM-DD" | "MM.DD" | "MM/DD" | "M D" | "M-D" | "M.D" | "M/D" | "M DD" | "M-DD" | "M.DD" | "M/DD" | "D MM" | "D-MM" | "D.MM" | "D/MM" | "DD MM" | "DD-MM" | "DD.MM" | "DD/MM" | "D M" | "D-M" | "D.M" | "D/M" | "DD M" | "DD-M" | "DD.M" | "DD/M";
+        /**
+         * locale enum
+         * @description Locale used for formatting numbers and currency amounts in the Lunch Money app.
+         * @example en-US
+         * @enum {string}
+         */
+        localeEnum: "sq-AL" | "be-BY" | "bg-BG" | "ca-ES" | "zh-CN" | "zh-HK" | "zh-TW" | "hr-HR" | "cs-CZ" | "da-DK" | "nl-BE" | "nl-NL" | "en-AU" | "en-CA" | "en-IN" | "en-IE" | "en-MT" | "en-NZ" | "en-PH" | "en-SG" | "en-ZA" | "en-GB" | "en-US" | "et-EE" | "fi-FI" | "fr-BE" | "fr-CA" | "fr-FR" | "fr-LU" | "fr-CH" | "de-AT" | "de-DE" | "de-LU" | "de-CH" | "el-CY" | "el-GR" | "iw-IL" | "hi-IN" | "hu-HU" | "is-IS" | "in-ID" | "ga-IE" | "it-IT" | "it-CH" | "ja-JP" | "ko-KR" | "lv-LV" | "lt-LT" | "mk-MK" | "ms-MY" | "mt-MT" | "no-NO" | "pl-PL" | "pt-BR" | "pt-PT" | "ro-RO" | "ru-RU" | "sk-SK" | "sl-SI" | "es-AR" | "es-BO" | "es-CL" | "es-CO" | "es-CR" | "es-DO" | "es-EC" | "es-SV" | "es-GT" | "es-HN" | "es-MX" | "es-NI" | "es-PA" | "es-PY" | "es-PE" | "es-PR" | "es-ES" | "es-US" | "es-UY" | "es-VE" | "sv-SE" | "th-TH" | "tr-TR" | "uk-UA" | "vi-VN";
+        /**
+         * account settings object
+         * @description Account-level settings for the budgeting account associated with the authorized API token.
+         */
+        accountSettingsObject: {
+            /** @description Primary currency for the account. */
+            primary_currency: components["schemas"]["currencyEnum"];
+            /** @description Currencies available when creating or editing transactions, balances, and other amounts in the Lunch Money app. */
+            supported_currencies: components["schemas"]["currencyEnum"][];
+            /** @description Display name of the budgeting account in the Lunch Money app. */
+            display_name: string | null;
+            /**
+             * @description Locale used for formatting numbers and currency amounts in the Lunch Money app (for example, `en-US`). See [Supported Locales](https://lunchmoney.dev/v2/locales) for accepted values. Date presentation is configured separately through [GET /me/user/settings](#tag/me/GET/me/user/settings) and [PUT /me/user/settings](#tag/me/PUT/me/user/settings). When no locale is explicitly stored for the account, the effective locale is derived from the `default_locale` associated with `primary_currency` in the currencies table (for example, `usd` → `en-US`, `cad` → `en-CA`, `gbp` → `en-GB`).
+             * @example en-US
+             */
+            locale: components["schemas"]["localeEnum"];
+            /**
+             * @description If `true`, category rules are created automatically when categorizing transactions.
+             * @default true
+             */
+            auto_create_category_rules: boolean;
+            /**
+             * @description If `true`, suggested transaction rules are created automatically.
+             * @default true
+             */
+            auto_create_suggested_transaction_rules: boolean;
+            /**
+             * @description If `true`, pending transactions are included in account totals.
+             * @default true
+             */
+            include_pending_in_totals: boolean;
+        };
+        /** @description Request body for updating account settings. Include at least one property to update. */
+        updateAccountSettingsRequestObject: {
+            /** @description If set, updates the account's primary currency. */
+            primary_currency?: components["schemas"]["currencyEnum"];
+            /** @description If set, replaces the list of supported currencies for the account. */
+            supported_currencies?: components["schemas"]["currencyEnum"][];
+            /** @description If set, updates the display name of the budgeting account. */
+            display_name?: string | null;
+            /**
+             * @description If set, updates the locale used for formatting numbers and currency amounts in the Lunch Money app. See [Supported Locales](https://lunchmoney.dev/v2/locales) for accepted values. Date presentation is configured separately through [GET /me/user/settings](#tag/me/GET/me/user/settings) and [PUT /me/user/settings](#tag/me/PUT/me/user/settings).
+             * @example en-US
+             */
+            locale?: components["schemas"]["localeEnum"];
+            /** @description If set, updates whether category rules are created automatically. */
+            auto_create_category_rules?: boolean;
+            /** @description If set, updates whether suggested transaction rules are created automatically. */
+            auto_create_suggested_transaction_rules?: boolean;
+            /** @description If set, updates whether pending transactions are included in account totals. */
+            include_pending_in_totals?: boolean;
+        };
+        /**
+         * user account settings object
+         * @description Settings specific to the authorized user within the current budgeting account.
+         */
+        userAccountSettingsObject: {
+            /**
+             * @description If `true`, transactions are marked as reviewed when their date, category, payee, amount, account, or notes are changed.
+             * @default true
+             */
+            auto_review_transaction_on_update: boolean;
+            /**
+             * @description If `true`, new manual transactions start as reviewed. If `false`, they start as unreviewed.
+             * @default true
+             */
+            auto_review_transaction_on_creation: boolean;
+            /** @description Manual account selected by default when the user creates a manual transaction in the current budgeting account. Must identify a manual account returned by [GET /manual_accounts](#tag/manual_accounts/GET/manual_accounts) for the current budgeting account. Set to `null` to clear the selection. */
+            default_manual_account_id: number | null;
+        };
+        /** @description Request body for updating settings specific to the authorized user within the current budgeting account. Include at least one property to update. */
+        updateUserAccountSettingsRequestObject: {
+            /** @description If set, updates whether transactions are marked as reviewed when their date, category, payee, amount, account, or notes are changed. */
+            auto_review_transaction_on_update?: boolean;
+            /** @description If set, updates whether new manual transactions start as reviewed or unreviewed. */
+            auto_review_transaction_on_creation?: boolean;
+            /** @description If set, updates the manual account selected by default when the user creates a manual transaction in the current budgeting account. Must identify a manual account returned by [GET /manual_accounts](#tag/manual_accounts/GET/manual_accounts) for the current budgeting account. Set to `null` to clear the selection. */
+            default_manual_account_id?: number | null;
+        };
+        /**
+         * user settings object
+         * @description User-level display and formatting preferences for the user associated with the authorized API token.
+         */
+        userSettingsObject: {
+            /**
+             * @description Display preference for how amounts are shown in the Lunch Money app. When `true`, debits are shown as negative values and credits as positive values.<p> This setting does **not** change amount sign conventions in API responses. Amount fields such as `amount` and `to_base` on transaction objects always use positive values for debits and negative values for credits.
+             * @default true
+             */
+            show_debits_as_negative: boolean;
+            /**
+             * @description If `true`, payee suggestions are shown when entering transactions in the Lunch Money app.
+             * @default true
+             */
+            auto_suggest_payee: boolean;
+            /**
+             * @description Format string used when displaying month and year values.
+             * @default MMM YYYY
+             */
+            month_year_format: components["schemas"]["monthYearFormatEnum"];
+            /**
+             * @description Format string used when displaying full dates (month, day, and year).
+             * @default MMM D, YYYY
+             */
+            month_day_year_format: components["schemas"]["monthDayYearFormatEnum"];
+            /**
+             * @description Format string used when displaying month and day values without a year.
+             * @default MMM D
+             */
+            month_day_format: components["schemas"]["monthDayFormatEnum"];
+            /**
+             * @description If `true`, times are displayed using a 12-hour clock with AM/PM. If `false`, times are displayed using a 24-hour clock.
+             * @default true
+             */
+            show_am_pm: boolean;
+            /**
+             * @description The day on which a calendar week begins.
+             * @default sunday
+             */
+            week_starts_on: components["schemas"]["weekStartsOnEnum"];
+            /**
+             * @description If `true`, dates always include the year and `month_day_format` is not used.
+             * @default false
+             */
+            always_display_year: boolean;
+            /**
+             * @description If `true`, weekday names are included when displaying dates.
+             * @default true
+             */
+            always_display_weekday: boolean;
+        };
+        /** @description Request body for updating user settings. Include at least one property to update. */
+        updateUserSettingsRequestObject: {
+            /** @description If set, updates the display preference for amount signs in the Lunch Money app. Does not affect amount sign conventions in API responses. */
+            show_debits_as_negative?: boolean;
+            /** @description If set, updates whether payee suggestions are shown. */
+            auto_suggest_payee?: boolean;
+            /** @description If set, updates the month and year display format. */
+            month_year_format?: components["schemas"]["monthYearFormatEnum"];
+            /** @description If set, updates the full date display format. */
+            month_day_year_format?: components["schemas"]["monthDayYearFormatEnum"];
+            /** @description If set, updates the month and day display format. */
+            month_day_format?: components["schemas"]["monthDayFormatEnum"];
+            /** @description If set, updates whether times use a 12-hour (AM/PM) or 24-hour clock. */
+            show_am_pm?: boolean;
+            /** @description If set, updates the day on which a calendar week begins. */
+            week_starts_on?: components["schemas"]["weekStartsOnEnum"];
+            /** @description If set, updates whether dates always include the year. */
+            always_display_year?: boolean;
+            /** @description If set, updates whether weekday names are shown when displaying dates. */
+            always_display_weekday?: boolean;
         };
         /**
          * summary object
@@ -2886,6 +3165,218 @@ export interface operations {
                      *     }
                      */
                     "application/json": components["schemas"]["userObject"];
+                };
+            };
+            401: components["responses"]["unauthorizedToken"];
+            429: components["responses"]["rateLimited"];
+            500: components["responses"]["serverError"];
+        };
+    };
+    getAccountSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Account settings for the current budgeting account */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "primary_currency": "usd",
+                     *       "supported_currencies": [
+                     *         "usd",
+                     *         "cad",
+                     *         "jpy"
+                     *       ],
+                     *       "display_name": "🏠 Family budget",
+                     *       "locale": "en-US",
+                     *       "auto_create_category_rules": true,
+                     *       "auto_create_suggested_transaction_rules": true,
+                     *       "include_pending_in_totals": true
+                     *     }
+                     */
+                    "application/json": components["schemas"]["accountSettingsObject"];
+                };
+            };
+            401: components["responses"]["unauthorizedToken"];
+            429: components["responses"]["rateLimited"];
+            500: components["responses"]["serverError"];
+        };
+    };
+    updateAccountSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["updateAccountSettingsRequestObject"];
+            };
+        };
+        responses: {
+            /** @description Account settings updated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["accountSettingsObject"];
+                };
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["errorResponseObject"];
+                };
+            };
+            401: components["responses"]["unauthorizedToken"];
+            429: components["responses"]["rateLimited"];
+            500: components["responses"]["serverError"];
+        };
+    };
+    getUserSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description User settings for the authorized user */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "show_debits_as_negative": true,
+                     *       "auto_suggest_payee": true,
+                     *       "month_year_format": "MMM YYYY",
+                     *       "month_day_year_format": "MMM D, YYYY",
+                     *       "month_day_format": "MMM D",
+                     *       "show_am_pm": true,
+                     *       "week_starts_on": "sunday",
+                     *       "always_display_year": false,
+                     *       "always_display_weekday": true
+                     *     }
+                     */
+                    "application/json": components["schemas"]["userSettingsObject"];
+                };
+            };
+            401: components["responses"]["unauthorizedToken"];
+            429: components["responses"]["rateLimited"];
+            500: components["responses"]["serverError"];
+        };
+    };
+    updateUserSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["updateUserSettingsRequestObject"];
+            };
+        };
+        responses: {
+            /** @description User settings updated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["userSettingsObject"];
+                };
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["errorResponseObject"];
+                };
+            };
+            401: components["responses"]["unauthorizedToken"];
+            429: components["responses"]["rateLimited"];
+            500: components["responses"]["serverError"];
+        };
+    };
+    getUserAccountSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Settings for the authorized user in the current budgeting account */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "auto_review_transaction_on_update": true,
+                     *       "auto_review_transaction_on_creation": true,
+                     *       "default_manual_account_id": null
+                     *     }
+                     */
+                    "application/json": components["schemas"]["userAccountSettingsObject"];
+                };
+            };
+            401: components["responses"]["unauthorizedToken"];
+            429: components["responses"]["rateLimited"];
+            500: components["responses"]["serverError"];
+        };
+    };
+    updateUserAccountSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["updateUserAccountSettingsRequestObject"];
+            };
+        };
+        responses: {
+            /** @description User account settings updated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["userAccountSettingsObject"];
+                };
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["errorResponseObject"];
                 };
             };
             401: components["responses"]["unauthorizedToken"];
