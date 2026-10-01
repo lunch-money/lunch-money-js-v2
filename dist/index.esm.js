@@ -88,6 +88,61 @@ class LunchMoneyClient {
                 const response = await this.client.GET("/me");
                 return this.handleDataResponse(response);
             },
+            /**
+             * Get settings for the current budgeting account, shared by all users
+             * of the account
+             */
+            getAccountSettings: async () => {
+                const response = await this.client.GET("/me/account/settings");
+                return this.handleDataResponse(response);
+            },
+            /**
+             * Update settings for the current budgeting account. Only the provided
+             * properties are updated; returns the complete updated settings.
+             */
+            updateAccountSettings: async (data) => {
+                const response = await this.client.PUT("/me/account/settings", {
+                    body: data,
+                });
+                return this.handleDataResponse(response);
+            },
+            /**
+             * Get settings specific to the current user within the current
+             * budgeting account
+             */
+            getUserAccountSettings: async () => {
+                const response = await this.client.GET("/me/user/account/settings");
+                return this.handleDataResponse(response);
+            },
+            /**
+             * Update settings specific to the current user within the current
+             * budgeting account. Only the provided properties are updated; returns
+             * the complete updated settings.
+             */
+            updateUserAccountSettings: async (data) => {
+                const response = await this.client.PUT("/me/user/account/settings", {
+                    body: data,
+                });
+                return this.handleDataResponse(response);
+            },
+            /**
+             * Get display and formatting settings for the current user across all
+             * budgeting accounts
+             */
+            getSettings: async () => {
+                const response = await this.client.GET("/me/user/settings");
+                return this.handleDataResponse(response);
+            },
+            /**
+             * Update display and formatting settings for the current user. Only the
+             * provided properties are updated; returns the complete updated settings.
+             */
+            updateSettings: async (data) => {
+                const response = await this.client.PUT("/me/user/settings", {
+                    body: data,
+                });
+                return this.handleDataResponse(response);
+            },
         };
     }
     get categories() {
